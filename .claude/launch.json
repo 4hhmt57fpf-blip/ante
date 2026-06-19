@@ -4,7 +4,7 @@
     {
       "name": "ante",
       "runtimeExecutable": "python3",
-      "runtimeArgs": ["-m", "http.server", "3847"],
+      "runtimeArgs": ["server.py"],
       "port": 3847,
       "cwd": "/Users/beckettlee/Desktop/ante"
     }

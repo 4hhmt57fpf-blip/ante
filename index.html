@@ -1097,6 +1097,40 @@
   </div>
 </div>
 
+<!-- Canvas Setup Modal -->
+<div class="modal-overlay" id="canvas-modal" onclick="closeModalIfBg(event,'canvas-modal')">
+  <div class="modal">
+    <div class="modal-handle"></div>
+    <div class="modal-title">🎓 Connect Canvas</div>
+    <div class="onboard-hint">Ante reads your assignments straight from your own Canvas account using a personal access token. The token stays on your device and is only ever sent to your school's Canvas.</div>
+
+    <div style="background:var(--surface);border:1px solid var(--border);border-radius:var(--radius-sm);padding:16px;margin:4px 0 18px">
+      <div style="font-size:12px;font-weight:700;color:var(--gold);text-transform:uppercase;letter-spacing:.6px;margin-bottom:12px">How to get your token</div>
+      <div style="display:flex;flex-direction:column;gap:11px;font-size:13px;color:var(--text-dim);line-height:1.45">
+        <div><strong style="color:var(--text)">1.</strong>&nbsp; Open Canvas in a browser and log in.</div>
+        <div><strong style="color:var(--text)">2.</strong>&nbsp; Go to <strong>Account → Settings</strong>.</div>
+        <div><strong style="color:var(--text)">3.</strong>&nbsp; Scroll to <strong>Approved Integrations</strong> → click <strong>+ New Access Token</strong>.</div>
+        <div><strong style="color:var(--text)">4.</strong>&nbsp; Purpose: <strong>Ante</strong>. Leave the expiry blank → <strong>Generate Token</strong>.</div>
+        <div><strong style="color:var(--text)">5.</strong>&nbsp; Copy the token (shown only once) and paste it below.</div>
+      </div>
+    </div>
+
+    <div class="onboard-hint">Your school's Canvas URL</div>
+    <input class="input-field" id="canvas-host" placeholder="e.g. canvas.umich.edu" style="margin-bottom:16px" autocapitalize="off" autocorrect="off" spellcheck="false">
+
+    <div class="onboard-hint">Access token</div>
+    <input class="input-field" id="canvas-token" type="password" placeholder="Paste your token here" style="margin-bottom:6px" autocapitalize="off" autocorrect="off" spellcheck="false">
+    <div id="canvas-status" style="font-size:13px;color:var(--text-dim);min-height:18px;margin-bottom:14px"></div>
+
+    <button class="btn btn-primary" onclick="testCanvas()">Test &amp; Connect</button>
+    <button class="btn btn-ghost" id="canvas-disconnect" style="display:none;color:var(--red);margin-top:8px" onclick="disconnectCanvas()">Disconnect Canvas</button>
+
+    <div style="margin-top:16px;font-size:12px;color:var(--text-muted);line-height:1.5">
+      🔒 A Canvas token can read your account — keep it private. It's stored only in this browser and never sent anywhere except your school's Canvas. Revoke it anytime in Canvas → Settings. (Needs the Ante server running; some schools disable personal tokens.)
+    </div>
+  </div>
+</div>
+
 <script>
 // ─────────────────────────────────────────────
 // STATE
@@ -1107,7 +1141,8 @@ let state = {
   walletBalance: 50,
   totalForfeit: 0,
   txHistory: [],
-  connections: { health: false, screentime: false, gps: false, camera: false },
+  connections: { health: false, screentime: false, canvas: false, gps: false, camera: false },
+  canvas: { host: '', token: '', connected: false },
   profile: { name: 'Beckett', handle: 'beckett', reminderTime: '20:00', reminderOn: false },
   onboardData: { goalId: null, name: '', target: null, freq: 'Every Day', stake: 5, charity: 'Boys & Girls Club' }
 };
@@ -1115,6 +1150,9 @@ let state = {
 function loadState() {
   const raw = localStorage.getItem(STORAGE_KEY);
   if (raw) state = { ...state, ...JSON.parse(raw) };
+  state.connections = Object.assign({ health:false, screentime:false, canvas:false, gps:false, camera:false }, state.connections || {});
+  state.canvas = Object.assign({ host:'', token:'', connected:false }, state.canvas || {});
+  state.connections.canvas = !!state.canvas.connected;
 }
 function saveState() {
   localStorage.setItem(STORAGE_KEY, JSON.stringify(state));
@@ -1168,6 +1206,7 @@ let selectedCharity = 'Boys & Girls Club';
 const SOURCES = {
   health:     { label: 'Apple Health', icon: '🍎', sub: 'Steps, workouts, mindfulness, sleep — plus anything that syncs to Health (Strava, Whoop…).' },
   screentime: { label: 'Screen Time',  icon: '⏱️', sub: 'App & category time limits, enforced by iOS.' },
+  canvas:     { label: 'Canvas',        icon: '🎓', sub: 'Verify assignments are submitted on time — read straight from your own Canvas account.' },
   gps:        { label: 'Location',      icon: '📍', sub: 'GPS check-ins — prove you showed up (or stayed away).' },
   camera:     { label: 'Photo + AI',    icon: '📸', sub: 'AI checks your photo against your description; a human reviews if unsure.' },
 };
@@ -1179,6 +1218,8 @@ const GOALS = [
   { id:'meditate', label:'Meditate 10 min',      emoji:'🧘', color:'#a78bfa', source:'health',     metric:'Mindful minutes', dir:'≥', target:10,    unit:'min',   verify:'auto' },
   { id:'sleep',    label:'Sleep 7+ hours',       emoji:'🛌', color:'#60a5fa', source:'health',     metric:'Sleep',           dir:'≥', target:7,     unit:'hr',    verify:'auto' },
   { id:'screen',   label:'Limit social apps',    emoji:'📱', color:'#f87171', source:'screentime', metric:'Screen time',     dir:'≤', target:30,    unit:'min',   verify:'auto' },
+  { id:'cv_ontime',label:'Submit assignments on time', emoji:'🎓', color:'#dc2626', source:'canvas', metric:'Canvas',          dir:'',  target:0,     unit:'',      verify:'canvas' },
+  { id:'cv_nomiss',label:'No missing assignments', emoji:'📚', color:'#2563eb', source:'canvas',    metric:'Canvas',          dir:'',  target:0,     unit:'',      verify:'canvas' },
   { id:'gym',      label:'Get to the gym',       emoji:'📍', color:'#38bdf8', source:'gps',        metric:'Gym check-in',    dir:'',  target:0,     unit:'',      verify:'auto' },
   { id:'avoid',    label:'Avoid a place',        emoji:'🚫', color:'#94a3b8', source:'gps',        metric:'Stay away',       dir:'',  target:0,     unit:'',      verify:'auto' },
   { id:'proof',    label:'Custom (photo proof)', emoji:'📸', color:'#e6b94e', source:'camera',     metric:'Photo + AI',      dir:'',  target:0,     unit:'',      verify:'proof' },
@@ -1192,11 +1233,14 @@ function renderConnectList(){
   const el = document.getElementById('connect-list');
   if (!el) return;
   el.innerHTML = Object.entries(SOURCES).map(([k,s]) => {
-    const on = state.connections[k];
+    const isCanvas = k === 'canvas';
+    const on = isCanvas ? !!(state.canvas && state.canvas.connected) : state.connections[k];
+    const action = isCanvas ? 'openCanvasSetup()' : `toggleConnect('${k}')`;
+    const label = isCanvas ? (on ? 'Connected ✓' : 'Set up') : (on ? 'Connected ✓' : 'Connect');
     return `<div class="connect-card ${on?'connected':''}">
       <div class="ci">${s.icon}</div>
       <div class="cc-body"><div class="cc-name">${s.label}</div><div class="cc-sub">${s.sub}</div></div>
-      <button class="connect-btn" onclick="toggleConnect('${k}')">${on?'Connected ✓':'Connect'}</button>
+      <button class="connect-btn" onclick="${action}">${label}</button>
     </div>`;
   }).join('');
 }
@@ -1205,6 +1249,55 @@ function toggleConnect(k){
   saveState();
   renderConnectList();
   showToast(state.connections[k] ? `✅ ${SOURCES[k].label} connected` : `${SOURCES[k].label} disconnected`, state.connections[k]?'green':null);
+}
+
+// ── Canvas (real integration via local proxy) ──
+function canvasFetch(path){
+  const c = state.canvas || {};
+  return fetch(`/__canvas?host=${encodeURIComponent(c.host)}&path=${encodeURIComponent(path)}`, {
+    headers: { 'X-Canvas-Token': c.token || '' }
+  }).then(async r => {
+    let j; try { j = await r.json(); } catch(e){ j = { error: 'Unexpected response (is the Ante server running?)' }; }
+    if (!r.ok || (j && j.error)) throw new Error((j && j.error) || ('HTTP ' + r.status));
+    return j;
+  });
+}
+function openCanvasSetup(){
+  const c = state.canvas || {};
+  document.getElementById('canvas-host').value = c.host || '';
+  document.getElementById('canvas-token').value = c.token || '';
+  document.getElementById('canvas-status').textContent = c.connected ? '✅ Connected' : '';
+  document.getElementById('canvas-disconnect').style.display = c.connected ? 'block' : 'none';
+  showModal('canvas-modal');
+}
+function testCanvas(){
+  const host = document.getElementById('canvas-host').value.trim().replace(/^https?:\/\//,'').replace(/\/+$/,'');
+  const token = document.getElementById('canvas-token').value.trim();
+  const status = document.getElementById('canvas-status');
+  if (!host || !token){ status.textContent = '⚠️ Enter both your Canvas URL and token.'; return; }
+  state.canvas = { host, token, connected: false };
+  status.textContent = '⏳ Testing connection…';
+  canvasFetch('users/self/profile').then(p => {
+    state.canvas.connected = true;
+    state.connections.canvas = true;
+    saveState();
+    status.textContent = `✅ Connected as ${p.name || 'your account'}`;
+    document.getElementById('canvas-disconnect').style.display = 'block';
+    renderConnectList();
+    showToast(`✅ Canvas connected — ${p.name || 'done'}`, 'green');
+  }).catch(e => {
+    state.canvas.connected = false; state.connections.canvas = false; saveState();
+    status.textContent = `❌ ${e.message}`;
+    renderConnectList();
+  });
+}
+function disconnectCanvas(){
+  state.canvas = { host:'', token:'', connected:false };
+  state.connections.canvas = false;
+  saveState();
+  renderConnectList();
+  closeModal('canvas-modal');
+  showToast('Canvas disconnected', null);
 }
 
 function renderGoalList(){
@@ -1252,6 +1345,7 @@ function renderGoalConfig(){
   } else {
     const how = g.id==='gym' ? "enter the location's 100m radius before the deadline and tap Check In."
               : g.id==='avoid' ? "stay outside the location's radius at the deadline."
+              : g.source==='canvas' ? "we read your Canvas submissions and check nothing's missing or late."
               : 'auto-checked.';
     inner = `<div style="margin-top:18px;background:var(--surface);border:1px solid var(--border);border-radius:var(--radius-sm);padding:14px;font-size:13px;color:var(--text-dim);line-height:1.5">${SOURCES[g.source].icon} Verified via ${SOURCES[g.source].label} — ${how}</div>`;
   }
@@ -1503,6 +1597,18 @@ function verifyComplete(id){
   const h = state.habits.find(x => x.id === id);
   if (!h || isCompletedToday(h)) return;
   const src = SOURCES[h.source] || SOURCES.camera;
+  if (h.source === 'canvas') {
+    if (!(state.canvas && state.canvas.connected)) { showToast('Connect Canvas first', 'red'); return; }
+    showToast('🎓 Checking Canvas…', null);
+    canvasFetch('users/self/missing_submissions?filter[]=submittable')
+      .then(list => {
+        const n = Array.isArray(list) ? list.length : 0;
+        if (n === 0) { completeHabit(id); showToast('✅ Canvas: nothing missing — verified', 'green'); }
+        else { showToast(`⚠️ ${n} missing assignment${n>1?'s':''} on Canvas`, 'red'); }
+      })
+      .catch(e => showToast('Canvas check failed: ' + e.message, 'red'));
+    return;
+  }
   if (h.verify === 'proof') {
     showToast('📸 Checking your photo with AI…', null);
     setTimeout(() => { completeHabit(id); showToast('✅ Photo verified by AI', 'green'); }, 750);
