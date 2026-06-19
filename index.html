@@ -7,7 +7,7 @@
 
 <!-- PWA / installable -->
 <link rel="manifest" href="manifest.json">
-<meta name="theme-color" content="#080810">
+<meta name="theme-color" content="#0a0a0b">
 <link rel="icon" type="image/png" href="assets/icon-192.png">
 <link rel="apple-touch-icon" href="assets/apple-touch-icon.png">
 <meta name="apple-mobile-web-app-capable" content="yes">
@@ -16,21 +16,27 @@
 <meta name="apple-mobile-web-app-title" content="Ante">
 <style>
   :root {
-    --bg: #080810;
-    --surface: #1c1c38;
-    --surface2: #22223e;
-    --border: #3c3c68;
-    --green: #00e676;
-    --green-dim: #00e67622;
-    --gold: #ffd600;
-    --gold-dim: #ffd60018;
-    --red: #ff5252;
-    --red-dim: #ff525218;
-    --text: #f4f4f8;
-    --text-muted: #7a7a9a;
-    --text-dim: #a0a0c0;
-    --radius: 16px;
-    --radius-sm: 10px;
+    --bg: #0a0a0b;
+    --bg-2: #0f0f11;
+    --surface: #151518;
+    --surface2: #1c1c20;
+    --border: rgba(255,255,255,0.07);
+    --border-strong: rgba(255,255,255,0.13);
+    --green: #4ade80;
+    --green-dim: rgba(74,222,128,0.10);
+    --gold: #e6b94e;
+    --gold-soft: #f0cd76;
+    --gold-dim: rgba(230,185,78,0.10);
+    --red: #f87171;
+    --red-dim: rgba(248,113,113,0.10);
+    --text: #f5f5f6;
+    --text-muted: #6c6c75;
+    --text-dim: #9b9ba4;
+    --radius: 20px;
+    --radius-sm: 14px;
+    --radius-lg: 28px;
+    --shadow: 0 12px 32px rgba(0,0,0,0.45);
+    --shadow-sm: 0 4px 14px rgba(0,0,0,0.35);
   }
 
   * { box-sizing: border-box; margin: 0; padding: 0; -webkit-tap-highlight-color: transparent; }
@@ -56,33 +62,33 @@
     align-items: center;
     padding: 40px 28px;
     text-align: center;
-    background: radial-gradient(ellipse at 50% 10%, #25253e 0%, var(--bg) 65%);
+    background: radial-gradient(ellipse at 50% 10%, var(--bg-2) 0%, var(--bg) 65%);
   }
 
   .logo-mark {
     width: 80px; height: 80px;
-    background: linear-gradient(135deg, var(--gold), #ff9800);
+    background: linear-gradient(135deg, var(--gold), #b8882e);
     border-radius: 22px;
     display: flex; align-items: center; justify-content: center;
     font-size: 36px;
     margin: 0 auto 24px;
-    box-shadow: 0 8px 32px #ffd60035;
+    box-shadow: var(--shadow-sm);
   }
 
   .welcome-title { font-size: 38px; font-weight: 800; letter-spacing: -1.5px; line-height: 1.1; }
   .welcome-title span { color: var(--gold); }
-  .welcome-sub { color: #b0b0d0; margin-top: 14px; font-size: 17px; line-height: 1.5; }
+  .welcome-sub { color: var(--text-dim); margin-top: 16px; font-size: 16px; line-height: 1.55; letter-spacing: -.1px; }
 
   .stats-row {
     display: flex; gap: 12px; margin: 36px 0;
     width: 100%;
   }
   .stat-pill {
-    flex: 1; background: #1e1e32; border: 1px solid #3a3a60;
+    flex: 1; background: var(--surface); border: 1px solid var(--border);
     border-radius: var(--radius-sm); padding: 14px 10px; text-align: center;
   }
   .stat-pill .num { font-size: 22px; font-weight: 800; color: var(--gold); }
-  .stat-pill .label { font-size: 11px; color: #8888aa; margin-top: 4px; text-transform: uppercase; letter-spacing: .5px; }
+  .stat-pill .label { font-size: 11px; color: var(--text-muted); margin-top: 4px; text-transform: uppercase; letter-spacing: .5px; }
 
   /* ── BUTTONS ── */
   .btn {
@@ -154,7 +160,7 @@
   .topbar-title { font-size: 28px; font-weight: 800; letter-spacing: -.5px; }
   .avatar {
     width: 38px; height: 38px; border-radius: 50%;
-    background: linear-gradient(135deg, var(--gold), #ff9800);
+    background: linear-gradient(135deg, var(--gold), #b8882e);
     display: flex; align-items: center; justify-content: center;
     font-weight: 800; font-size: 14px; color: #000; cursor: pointer;
   }
@@ -181,15 +187,15 @@
 
   .wallet-card {
     margin: 0 20px 20px;
-    background: linear-gradient(135deg, #1a1a35, #1e1e30);
-    border: 1px solid #3a3a60;
+    background: linear-gradient(135deg, var(--surface), var(--surface2));
+    border: 1px solid var(--border);
     border-radius: 20px; padding: 24px;
     position: relative; overflow: hidden;
   }
   .wallet-card::before {
     content: ''; position: absolute; top: -40px; right: -40px;
     width: 150px; height: 150px; border-radius: 50%;
-    background: radial-gradient(circle, #ffd60020, transparent 70%);
+    background: radial-gradient(circle, rgba(230,185,78,0.10), transparent 70%);
   }
   .wallet-label { font-size: 12px; color: var(--text-muted); text-transform: uppercase; letter-spacing: .8px; font-weight: 600; }
   .wallet-amount { font-size: 44px; font-weight: 900; letter-spacing: -2px; margin: 6px 0; }
@@ -214,7 +220,7 @@
   .habits-list { padding: 0 20px; display: flex; flex-direction: column; gap: 12px; }
 
   .habit-card {
-    background: #1c1c38; border: 1px solid #3c3c68;
+    background: var(--surface); border: 1px solid var(--border);
     border-radius: var(--radius); padding: 18px;
     cursor: pointer; transition: all .15s; position: relative; overflow: hidden;
   }
@@ -278,7 +284,7 @@
   .feed-top { display: flex; align-items: center; gap: 12px; margin-bottom: 10px; }
   .feed-avatar {
     width: 36px; height: 36px; border-radius: 50%;
-    background: linear-gradient(135deg, #6c63ff, #e040fb);
+    background: linear-gradient(135deg, #34343c, #26262c);
     display: flex; align-items: center; justify-content: center;
     font-weight: 700; font-size: 14px; flex-shrink: 0;
   }
@@ -296,11 +302,11 @@
 
   .challenge-banner {
     margin: 0 20px 16px;
-    background: linear-gradient(135deg, #1a1a2e, var(--surface2));
-    border: 1px solid #6c63ff55; border-radius: var(--radius);
+    background: linear-gradient(135deg, var(--surface), var(--surface2));
+    border: 1px solid var(--border-strong); border-radius: var(--radius);
     padding: 18px;
   }
-  .challenge-banner .cb-label { font-size: 11px; color: #a89bff; font-weight: 700; text-transform: uppercase; letter-spacing: 1px; }
+  .challenge-banner .cb-label { font-size: 11px; color: var(--gold); font-weight: 700; text-transform: uppercase; letter-spacing: 1px; }
   .challenge-banner .cb-title { font-size: 17px; font-weight: 700; margin: 6px 0 4px; }
   .challenge-banner .cb-sub { font-size: 13px; color: var(--text-muted); margin-bottom: 14px; }
 
@@ -308,7 +314,7 @@
   #screen-stats { padding-bottom: 100px; }
   .stats-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; padding: 0 20px; margin-bottom: 20px; }
   .stat-card {
-    background: #1c1c38; border: 1px solid #3c3c68;
+    background: var(--surface); border: 1px solid var(--border);
     border-radius: var(--radius); padding: 20px 16px;
   }
   .stat-card .s-val { font-size: 30px; font-weight: 900; letter-spacing: -1px; }
@@ -319,7 +325,7 @@
 
   .chart-card {
     margin: 0 20px 20px;
-    background: #1c1c38; border: 1px solid #3c3c68;
+    background: var(--surface); border: 1px solid var(--border);
     border-radius: var(--radius); padding: 20px;
   }
   .chart-title { font-size: 15px; font-weight: 700; margin-bottom: 16px; }
@@ -336,7 +342,7 @@
     width: 56px; height: 56px; border-radius: 50%;
     background: var(--gold); border: none; cursor: pointer;
     font-size: 26px; color: #000; font-weight: 900;
-    box-shadow: 0 4px 20px #ffd60050;
+    box-shadow: var(--shadow);
     display: flex; align-items: center; justify-content: center;
     transition: transform .15s;
     z-index: 99;
@@ -445,13 +451,13 @@
 
   .profile-section {
     margin: 0 20px 20px;
-    background: #1c1c38; border: 1px solid #3c3c68;
+    background: var(--surface); border: 1px solid var(--border);
     border-radius: var(--radius); padding: 20px;
     text-align: center;
   }
   .profile-avatar-lg {
     width: 72px; height: 72px; border-radius: 50%;
-    background: linear-gradient(135deg, var(--gold), #ff9800);
+    background: linear-gradient(135deg, var(--gold), #b8882e);
     display: flex; align-items: center; justify-content: center;
     font-size: 28px; font-weight: 900; color: #000;
     margin: 0 auto 12px;
@@ -475,6 +481,86 @@
   .hi-amount { font-size: 14px; font-weight: 700; }
   .hi-amount.pos { color: var(--green); }
   .hi-amount.neg { color: var(--red); }
+
+  /* ════════ PREMIUM REFINEMENTS (Grit-inspired) ════════ */
+  body {
+    -webkit-font-smoothing: antialiased;
+    text-rendering: optimizeLegibility;
+    background: radial-gradient(130% 90% at 50% -15%, #16161a 0%, var(--bg) 55%);
+    background-attachment: fixed;
+  }
+  .welcome-title, .onboard-q, .topbar-title, .modal-title,
+  .wallet-amount, .s-val, .ps-val, .profile-name { letter-spacing: -.6px; }
+
+  /* Buttons — calm, confident */
+  .btn { border-radius: 14px; font-weight: 650; letter-spacing: -.1px;
+         transition: transform .12s ease, opacity .12s ease, background .15s ease; }
+  .btn-primary { background: var(--gold); color: #16120a; }
+  .btn-primary:hover { background: var(--gold-soft); }
+  .btn-secondary { background: var(--surface2); border: 1px solid var(--border); color: var(--text); }
+  .btn-success { background: var(--green); color: #062712; }
+  .btn-small { border-radius: 10px; }
+
+  /* Cards — hairline borders, soft elevation, thin status accent */
+  .habit-card, .stat-card, .chart-card { box-shadow: var(--shadow-sm); }
+  .wallet-card { box-shadow: var(--shadow); }
+  .habit-card { padding: 20px; }
+  .habit-card::after { width: 3px; }
+
+  /* Wallet — white figure, gold $ */
+  .wallet-amount { color: var(--text); font-weight: 800; letter-spacing: -2.5px; }
+  .wallet-amount span { color: var(--gold); }
+  .wallet-label { color: var(--text-muted); }
+  .wallet-btn { background: var(--surface2); border: 1px solid var(--border); }
+
+  /* Stake badge — outline, restrained */
+  .habit-stake-badge { background: transparent; border: 1px solid var(--border-strong);
+                       color: var(--gold); font-weight: 700; font-size: 12px; }
+
+  /* Habit emoji housed in a neutral tile */
+  .habit-emoji { width: 42px; height: 42px; border-radius: 12px;
+                 background: var(--surface2); border: 1px solid var(--border);
+                 display: flex; align-items: center; justify-content: center; font-size: 21px; }
+
+  /* Progress — thin & subtle */
+  .progress-bar { height: 3px; }
+
+  /* Check button — quiet until pressed */
+  .check-btn { background: transparent; border: 1px solid var(--border-strong); color: var(--text); }
+  .check-btn:hover { background: var(--surface2); }
+
+  .streak-display { color: var(--gold); font-weight: 600; }
+  .section-action { color: var(--gold); font-weight: 600; }
+
+  /* Bottom nav — frosted, SVG icons */
+  .bottom-nav { background: rgba(12,12,14,.82); backdrop-filter: blur(22px);
+                -webkit-backdrop-filter: blur(22px); border-top: 1px solid var(--border); }
+  .nav-item { color: var(--text-muted); gap: 5px; font-size: 10px; letter-spacing: .4px; }
+  .nav-item.active { color: var(--gold); }
+  .nav-icon { display: flex; align-items: center; justify-content: center; height: 24px; }
+  .nav-icon svg { width: 23px; height: 23px; stroke: currentColor; fill: none;
+                  stroke-width: 1.9; stroke-linecap: round; stroke-linejoin: round; }
+
+  /* FAB — refined */
+  .fab { background: var(--gold); color: #16120a; box-shadow: var(--shadow); font-weight: 400; }
+  .fab svg { width: 24px; height: 24px; stroke: #16120a; fill: none; stroke-width: 2.4; stroke-linecap: round; }
+
+  /* Topbar / avatar */
+  .topbar-title { font-weight: 760; }
+  .avatar { font-weight: 700; box-shadow: var(--shadow-sm); }
+
+  /* Inputs — neutral, refined */
+  .input-field { background: var(--surface2); border: 1px solid var(--border); border-radius: 14px; }
+  .input-field:focus { border-color: var(--gold); }
+
+  /* Chips & options */
+  .stake-chip, .option-card, .charity-item, .tag { border-width: 1px; }
+  .stake-chip.selected, .option-card.selected, .charity-item.selected, .tag.selected {
+    border-color: var(--gold); background: var(--gold-dim); }
+
+  /* Logo mark — refined metallic, no glow */
+  .logo-mark { box-shadow: var(--shadow); border-radius: 20px; }
+  .modal { box-shadow: 0 -12px 40px rgba(0,0,0,.55); }
 </style>
 </head>
 <body>
@@ -486,16 +572,11 @@
      SCREEN 0: WELCOME
 ══════════════════════════════════════════════ -->
 <div class="screen active" id="screen-welcome">
-  <div class="logo-mark">🃏</div>
+  <div class="logo-mark" style="color:#16120a;font-weight:800">A</div>
   <div class="welcome-title">Bet on<br><span>Yourself.</span></div>
   <div class="welcome-sub">Stake real money on your habits.<br>Complete them — or pay up.</div>
-  <div class="stats-row">
-    <div class="stat-pill"><div class="num">$2.1M</div><div class="label">Committed</div></div>
-    <div class="stat-pill"><div class="num">84%</div><div class="label">Success Rate</div></div>
-    <div class="stat-pill"><div class="num">12K</div><div class="label">Users</div></div>
-  </div>
 
-  <div style="width:100%;background:#1c1c38;border:1px solid #3c3c68;border-radius:16px;padding:20px;margin-bottom:24px;text-align:left">
+  <div style="width:100%;background:var(--surface);border:1px solid var(--border);border-radius:16px;padding:20px;margin-bottom:24px;text-align:left">
     <div style="font-size:13px;font-weight:700;color:var(--text-muted);text-transform:uppercase;letter-spacing:.8px;margin-bottom:16px">How it works</div>
     <div style="display:flex;flex-direction:column;gap:14px">
       <div style="display:flex;gap:14px;align-items:flex-start">
@@ -513,8 +594,8 @@
     </div>
   </div>
 
-  <button class="btn btn-primary pulsing" onclick="goTo('screen-ob1')">Get Started — Free →</button>
-  <button class="btn btn-ghost" style="margin-top:12px" onclick="skipOnboard()">I have an account</button>
+  <button class="btn btn-primary" onclick="goTo('screen-ob1')">Get Started</button>
+  <button class="btn btn-ghost" style="margin-top:12px" onclick="skipOnboard()">I already have habits</button>
 </div>
 
 <!-- ══════════════════════════════════════════════
@@ -671,7 +752,7 @@
 ══════════════════════════════════════════════ -->
 <div class="screen" id="screen-home">
   <div class="topbar">
-    <div class="topbar-title">Ante 🃏</div>
+    <div class="topbar-title">Ante</div>
     <div class="avatar" id="home-avatar" onclick="showTab('stats')">B</div>
   </div>
 
@@ -694,17 +775,17 @@
     <!-- populated by JS -->
   </div>
 
-  <button class="fab" onclick="showModal('add-habit-modal')">+</button>
+  <button class="fab" onclick="showModal('add-habit-modal')"><svg viewBox="0 0 24 24"><path d="M12 5v14"/><path d="M5 12h14"/></svg></button>
 
   <div class="bottom-nav">
     <div class="nav-item active" onclick="showTab('home')">
-      <div class="nav-icon">🏠</div>Home
+      <div class="nav-icon"><svg viewBox="0 0 24 24"><path d="m3 9 9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><path d="M9 22V12h6v10"/></svg></div>Home
     </div>
     <div class="nav-item" onclick="showTab('feed')">
-      <div class="nav-icon">👥</div>Friends
+      <div class="nav-icon"><svg viewBox="0 0 24 24"><path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M22 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg></div>Friends
     </div>
     <div class="nav-item" onclick="showTab('stats')">
-      <div class="nav-icon">📊</div>Stats
+      <div class="nav-icon"><svg viewBox="0 0 24 24"><path d="M3 3v18h18"/><path d="M7 16v-5"/><path d="M12 16V8"/><path d="M17 16v-3"/></svg></div>Stats
     </div>
   </div>
 </div>
@@ -715,7 +796,7 @@
 <div class="screen" id="screen-feed">
   <div class="topbar">
     <div class="topbar-title">Friends</div>
-    <div class="avatar" style="background:linear-gradient(135deg,#6c63ff,#e040fb)">👥</div>
+    <div class="avatar" style="background:linear-gradient(135deg,#2c2c32,#1f1f24)">👥</div>
   </div>
 
   <div class="challenge-banner">
@@ -729,13 +810,13 @@
 
   <div class="bottom-nav">
     <div class="nav-item" onclick="showTab('home')">
-      <div class="nav-icon">🏠</div>Home
+      <div class="nav-icon"><svg viewBox="0 0 24 24"><path d="m3 9 9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><path d="M9 22V12h6v10"/></svg></div>Home
     </div>
     <div class="nav-item active" onclick="showTab('feed')">
-      <div class="nav-icon">👥</div>Friends
+      <div class="nav-icon"><svg viewBox="0 0 24 24"><path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M22 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg></div>Friends
     </div>
     <div class="nav-item" onclick="showTab('stats')">
-      <div class="nav-icon">📊</div>Stats
+      <div class="nav-icon"><svg viewBox="0 0 24 24"><path d="M3 3v18h18"/><path d="M7 16v-5"/><path d="M12 16V8"/><path d="M17 16v-3"/></svg></div>Stats
     </div>
   </div>
 </div>
@@ -747,7 +828,7 @@
   <div class="topbar">
     <div class="topbar-title">Your Stats</div>
     <div style="display:flex;align-items:center;gap:12px">
-      <div class="avatar" style="background:var(--surface2);border:1px solid var(--border);font-size:18px" onclick="openSettings()">⚙️</div>
+      <div class="avatar" style="background:var(--surface2);border:1px solid var(--border)" onclick="openSettings()"><svg viewBox="0 0 24 24" style="width:20px;height:20px;stroke:var(--text-dim);fill:none;stroke-width:1.9;stroke-linecap:round;stroke-linejoin:round"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 2.83-2.83l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg></div>
       <div class="avatar" id="stats-avatar" onclick="showTab('stats')">B</div>
     </div>
   </div>
@@ -803,13 +884,13 @@
 
   <div class="bottom-nav">
     <div class="nav-item" onclick="showTab('home')">
-      <div class="nav-icon">🏠</div>Home
+      <div class="nav-icon"><svg viewBox="0 0 24 24"><path d="m3 9 9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><path d="M9 22V12h6v10"/></svg></div>Home
     </div>
     <div class="nav-item" onclick="showTab('feed')">
-      <div class="nav-icon">👥</div>Friends
+      <div class="nav-icon"><svg viewBox="0 0 24 24"><path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M22 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg></div>Friends
     </div>
     <div class="nav-item active" onclick="showTab('stats')">
-      <div class="nav-icon">📊</div>Stats
+      <div class="nav-icon"><svg viewBox="0 0 24 24"><path d="M3 3v18h18"/><path d="M7 16v-5"/><path d="M12 16V8"/><path d="M17 16v-3"/></svg></div>Stats
     </div>
   </div>
 </div>
@@ -880,7 +961,7 @@
     <div class="modal-handle"></div>
     <div class="modal-title">Challenge Friends 🔥</div>
     <div class="onboard-hint">Send your Ante link — they see your stake and can join the same habit bet.</div>
-    <div style="background:#1c1c38;border:1px solid #3c3c68;border-radius:12px;padding:16px;margin-bottom:20px;display:flex;align-items:center;gap:12px">
+    <div style="background:var(--surface);border:1px solid var(--border);border-radius:12px;padding:16px;margin-bottom:20px;display:flex;align-items:center;gap:12px">
       <div style="flex:1;font-size:14px;color:var(--text-dim);font-family:monospace">ante.app/join/<span id="share-code">bk7x2q</span></div>
       <button class="btn btn-primary btn-small" onclick="copyShareLink()">Copy</button>
     </div>
@@ -1419,10 +1500,10 @@ function renderStats() {
 // RENDER FEED
 // ─────────────────────────────────────────────
 const FEED_DATA = [
-  { name: 'Marcus K.', initials: 'MK', color: '#6c63ff,#e040fb', time: '2m ago', body: 'Just hit 30 days of cold showers. No way I\'m losing $10 to charity 🧊', stake: 10, result: 'win', streak: 30 },
-  { name: 'Anika R.', initials: 'AR', color: '#00bcd4,#00e676', time: '18m ago', body: 'Missed my run today. $25 to Red Cross 😭 Starting fresh tomorrow.', stake: 25, result: 'loss', streak: 0 },
-  { name: 'Jake T.', initials: 'JT', color: '#ff9800,#ff5722', time: '1h ago', body: 'Week 3 of waking up at 5am. The $50 at risk is a better alarm than any clock', stake: 50, result: 'win', streak: 21 },
-  { name: 'Priya S.', initials: 'PS', color: '#4caf50,#8bc34a', time: '3h ago', body: 'Meditation streak: 7 days straight. $5 bets hit different when you actually want to keep them', stake: 5, result: 'win', streak: 7 },
+  { name: 'Marcus K.', initials: 'MK', color: '#34343c,#26262c', time: '2m ago', body: 'Just hit 30 days of cold showers. No way I\'m losing $10 to charity 🧊', stake: 10, result: 'win', streak: 30 },
+  { name: 'Anika R.', initials: 'AR', color: '#34343c,#26262c', time: '18m ago', body: 'Missed my run today. $25 to Red Cross 😭 Starting fresh tomorrow.', stake: 25, result: 'loss', streak: 0 },
+  { name: 'Jake T.', initials: 'JT', color: '#34343c,#26262c', time: '1h ago', body: 'Week 3 of waking up at 5am. The $50 at risk is a better alarm than any clock', stake: 50, result: 'win', streak: 21 },
+  { name: 'Priya S.', initials: 'PS', color: '#34343c,#26262c', time: '3h ago', body: 'Meditation streak: 7 days straight. $5 bets hit different when you actually want to keep them', stake: 5, result: 'win', streak: 7 },
 ];
 
 function renderFeed() {
@@ -1472,7 +1553,7 @@ function showToast(msg, type) {
 // CONFETTI
 // ─────────────────────────────────────────────
 function spawnConfetti() {
-  const colors = ['#ffd600','#00e676','#6c63ff','#ff9800','#e040fb'];
+  const colors = ['#e6b94e','#4ade80','#f0cd76','#9b9ba4','#ffffff'];
   for (let i = 0; i < 24; i++) {
     const el = document.createElement('div');
     el.className = 'confetti-piece';
