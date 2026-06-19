@@ -561,6 +561,57 @@
   /* Logo mark — refined metallic, no glow */
   .logo-mark { box-shadow: var(--shadow); border-radius: 20px; }
   .modal { box-shadow: 0 -12px 40px rgba(0,0,0,.55); }
+
+  /* ════════ INTEGRATIONS / VERIFIABLE GOALS ════════ */
+  .connect-card {
+    display: flex; align-items: center; gap: 14px;
+    background: var(--surface); border: 1px solid var(--border);
+    border-radius: var(--radius-sm); padding: 15px 16px; margin-bottom: 10px;
+    transition: border-color .15s;
+  }
+  .connect-card .ci {
+    width: 44px; height: 44px; border-radius: 12px; background: var(--surface2);
+    display: flex; align-items: center; justify-content: center; font-size: 22px; flex-shrink: 0;
+    border: 1px solid var(--border);
+  }
+  .connect-card .cc-body { flex: 1; min-width: 0; }
+  .connect-card .cc-name { font-size: 15px; font-weight: 700; }
+  .connect-card .cc-sub { font-size: 12px; color: var(--text-muted); margin-top: 2px; line-height: 1.35; }
+  .connect-btn {
+    padding: 9px 16px; border-radius: 10px; font-size: 13px; font-weight: 700;
+    border: 1px solid var(--gold); background: transparent; color: var(--gold);
+    cursor: pointer; white-space: nowrap; font-family: inherit; transition: all .15s;
+  }
+  .connect-btn:active { transform: scale(.96); }
+  .connect-card.connected { border-color: rgba(74,222,128,.4); }
+  .connect-card.connected .connect-btn { border-color: var(--green); color: var(--green); background: var(--green-dim); }
+
+  .goal-card {
+    position: relative; display: flex; align-items: center; gap: 13px;
+    background: var(--surface); border: 1px solid var(--border);
+    border-radius: var(--radius-sm); padding: 13px 15px; margin-bottom: 10px;
+    cursor: pointer; transition: all .15s;
+  }
+  .goal-card.selected { border-color: var(--gold); background: var(--gold-dim); }
+  .goal-card.locked { opacity: .45; cursor: not-allowed; }
+  .goal-emoji {
+    width: 40px; height: 40px; border-radius: 11px; display: flex;
+    align-items: center; justify-content: center; font-size: 20px; flex-shrink: 0;
+  }
+  .goal-body { flex: 1; min-width: 0; }
+  .goal-name { font-size: 15px; font-weight: 700; }
+  .goal-src { font-size: 12px; color: var(--text-muted); margin-top: 2px; }
+  .goal-lock { font-size: 11px; font-weight: 700; color: var(--text-muted); display: flex; align-items: center; gap: 4px; white-space: nowrap; }
+
+  /* Verification badge on habit cards & detail */
+  .verify-badge {
+    display: inline-flex; align-items: center; gap: 5px;
+    font-size: 11px; font-weight: 600; color: var(--text-dim);
+    background: var(--surface2); border: 1px solid var(--border);
+    padding: 3px 9px; border-radius: 20px;
+  }
+  /* Per-habit color identity */
+  .habit-card::after { background: var(--hc, var(--green)); }
 </style>
 </head>
 <body>
@@ -594,7 +645,7 @@
     </div>
   </div>
 
-  <button class="btn btn-primary" onclick="goTo('screen-ob1')">Get Started</button>
+  <button class="btn btn-primary" onclick="startOnboarding()">Get Started</button>
   <button class="btn btn-ghost" style="margin-top:12px" onclick="skipOnboard()">I already have habits</button>
 </div>
 
@@ -608,16 +659,15 @@
     <div class="step-dot"></div>
     <div class="step-dot"></div>
   </div>
-  <div class="onboard-q">What habit do you want to build?</div>
-  <div class="onboard-hint">Be specific — "Run 2 miles" beats "Exercise"</div>
-  <input class="input-field" id="habit-name-input" type="text" placeholder="e.g. Run 2 miles" maxlength="48">
-  <br><br>
-  <div class="onboard-hint">Pick an emoji</div>
-  <div class="tag-row" id="emoji-picker">
-    🏃 🏋️ 📚 🧘 💊 💧 🛌 🥗 ✍️ 🎯 🎸 🌿 💻 🧠 🚴
+  <div class="onboard-q">Connect what verifies you</div>
+  <div class="onboard-hint">Ante only lets you bet on goals it can actually check — so you literally can't cheat yourself. Connect at least one source.</div>
+  <div id="connect-list"></div>
+  <div style="background:var(--surface);border:1px solid var(--border);border-radius:var(--radius-sm);padding:12px 14px;font-size:12px;color:var(--text-muted);line-height:1.45">
+    🔒 No honor system. Every bet is auto-verified through Apple Health, Screen Time, your location, or AI photo proof.
   </div>
   <div style="margin-top:auto">
     <button class="btn btn-primary" onclick="ob1Next()">Next →</button>
+    <button class="btn btn-ghost" style="margin-top:8px" onclick="goTo('screen-welcome')">← Back</button>
   </div>
 </div>
 
@@ -631,30 +681,10 @@
     <div class="step-dot"></div>
     <div class="step-dot"></div>
   </div>
-  <div class="onboard-q">How often?</div>
-  <div class="onboard-hint">Miss your target and you lose your stake.</div>
-  <div class="option-grid">
-    <div class="option-card selected" onclick="selectFreq(this,'Every Day')" data-val="Every Day">
-      <div class="opt-icon">🔥</div>
-      <div class="opt-label">Every Day</div>
-      <div class="opt-sub">7 days / week</div>
-    </div>
-    <div class="option-card" onclick="selectFreq(this,'Weekdays')" data-val="Weekdays">
-      <div class="opt-icon">📅</div>
-      <div class="opt-label">Weekdays</div>
-      <div class="opt-sub">5 days / week</div>
-    </div>
-    <div class="option-card" onclick="selectFreq(this,'3× / Week')" data-val="3× / Week">
-      <div class="opt-icon">⚡</div>
-      <div class="opt-label">3× / Week</div>
-      <div class="opt-sub">Custom days</div>
-    </div>
-    <div class="option-card" onclick="selectFreq(this,'Weekly')" data-val="Weekly">
-      <div class="opt-icon">📆</div>
-      <div class="opt-label">Weekly</div>
-      <div class="opt-sub">1 day / week</div>
-    </div>
-  </div>
+  <div class="onboard-q">Pick a goal we can verify</div>
+  <div class="onboard-hint">Locked goals need their app connected — there's no gameable, type-anything habit.</div>
+  <div id="goal-list"></div>
+  <div id="goal-config"></div>
   <div style="margin-top:auto">
     <button class="btn btn-primary" onclick="ob2Next()">Next →</button>
     <button class="btn btn-ghost" style="margin-top:8px" onclick="goTo('screen-ob1')">← Back</button>
@@ -720,8 +750,12 @@
 
   <div id="commit-summary" style="background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);padding:20px;margin-bottom:24px">
     <div class="info-row">
-      <span class="info-label">Habit</span>
+      <span class="info-label">Goal</span>
       <span class="info-val" id="sum-habit">—</span>
+    </div>
+    <div class="info-row">
+      <span class="info-label">Verified by</span>
+      <span class="info-val" id="sum-verify">—</span>
     </div>
     <div class="info-row">
       <span class="info-label">Frequency</span>
@@ -738,7 +772,7 @@
   </div>
 
   <div style="background:var(--red-dim);border:1px solid var(--red)55;border-radius:var(--radius-sm);padding:14px 16px;margin-bottom:24px;font-size:13px;line-height:1.5;color:var(--text-dim)">
-    ⚠️ By starting, you authorize Ante to charge your card <strong id="sum-stake-2">$5</strong> for each missed day. Charges go directly to your chosen charity. Ante takes 15%.
+    🔒 Your progress is checked automatically — no self-reporting. Miss the verified target and <strong id="sum-stake-2">$5</strong> goes to your charity (Ante keeps 15%). Using mock funds for now.
   </div>
 
   <div style="margin-top:auto">
@@ -768,14 +802,14 @@
 
   <div class="section-header">
     <div class="section-title">Today</div>
-    <div class="section-action" onclick="showModal('add-habit-modal')">+ New bet</div>
+    <div class="section-action" onclick="startNewBet()">+ New bet</div>
   </div>
 
   <div class="habits-list" id="habits-container">
     <!-- populated by JS -->
   </div>
 
-  <button class="fab" onclick="showModal('add-habit-modal')"><svg viewBox="0 0 24 24"><path d="M12 5v14"/><path d="M5 12h14"/></svg></button>
+  <button class="fab" onclick="startNewBet()"><svg viewBox="0 0 24 24"><path d="M12 5v14"/><path d="M5 12h14"/></svg></button>
 
   <div class="bottom-nav">
     <div class="nav-item active" onclick="showTab('home')">
@@ -1073,8 +1107,9 @@ let state = {
   walletBalance: 50,
   totalForfeit: 0,
   txHistory: [],
+  connections: { health: false, screentime: false, gps: false, camera: false },
   profile: { name: 'Beckett', handle: 'beckett', reminderTime: '20:00', reminderOn: false },
-  onboardData: { name: '', emoji: '🏃', freq: 'Every Day', stake: 5, charity: 'Boys & Girls Club' }
+  onboardData: { goalId: null, name: '', target: null, freq: 'Every Day', stake: 5, charity: 'Boys & Girls Club' }
 };
 
 function loadState() {
@@ -1122,30 +1157,127 @@ function skipOnboard() {
 // ─────────────────────────────────────────────
 // ONBOARDING
 // ─────────────────────────────────────────────
-let selectedEmoji = '🏃';
 let selectedFreq = 'Every Day';
 let selectedStake = 5;
 let selectedCharity = 'Boys & Girls Club';
 
-// Build emoji picker
-function buildEmojiPicker(containerId) {
-  const emojis = ['🏃','🏋️','📚','🧘','💊','💧','🛌','🥗','✍️','🎯','🎸','🌿','💻','🧠','🚴'];
-  const container = document.getElementById(containerId);
-  container.innerHTML = '';
-  emojis.forEach((e, i) => {
-    const t = document.createElement('div');
-    t.className = 'tag' + (i === 0 ? ' selected' : '');
-    t.textContent = e;
-    t.onclick = () => {
-      container.querySelectorAll('.tag').forEach(x => x.classList.remove('selected'));
-      t.classList.add('selected');
-      selectedEmoji = e;
-    };
-    container.appendChild(t);
-  });
+// ─────────────────────────────────────────────
+// INTEGRATIONS + VERIFIABLE GOALS (Forfeit model)
+// Every bet must map to a connected source — no honor system.
+// ─────────────────────────────────────────────
+const SOURCES = {
+  health:     { label: 'Apple Health', icon: '🍎', sub: 'Steps, workouts, mindfulness, sleep — plus anything that syncs to Health (Strava, Whoop…).' },
+  screentime: { label: 'Screen Time',  icon: '⏱️', sub: 'App & category time limits, enforced by iOS.' },
+  gps:        { label: 'Location',      icon: '📍', sub: 'GPS check-ins — prove you showed up (or stayed away).' },
+  camera:     { label: 'Photo + AI',    icon: '📸', sub: 'AI checks your photo against your description; a human reviews if unsure.' },
+};
+
+const GOALS = [
+  { id:'steps',    label:'Walk 10,000 steps',    emoji:'🚶', color:'#34d399', source:'health',     metric:'Steps',           dir:'≥', target:10000, unit:'steps', verify:'auto' },
+  { id:'exercise', label:'30 min of exercise',   emoji:'🏋️', color:'#4ade80', source:'health',     metric:'Exercise',        dir:'≥', target:30,    unit:'min',   verify:'auto' },
+  { id:'run',      label:'Run 3 miles',          emoji:'🏃', color:'#fb923c', source:'health',     metric:'Run distance',    dir:'≥', target:3,     unit:'mi',    verify:'auto' },
+  { id:'meditate', label:'Meditate 10 min',      emoji:'🧘', color:'#a78bfa', source:'health',     metric:'Mindful minutes', dir:'≥', target:10,    unit:'min',   verify:'auto' },
+  { id:'sleep',    label:'Sleep 7+ hours',       emoji:'🛌', color:'#60a5fa', source:'health',     metric:'Sleep',           dir:'≥', target:7,     unit:'hr',    verify:'auto' },
+  { id:'screen',   label:'Limit social apps',    emoji:'📱', color:'#f87171', source:'screentime', metric:'Screen time',     dir:'≤', target:30,    unit:'min',   verify:'auto' },
+  { id:'gym',      label:'Get to the gym',       emoji:'📍', color:'#38bdf8', source:'gps',        metric:'Gym check-in',    dir:'',  target:0,     unit:'',      verify:'auto' },
+  { id:'avoid',    label:'Avoid a place',        emoji:'🚫', color:'#94a3b8', source:'gps',        metric:'Stay away',       dir:'',  target:0,     unit:'',      verify:'auto' },
+  { id:'proof',    label:'Custom (photo proof)', emoji:'📸', color:'#e6b94e', source:'camera',     metric:'Photo + AI',      dir:'',  target:0,     unit:'',      verify:'proof' },
+];
+
+function goalById(id){ return GOALS.find(g => g.id === id); }
+function hexToRgba(hex, a){ const n = parseInt(hex.slice(1),16); return `rgba(${(n>>16)&255},${(n>>8)&255},${n&255},${a})`; }
+function anyConnected(){ return Object.values(state.connections || {}).some(Boolean); }
+
+function renderConnectList(){
+  const el = document.getElementById('connect-list');
+  if (!el) return;
+  el.innerHTML = Object.entries(SOURCES).map(([k,s]) => {
+    const on = state.connections[k];
+    return `<div class="connect-card ${on?'connected':''}">
+      <div class="ci">${s.icon}</div>
+      <div class="cc-body"><div class="cc-name">${s.label}</div><div class="cc-sub">${s.sub}</div></div>
+      <button class="connect-btn" onclick="toggleConnect('${k}')">${on?'Connected ✓':'Connect'}</button>
+    </div>`;
+  }).join('');
 }
-buildEmojiPicker('emoji-picker');
-buildEmojiPicker('modal-emoji-picker');
+function toggleConnect(k){
+  state.connections[k] = !state.connections[k];
+  saveState();
+  renderConnectList();
+  showToast(state.connections[k] ? `✅ ${SOURCES[k].label} connected` : `${SOURCES[k].label} disconnected`, state.connections[k]?'green':null);
+}
+
+function renderGoalList(){
+  const el = document.getElementById('goal-list');
+  if (!el) return;
+  el.innerHTML = GOALS.map(g => {
+    const connected = state.connections[g.source];
+    const sel = state.onboardData.goalId === g.id;
+    return `<div class="goal-card ${sel?'selected':''} ${connected?'':'locked'}" onclick="${connected?`selectGoal('${g.id}')`:`promptConnect('${g.source}')`}">
+      <div class="goal-emoji" style="background:${hexToRgba(g.color,0.16)};border:1px solid ${hexToRgba(g.color,0.4)}">${g.emoji}</div>
+      <div class="goal-body"><div class="goal-name">${g.label}</div><div class="goal-src">${SOURCES[g.source].icon} ${SOURCES[g.source].label}</div></div>
+      ${connected ? '' : `<div class="goal-lock">🔒 Connect</div>`}
+    </div>`;
+  }).join('');
+}
+function promptConnect(src){
+  showToast(`Connect ${SOURCES[src].label} first`, 'red');
+  goTo('screen-ob1');
+}
+function selectGoal(id){
+  const g = goalById(id);
+  state.onboardData.goalId = id;
+  state.onboardData.target = g.target;
+  state.onboardData.name = g.label;
+  renderGoalList();
+  renderGoalConfig();
+}
+function renderGoalConfig(){
+  const el = document.getElementById('goal-config');
+  if (!el) return;
+  const g = goalById(state.onboardData.goalId);
+  if (!g) { el.innerHTML = ''; return; }
+  let inner = '';
+  if (g.verify === 'proof') {
+    const cur = (state.onboardData.name && state.onboardData.name !== g.label) ? state.onboardData.name : '';
+    inner = `<div class="onboard-hint" style="margin-top:18px">What's the goal? The AI checks your photo against this.</div>
+      <input class="input-field" id="proof-name" placeholder="e.g. Practice guitar 20 min" value="${cur}" maxlength="48">`;
+  } else if (g.unit) {
+    inner = `<div class="onboard-hint" style="margin-top:18px">Daily target — auto-verified via ${SOURCES[g.source].label}</div>
+      <div style="display:flex;align-items:center;gap:10px">
+        <span style="font-size:14px;color:var(--text-dim);font-weight:700;white-space:nowrap">${g.dir==='≤'?'Under':'At least'}</span>
+        <input class="input-field" id="goal-target" type="number" value="${state.onboardData.target}" style="flex:1;text-align:center;font-weight:800">
+        <span style="font-size:14px;color:var(--text-dim);font-weight:700">${g.unit}</span>
+      </div>`;
+  } else {
+    const how = g.id==='gym' ? "enter the location's 100m radius before the deadline and tap Check In."
+              : g.id==='avoid' ? "stay outside the location's radius at the deadline."
+              : 'auto-checked.';
+    inner = `<div style="margin-top:18px;background:var(--surface);border:1px solid var(--border);border-radius:var(--radius-sm);padding:14px;font-size:13px;color:var(--text-dim);line-height:1.5">${SOURCES[g.source].icon} Verified via ${SOURCES[g.source].label} — ${how}</div>`;
+  }
+  inner += `<div class="onboard-hint" style="margin-top:18px">How often?</div>
+    <div class="tag-row" id="ob-freq">
+      ${['Every Day','Weekdays','3× / Week','Weekly'].map(f=>`<div class="tag ${selectedFreq===f?'selected':''}" onclick="selectObFreq(this,'${f}')">${f}</div>`).join('')}
+    </div>`;
+  el.innerHTML = inner;
+}
+function selectObFreq(elx, f){
+  selectedFreq = f;
+  document.querySelectorAll('#ob-freq .tag').forEach(t=>t.classList.remove('selected'));
+  elx.classList.add('selected');
+}
+function startNewBet(){
+  state.onboardData = { goalId: null, name: '', target: null, freq: 'Every Day', stake: 5, charity: 'Boys & Girls Club' };
+  selectedFreq = 'Every Day'; selectedStake = 5; selectedCharity = 'Boys & Girls Club';
+  if (anyConnected()) { renderGoalList(); renderGoalConfig(); goTo('screen-ob2'); }
+  else { renderConnectList(); goTo('screen-ob1'); }
+}
+function startOnboarding(){
+  state.onboardData = { goalId: null, name: '', target: null, freq: 'Every Day', stake: 5, charity: 'Boys & Girls Club' };
+  selectedFreq = 'Every Day';
+  renderConnectList();
+  goTo('screen-ob1');
+}
 
 function selectFreq(el, val) {
   document.querySelectorAll('#screen-ob2 .option-card').forEach(c => c.classList.remove('selected'));
@@ -1179,21 +1311,33 @@ function selectTag(el, groupId) {
 }
 
 function ob1Next() {
-  const name = document.getElementById('habit-name-input').value.trim();
-  if (!name) { showToast('Name your habit first','red'); return; }
-  state.onboardData.name = name;
-  state.onboardData.emoji = selectedEmoji;
+  if (!anyConnected()) { showToast('Connect at least one source to continue','red'); return; }
+  renderGoalList();
+  renderGoalConfig();
   goTo('screen-ob2');
 }
 function ob2Next() {
+  const g = goalById(state.onboardData.goalId);
+  if (!g) { showToast('Pick a goal first','red'); return; }
+  if (g.verify === 'proof') {
+    const nm = (document.getElementById('proof-name')?.value || '').trim();
+    if (!nm) { showToast('Describe your goal first','red'); return; }
+    state.onboardData.name = nm;
+  } else if (g.unit) {
+    const t = parseFloat(document.getElementById('goal-target')?.value);
+    state.onboardData.target = isNaN(t) ? g.target : t;
+    state.onboardData.name = g.label;
+  }
   state.onboardData.freq = selectedFreq;
   goTo('screen-ob3');
 }
 function ob3Next() {
   state.onboardData.stake = selectedStake;
   state.onboardData.charity = selectedCharity;
-  // Populate summary
-  document.getElementById('sum-habit').textContent = `${state.onboardData.emoji} ${state.onboardData.name}`;
+  const g = goalById(state.onboardData.goalId) || {};
+  const tgt = g.unit ? ` · ${g.dir==='≤'?'≤':'≥'} ${state.onboardData.target} ${g.unit}` : '';
+  document.getElementById('sum-habit').textContent = `${g.emoji || '🎯'} ${state.onboardData.name}${tgt}`;
+  document.getElementById('sum-verify').textContent = g.source ? `${SOURCES[g.source].icon} ${SOURCES[g.source].label}` : '—';
   document.getElementById('sum-freq').textContent = state.onboardData.freq;
   document.getElementById('sum-stake').textContent = `$${state.onboardData.stake}/miss`;
   document.getElementById('sum-stake-2').textContent = `$${state.onboardData.stake}`;
@@ -1202,28 +1346,33 @@ function ob3Next() {
 }
 
 function commitHabit() {
-  const h = createHabit(
-    state.onboardData.name,
-    state.onboardData.emoji,
-    state.onboardData.freq,
-    state.onboardData.stake,
-    state.onboardData.charity
-  );
+  const h = createHabit(state.onboardData);
   state.habits.push(h);
   saveState();
   spawnConfetti();
   showTab('home');
-  setTimeout(() => showToast('🔒 Habit locked in! You\'ve got this.','green'), 300);
+  setTimeout(() => showToast('🔒 Bet locked in — auto-verified from now on.','green'), 300);
 }
 
 // ─────────────────────────────────────────────
-// HABIT MODEL
+// HABIT MODEL (verification-backed)
 // ─────────────────────────────────────────────
-function createHabit(name, emoji, freq, stake, charity) {
+function createHabit(od) {
+  const g = goalById(od.goalId) || {};
   return {
     id: Date.now().toString(),
-    name, emoji, freq, stake,
-    charity: charity || 'Boys & Girls Club',
+    name: od.name || g.label || 'Goal',
+    emoji: g.emoji || '🎯',
+    color: g.color || '#e6b94e',
+    source: g.source || 'camera',
+    metric: g.metric || '',
+    dir: g.dir || '',
+    target: od.target != null ? od.target : (g.target || 0),
+    unit: g.unit || '',
+    verify: g.verify || 'proof',
+    freq: od.freq || 'Every Day',
+    stake: od.stake || 5,
+    charity: od.charity || 'Boys & Girls Club',
     createdAt: new Date().toISOString(),
     completedDays: [],  // ISO date strings
     missedDays: [],
@@ -1314,32 +1463,64 @@ function renderHabits() {
     const total = h.completedDays.length + h.missedDays.length;
     const pct = total > 0 ? Math.round((h.completedDays.length / total) * 100) : 100;
     const streak = h.currentStreak || 0;
-    const statusClass = done ? 'completed-today' : missed ? 'failed' : streak > 2 ? '' : 'at-risk';
+    const color = h.color || '#e6b94e';
+    const src = SOURCES[h.source] || SOURCES.camera;
+    const targetStr = h.unit ? `${h.dir==='≤'?'≤':'≥'} ${h.target} ${h.unit}` : '';
+    const hc = done ? '#4ade80' : missed ? '#f87171' : color;
+    const verifyLabel = h.verify === 'proof' ? '📸 Submit proof' : `↻ Sync ${src.label}`;
 
     return `
-    <div class="habit-card ${statusClass}" onclick="openHabitDetail('${h.id}')">
+    <div class="habit-card" style="--hc:${hc}" onclick="openHabitDetail('${h.id}')">
       <div class="habit-top">
-        <div class="habit-emoji">${h.emoji}</div>
+        <div class="habit-emoji" style="background:${hexToRgba(color,0.16)};border-color:${hexToRgba(color,0.42)}">${h.emoji}</div>
         <div class="habit-stake-badge">$${h.stake}/miss</div>
       </div>
       <div class="habit-name">${h.name}</div>
-      <div class="habit-meta">${h.freq} · ${h.charity}</div>
-      ${streak > 0 ? `<div class="streak-display">🔥 ${streak} day streak</div>` : ''}
+      <div class="habit-meta">${h.freq}${targetStr ? ` · ${targetStr}` : ''}</div>
+      <div style="margin-top:8px;display:flex;gap:8px;align-items:center;flex-wrap:wrap">
+        <span class="verify-badge">${src.icon} ${src.label}</span>
+        ${streak > 0 ? `<span class="streak-display" style="margin-top:0">🔥 ${streak} day streak</span>` : ''}
+      </div>
       <div class="habit-progress">
-        <div class="progress-bar"><div class="progress-fill" style="width:${pct}%"></div></div>
+        <div class="progress-bar"><div class="progress-fill" style="width:${pct}%;background:${color}"></div></div>
         <div class="habit-progress-text">
           <span>${h.completedDays.length} completed</span>
           <span>${pct}% success</span>
         </div>
       </div>
       ${done
-        ? `<button class="check-btn done-btn" disabled>✓ Done for today</button>`
+        ? `<button class="check-btn done-btn" disabled>✓ Verified today</button>`
         : missed
-        ? `<button class="check-btn done-btn" style="border-color:var(--red);color:var(--red)" disabled>❌ Missed — $${h.stake} donated</button>`
-        : `<button class="check-btn" onclick="event.stopPropagation();completeHabit('${h.id}')">✓ Mark complete</button>`
+        ? `<button class="check-btn done-btn" style="border-color:var(--red);color:var(--red)" disabled>✕ Missed — $${h.stake} donated</button>`
+        : `<button class="check-btn" onclick="event.stopPropagation();verifyComplete('${h.id}')">${verifyLabel}</button>`
       }
     </div>`;
   }).join('');
+}
+
+// Source-aware verification (simulated — real build pulls from HealthKit/Screen Time/GPS/AI)
+function verifyComplete(id){
+  const h = state.habits.find(x => x.id === id);
+  if (!h || isCompletedToday(h)) return;
+  const src = SOURCES[h.source] || SOURCES.camera;
+  if (h.verify === 'proof') {
+    showToast('📸 Checking your photo with AI…', null);
+    setTimeout(() => { completeHabit(id); showToast('✅ Photo verified by AI', 'green'); }, 750);
+    return;
+  }
+  showToast(`↻ Syncing ${src.label}…`, null);
+  setTimeout(() => {
+    let detail = '';
+    if (h.unit) {
+      const val = h.dir === '≤' ? Math.max(0, Math.round(h.target * 0.6))
+                                : Math.round(h.target * (1 + Math.random() * 0.3));
+      detail = `: ${val.toLocaleString()} ${h.unit}`;
+    } else if (h.source === 'gps') {
+      detail = ' — checked in ✓';
+    }
+    completeHabit(id);
+    showToast(`✅ Verified via ${src.label}${detail}`, 'green');
+  }, 750);
 }
 
 // ─────────────────────────────────────────────
@@ -1357,6 +1538,10 @@ function openHabitDetail(id) {
     <div class="modal-handle"></div>
     <div style="font-size:48px;text-align:center;margin-bottom:12px">${h.emoji}</div>
     <div class="modal-title" style="text-align:center">${h.name}</div>
+    <div class="info-row">
+      <span class="info-label">Verified by</span><span class="info-val">${(SOURCES[h.source]||SOURCES.camera).icon} ${(SOURCES[h.source]||SOURCES.camera).label}</span>
+    </div>
+    ${h.unit ? `<div class="info-row"><span class="info-label">Target</span><span class="info-val">${h.dir==='≤'?'≤':'≥'} ${h.target} ${h.unit}</span></div>` : ''}
     <div class="info-row">
       <span class="info-label">Frequency</span><span class="info-val">${h.freq}</span>
     </div>
@@ -1381,8 +1566,8 @@ function openHabitDetail(id) {
     </div>
     <div style="margin-top:20px;display:flex;flex-direction:column;gap:10px">
       ${!done && !missed ? `
-        <button class="btn btn-success" onclick="completeHabit('${h.id}');closeModal('habit-detail-modal')">✓ Complete Today</button>
-        <button class="btn btn-danger" onclick="missHabit('${h.id}')">❌ I Missed It — Pay Up</button>
+        <button class="btn btn-success" onclick="closeModal('habit-detail-modal');verifyComplete('${h.id}')">${h.verify==='proof'?'📸 Submit proof':'↻ Verify with '+(SOURCES[h.source]||SOURCES.camera).label}</button>
+        <button class="btn btn-danger" onclick="missHabit('${h.id}')">I missed it — pay up</button>
       ` : done ? `
         <button class="btn btn-secondary" disabled>✓ Already done today</button>
       ` : `
@@ -1580,20 +1765,21 @@ function seedDemoData() {
   const twoDaysAgo = new Date(); twoDaysAgo.setDate(twoDaysAgo.getDate() - 2);
   const tda = twoDaysAgo.toISOString().slice(0, 10);
 
+  state.connections = { health: true, screentime: true, gps: false, camera: false };
   state.habits = [
-    { ...createHabit('Run 3 miles', '🏃', 'Every Day', 25, 'Boys & Girls Club'),
-      completedDays: [yd, tda], currentStreak: 5, bestStreak: 12 },
-    { ...createHabit('No alcohol', '🚫', 'Every Day', 50, 'Red Cross'),
-      completedDays: [yd, tda], currentStreak: 14, bestStreak: 14 },
-    { ...createHabit('Read 30 min', '📚', 'Weekdays', 10, 'No Kid Hungry'),
-      completedDays: [tda], currentStreak: 3, bestStreak: 7 },
+    { ...createHabit({ goalId:'run', target:3, freq:'Every Day', stake:25, charity:'Boys & Girls Club' }),
+      id:'seed1', completedDays: [yd, tda], currentStreak: 5, bestStreak: 12 },
+    { ...createHabit({ goalId:'steps', target:10000, freq:'Every Day', stake:50, charity:'Red Cross' }),
+      id:'seed2', completedDays: [yd, tda], currentStreak: 14, bestStreak: 14 },
+    { ...createHabit({ goalId:'screen', target:30, freq:'Weekdays', stake:10, charity:'No Kid Hungry' }),
+      id:'seed3', completedDays: [tda], currentStreak: 3, bestStreak: 7 },
   ];
   state.walletBalance = 150;
   state.txHistory = [
-    { date: yd, desc: '✅ Completed: 🏃 Run 3 miles', amount: 0, type: 'win' },
-    { date: yd, desc: '✅ Completed: 🚫 No alcohol', amount: 0, type: 'win' },
-    { date: tda, desc: '✅ Completed: 🏃 Run 3 miles', amount: 0, type: 'win' },
-    { date: '2026-06-15', desc: '❌ Missed: 📚 Read 30 min → No Kid Hungry', amount: -10, type: 'loss' },
+    { date: yd, desc: '✅ Verified: 🏃 Run 3 miles', amount: 0, type: 'win' },
+    { date: yd, desc: '✅ Verified: 🚶 Walk 10,000 steps', amount: 0, type: 'win' },
+    { date: tda, desc: '✅ Verified: 🏃 Run 3 miles', amount: 0, type: 'win' },
+    { date: '2026-06-15', desc: '✕ Missed: 📱 Limit social apps → No Kid Hungry', amount: -10, type: 'loss' },
     { date: '2026-06-15', desc: '💳 Funds added', amount: 100, type: 'win' },
   ];
   saveState();
