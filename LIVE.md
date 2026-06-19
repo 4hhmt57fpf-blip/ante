@@ -4,7 +4,7 @@
 
 **Open this URL on your iPhone (Safari):**
 
-> https://858436ce9b0fa6.lhr.life
+> https://21adf9a76e6ee5.lhr.life
 
 Then **Add to Home Screen**:
 1. Tap the **Share** button (square with ↑) in Safari
