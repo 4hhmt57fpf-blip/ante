@@ -1,23 +1,39 @@
 # Ante is LIVE 🃏
 
-## Install on your phone
+## Current live URL
 
-Once you have a live URL (GitHub Pages or Netlify — see DEPLOY.md), open it in **Safari** on iPhone, then:
+**https://aab32c32f2e40b.lhr.life**
 
+Open this in **Safari on iPhone**, then:
 1. Tap the **Share** button (square with ↑)
 2. Scroll down → **Add to Home Screen** → **Add**
 
-Ante now lives on your home screen as a real app with its own gold "A" icon.
-
-### Why it works offline
-Ante is a **PWA (installable web app)** with a service worker. Once loaded once, it's cached on your phone and runs **fully offline** — all your habits, streaks, and history are stored locally on your device.
+Ante lives on your home screen with its own gold "A" icon. Runs offline after first load.
 
 ---
 
-## Make the URL permanent (optional, ~3 min) — GitHub Pages
+## What's new in this build
+
+- **Category-first onboarding** — pick Fitness / Wellness / Digital / School / Location / Custom before choosing a specific goal
+- **App linking per category** — each category shows exactly which app verifies it; locked categories prompt you to connect the app first
+- **Savings Vault instead of charity** — missed stakes go into your personal 🔒 Savings Vault, not to charity. Your money stays yours, just locked. Build the habit back, unlock the vault.
+
+---
+
+## Re-launch the tunnel (URL expires hourly)
+
+```bash
+cd /Users/beckettlee/Desktop/ante
+ssh -i ~/.ssh/id_ed25519 -o StrictHostKeyChecking=no -R 80:localhost:3847 localhost.run
+```
+
+The new URL prints on screen. Update this file with it.
+
+---
+
+## Make the URL permanent (~3 min) — GitHub Pages
 
 The repo already has a Pages deploy workflow (`.github/workflows/deploy.yml`).
-To get a forever-URL like `https://<you>.github.io/ante`:
 
 1. Create a new public repo at https://github.com/new named `ante`
 2. In Terminal:
@@ -27,17 +43,6 @@ To get a forever-URL like `https://<you>.github.io/ante`:
    git push -u origin main
    ```
 3. Repo **Settings → Pages → Build and deployment → GitHub Actions**
-4. Your permanent app: `https://<your-username>.github.io/ante/`
+4. Your permanent URL: `https://<your-username>.github.io/ante/`
 
-(You'll need to log in to GitHub once — that's the one step I can't do for you.)
-
----
-
-## What's in the app
-- Stake money on daily habits; miss a day → it "donates" to your chosen charity
-- Streaks, success %, wallet, 7-day chart, transaction history
-- **Edit any bet** (name, emoji, stake, frequency, charity)
-- **Settings**: your name/handle, daily reminder notifications, export backup, reset
-- **5-week history heatmap** per habit
-- Friends feed + challenge-a-friend share flow
-- Installable, works offline, data stays on your device
+(You'll need to log in to GitHub once — that's the one step that requires you.)
