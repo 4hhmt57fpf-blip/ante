@@ -1,0 +1,1439 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0">
+<title>Ante — Bet on Yourself</title>
+<style>
+  :root {
+    --bg: #080810;
+    --surface: #1c1c38;
+    --surface2: #22223e;
+    --border: #3c3c68;
+    --green: #00e676;
+    --green-dim: #00e67622;
+    --gold: #ffd600;
+    --gold-dim: #ffd60018;
+    --red: #ff5252;
+    --red-dim: #ff525218;
+    --text: #f4f4f8;
+    --text-muted: #7a7a9a;
+    --text-dim: #a0a0c0;
+    --radius: 16px;
+    --radius-sm: 10px;
+  }
+
+  * { box-sizing: border-box; margin: 0; padding: 0; -webkit-tap-highlight-color: transparent; }
+
+  body {
+    background: var(--bg);
+    color: var(--text);
+    font-family: -apple-system, BlinkMacSystemFont, 'SF Pro Display', 'Segoe UI', sans-serif;
+    min-height: 100vh;
+    max-width: 430px;
+    margin: 0 auto;
+    position: relative;
+    overflow-x: hidden;
+  }
+
+  /* ── SCREENS ── */
+  .screen { display: none; min-height: 100vh; flex-direction: column; }
+  .screen.active { display: flex; }
+
+  /* ── ONBOARDING ── */
+  #screen-welcome {
+    justify-content: center;
+    align-items: center;
+    padding: 40px 28px;
+    text-align: center;
+    background: radial-gradient(ellipse at 50% 10%, #25253e 0%, var(--bg) 65%);
+  }
+
+  .logo-mark {
+    width: 80px; height: 80px;
+    background: linear-gradient(135deg, var(--gold), #ff9800);
+    border-radius: 22px;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 36px;
+    margin: 0 auto 24px;
+    box-shadow: 0 8px 32px #ffd60035;
+  }
+
+  .welcome-title { font-size: 38px; font-weight: 800; letter-spacing: -1.5px; line-height: 1.1; }
+  .welcome-title span { color: var(--gold); }
+  .welcome-sub { color: #b0b0d0; margin-top: 14px; font-size: 17px; line-height: 1.5; }
+
+  .stats-row {
+    display: flex; gap: 12px; margin: 36px 0;
+    width: 100%;
+  }
+  .stat-pill {
+    flex: 1; background: #1e1e32; border: 1px solid #3a3a60;
+    border-radius: var(--radius-sm); padding: 14px 10px; text-align: center;
+  }
+  .stat-pill .num { font-size: 22px; font-weight: 800; color: var(--gold); }
+  .stat-pill .label { font-size: 11px; color: #8888aa; margin-top: 4px; text-transform: uppercase; letter-spacing: .5px; }
+
+  /* ── BUTTONS ── */
+  .btn {
+    width: 100%; padding: 16px; border: none; border-radius: var(--radius);
+    font-size: 16px; font-weight: 700; cursor: pointer; transition: all .15s;
+    letter-spacing: .2px;
+  }
+  .btn-primary { background: var(--gold); color: #000; }
+  .btn-primary:active { transform: scale(.97); }
+  .btn-secondary { background: var(--surface2); color: var(--text); border: 1px solid var(--border); }
+  .btn-ghost { background: transparent; color: var(--text-muted); font-size: 14px; }
+  .btn-danger { background: var(--red); color: #fff; }
+  .btn-success { background: var(--green); color: #000; }
+  .btn-small {
+    width: auto; padding: 8px 16px; font-size: 13px;
+    border-radius: 8px; font-weight: 600;
+  }
+
+  /* ── CREATE HABIT SCREENS ── */
+  .onboard-screen {
+    padding: 56px 28px 40px;
+    flex-direction: column;
+  }
+
+  .step-indicator {
+    display: flex; gap: 6px; margin-bottom: 32px;
+  }
+  .step-dot {
+    height: 4px; border-radius: 2px; flex: 1;
+    background: var(--border); transition: background .3s;
+  }
+  .step-dot.done { background: var(--gold); }
+
+  .onboard-q { font-size: 26px; font-weight: 800; letter-spacing: -.5px; line-height: 1.2; margin-bottom: 8px; }
+  .onboard-hint { color: var(--text-muted); font-size: 15px; margin-bottom: 28px; }
+
+  .input-field {
+    width: 100%; background: var(--surface); border: 1.5px solid var(--border);
+    border-radius: var(--radius-sm); padding: 16px; color: var(--text);
+    font-size: 16px; font-family: inherit; outline: none; transition: border-color .2s;
+  }
+  .input-field:focus { border-color: var(--gold); }
+  .input-field::placeholder { color: var(--text-muted); }
+
+  .option-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-bottom: 28px; }
+  .option-card {
+    background: var(--surface); border: 1.5px solid var(--border);
+    border-radius: var(--radius-sm); padding: 16px 12px; text-align: center;
+    cursor: pointer; transition: all .15s;
+  }
+  .option-card.selected { border-color: var(--gold); background: var(--gold-dim); }
+  .option-card .opt-icon { font-size: 26px; margin-bottom: 6px; }
+  .option-card .opt-label { font-size: 13px; font-weight: 600; }
+  .option-card .opt-sub { font-size: 11px; color: var(--text-muted); margin-top: 2px; }
+
+  .stake-options { display: flex; gap: 8px; flex-wrap: wrap; margin-bottom: 28px; }
+  .stake-chip {
+    flex: 1; min-width: 60px; background: var(--surface); border: 1.5px solid var(--border);
+    border-radius: var(--radius-sm); padding: 14px 8px; text-align: center;
+    cursor: pointer; transition: all .15s; font-weight: 700; font-size: 15px;
+  }
+  .stake-chip.selected { border-color: var(--gold); background: var(--gold-dim); color: var(--gold); }
+
+  /* ── TOP NAV ── */
+  .topbar {
+    padding: 56px 24px 16px;
+    display: flex; align-items: center; justify-content: space-between;
+  }
+  .topbar-title { font-size: 28px; font-weight: 800; letter-spacing: -.5px; }
+  .avatar {
+    width: 38px; height: 38px; border-radius: 50%;
+    background: linear-gradient(135deg, var(--gold), #ff9800);
+    display: flex; align-items: center; justify-content: center;
+    font-weight: 800; font-size: 14px; color: #000; cursor: pointer;
+  }
+
+  /* ── BOTTOM NAV ── */
+  .bottom-nav {
+    position: fixed; bottom: 0; left: 50%; transform: translateX(-50%);
+    width: 100%; max-width: 430px;
+    background: var(--surface); border-top: 1px solid var(--border);
+    display: flex; padding: 12px 0 28px;
+    z-index: 100;
+  }
+  .nav-item {
+    flex: 1; display: flex; flex-direction: column; align-items: center;
+    gap: 4px; cursor: pointer; color: var(--text-muted);
+    font-size: 10px; font-weight: 600; text-transform: uppercase; letter-spacing: .5px;
+    transition: color .15s;
+  }
+  .nav-item.active { color: var(--gold); }
+  .nav-icon { font-size: 22px; }
+
+  /* ── HOME ── */
+  #screen-home { padding-bottom: 100px; }
+
+  .wallet-card {
+    margin: 0 20px 20px;
+    background: linear-gradient(135deg, #1a1a35, #1e1e30);
+    border: 1px solid #3a3a60;
+    border-radius: 20px; padding: 24px;
+    position: relative; overflow: hidden;
+  }
+  .wallet-card::before {
+    content: ''; position: absolute; top: -40px; right: -40px;
+    width: 150px; height: 150px; border-radius: 50%;
+    background: radial-gradient(circle, #ffd60020, transparent 70%);
+  }
+  .wallet-label { font-size: 12px; color: var(--text-muted); text-transform: uppercase; letter-spacing: .8px; font-weight: 600; }
+  .wallet-amount { font-size: 44px; font-weight: 900; letter-spacing: -2px; margin: 6px 0; }
+  .wallet-amount span { color: var(--gold); }
+  .wallet-sub { font-size: 13px; color: var(--text-muted); }
+  .wallet-actions { display: flex; gap: 10px; margin-top: 18px; }
+  .wallet-btn {
+    flex: 1; background: var(--surface); border: 1px solid var(--border);
+    border-radius: 10px; padding: 10px; text-align: center;
+    font-size: 12px; font-weight: 700; cursor: pointer; color: var(--text);
+    letter-spacing: .3px;
+  }
+  .wallet-btn:active { opacity: .7; }
+
+  .section-header {
+    padding: 0 20px; margin-bottom: 12px;
+    display: flex; align-items: center; justify-content: space-between;
+  }
+  .section-title { font-size: 18px; font-weight: 800; letter-spacing: -.3px; }
+  .section-action { font-size: 13px; color: var(--gold); font-weight: 600; cursor: pointer; }
+
+  .habits-list { padding: 0 20px; display: flex; flex-direction: column; gap: 12px; }
+
+  .habit-card {
+    background: #1c1c38; border: 1px solid #3c3c68;
+    border-radius: var(--radius); padding: 18px;
+    cursor: pointer; transition: all .15s; position: relative; overflow: hidden;
+  }
+  .habit-card:active { transform: scale(.98); }
+  .habit-card::after {
+    content: ''; position: absolute; left: 0; top: 0; bottom: 0; width: 4px;
+    background: var(--green);
+    border-radius: 4px 0 0 4px;
+  }
+  .habit-card.at-risk::after { background: var(--gold); }
+  .habit-card.failed::after { background: var(--red); }
+  .habit-card.completed-today::after { background: var(--green); }
+
+  .habit-top { display: flex; align-items: flex-start; justify-content: space-between; margin-bottom: 12px; }
+  .habit-emoji { font-size: 26px; }
+  .habit-stake-badge {
+    background: var(--gold-dim); border: 1px solid var(--gold);
+    color: var(--gold); font-size: 13px; font-weight: 800;
+    padding: 4px 10px; border-radius: 20px;
+  }
+  .habit-name { font-size: 17px; font-weight: 700; letter-spacing: -.2px; }
+  .habit-meta { font-size: 13px; color: var(--text-muted); margin-top: 2px; }
+
+  .habit-progress { margin-top: 14px; }
+  .progress-bar {
+    height: 4px; background: var(--border); border-radius: 2px; margin-bottom: 6px;
+  }
+  .progress-fill {
+    height: 100%; border-radius: 2px; background: var(--green);
+    transition: width .4s ease;
+  }
+  .habit-progress-text { display: flex; justify-content: space-between; font-size: 12px; color: var(--text-muted); }
+
+  .check-btn {
+    width: 100%; margin-top: 14px; padding: 12px;
+    background: var(--green-dim); border: 1.5px solid var(--green);
+    border-radius: 10px; color: var(--green); font-weight: 700;
+    font-size: 14px; cursor: pointer; font-family: inherit;
+    transition: all .15s;
+  }
+  .check-btn:active { transform: scale(.97); }
+  .check-btn.done-btn {
+    background: transparent; border-color: var(--border);
+    color: var(--text-muted); cursor: default;
+  }
+
+  .empty-state {
+    padding: 40px 20px; text-align: center;
+  }
+  .empty-icon { font-size: 48px; margin-bottom: 14px; }
+  .empty-title { font-size: 20px; font-weight: 700; margin-bottom: 8px; }
+  .empty-sub { color: var(--text-muted); font-size: 15px; line-height: 1.5; }
+
+  /* ── FEED ── */
+  #screen-feed { padding-bottom: 100px; }
+  .feed-list { padding: 0 20px; display: flex; flex-direction: column; gap: 12px; }
+  .feed-card {
+    background: var(--surface); border: 1px solid var(--border);
+    border-radius: var(--radius); padding: 16px;
+  }
+  .feed-top { display: flex; align-items: center; gap: 12px; margin-bottom: 10px; }
+  .feed-avatar {
+    width: 36px; height: 36px; border-radius: 50%;
+    background: linear-gradient(135deg, #6c63ff, #e040fb);
+    display: flex; align-items: center; justify-content: center;
+    font-weight: 700; font-size: 14px; flex-shrink: 0;
+  }
+  .feed-meta { flex: 1; }
+  .feed-name { font-size: 14px; font-weight: 700; }
+  .feed-time { font-size: 12px; color: var(--text-muted); }
+  .feed-body { font-size: 15px; line-height: 1.4; }
+  .feed-result {
+    display: inline-flex; align-items: center; gap: 6px;
+    margin-top: 10px; font-size: 13px; font-weight: 700;
+    padding: 6px 12px; border-radius: 20px;
+  }
+  .feed-result.win { background: var(--green-dim); color: var(--green); }
+  .feed-result.loss { background: var(--red-dim); color: var(--red); }
+
+  .challenge-banner {
+    margin: 0 20px 16px;
+    background: linear-gradient(135deg, #1a1a2e, var(--surface2));
+    border: 1px solid #6c63ff55; border-radius: var(--radius);
+    padding: 18px;
+  }
+  .challenge-banner .cb-label { font-size: 11px; color: #a89bff; font-weight: 700; text-transform: uppercase; letter-spacing: 1px; }
+  .challenge-banner .cb-title { font-size: 17px; font-weight: 700; margin: 6px 0 4px; }
+  .challenge-banner .cb-sub { font-size: 13px; color: var(--text-muted); margin-bottom: 14px; }
+
+  /* ── STATS ── */
+  #screen-stats { padding-bottom: 100px; }
+  .stats-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; padding: 0 20px; margin-bottom: 20px; }
+  .stat-card {
+    background: #1c1c38; border: 1px solid #3c3c68;
+    border-radius: var(--radius); padding: 20px 16px;
+  }
+  .stat-card .s-val { font-size: 30px; font-weight: 900; letter-spacing: -1px; }
+  .stat-card .s-val.green { color: var(--green); }
+  .stat-card .s-val.gold { color: var(--gold); }
+  .stat-card .s-val.red { color: var(--red); }
+  .stat-card .s-label { font-size: 12px; color: var(--text-muted); margin-top: 4px; font-weight: 600; text-transform: uppercase; letter-spacing: .5px; }
+
+  .chart-card {
+    margin: 0 20px 20px;
+    background: #1c1c38; border: 1px solid #3c3c68;
+    border-radius: var(--radius); padding: 20px;
+  }
+  .chart-title { font-size: 15px; font-weight: 700; margin-bottom: 16px; }
+  .bar-chart { display: flex; align-items: flex-end; gap: 6px; height: 80px; }
+  .bar-wrap { flex: 1; display: flex; flex-direction: column; align-items: center; gap: 6px; }
+  .bar { width: 100%; border-radius: 4px 4px 0 0; transition: height .4s ease; min-height: 4px; }
+  .bar.done { background: var(--green); }
+  .bar.missed { background: var(--red-dim); border: 1px solid var(--red); }
+  .bar-day { font-size: 10px; color: var(--text-muted); }
+
+  /* ── ADD HABIT (FAB) ── */
+  .fab {
+    position: fixed; bottom: 88px; right: 24px;
+    width: 56px; height: 56px; border-radius: 50%;
+    background: var(--gold); border: none; cursor: pointer;
+    font-size: 26px; color: #000; font-weight: 900;
+    box-shadow: 0 4px 20px #ffd60050;
+    display: flex; align-items: center; justify-content: center;
+    transition: transform .15s;
+    z-index: 99;
+  }
+  .fab:active { transform: scale(.92); }
+
+  /* ── MODAL ── */
+  .modal-overlay {
+    position: fixed; inset: 0; background: #00000090;
+    display: none; align-items: flex-end; z-index: 200;
+    backdrop-filter: blur(4px);
+  }
+  .modal-overlay.open { display: flex; }
+  .modal {
+    background: var(--surface2); border-radius: 24px 24px 0 0;
+    width: 100%; max-width: 430px; margin: 0 auto;
+    padding: 24px 24px 48px; max-height: 85vh; overflow-y: auto;
+  }
+  .modal-handle { width: 40px; height: 4px; background: var(--border); border-radius: 2px; margin: 0 auto 20px; }
+  .modal-title { font-size: 22px; font-weight: 800; letter-spacing: -.5px; margin-bottom: 20px; }
+
+  /* ── TOAST ── */
+  .toast {
+    position: fixed; top: 60px; left: 50%; transform: translateX(-50%) translateY(-80px);
+    background: var(--surface2); border: 1px solid var(--border);
+    border-radius: 100px; padding: 12px 20px;
+    font-size: 14px; font-weight: 600; white-space: nowrap;
+    transition: transform .35s cubic-bezier(0.34, 1.56, 0.64, 1);
+    z-index: 300;
+  }
+  .toast.show { transform: translateX(-50%) translateY(0); }
+  .toast.green { border-color: var(--green); color: var(--green); }
+  .toast.red { border-color: var(--red); color: var(--red); }
+  .toast.gold { border-color: var(--gold); color: var(--gold); }
+
+  /* ── CONFETTI ── */
+  @keyframes confettiFall {
+    0% { transform: translateY(-20px) rotate(0deg); opacity: 1; }
+    100% { transform: translateY(120vh) rotate(720deg); opacity: 0; }
+  }
+  .confetti-piece {
+    position: fixed; width: 8px; height: 8px; border-radius: 2px;
+    animation: confettiFall 2s ease-in forwards;
+    pointer-events: none; z-index: 400;
+  }
+
+  /* ── MISC ── */
+  .divider { height: 1px; background: var(--border); margin: 20px 0; }
+  .tag-row { display: flex; gap: 8px; flex-wrap: wrap; margin-bottom: 20px; }
+  .tag {
+    padding: 7px 14px; border-radius: 100px; font-size: 13px; font-weight: 600;
+    background: var(--surface); border: 1.5px solid var(--border); cursor: pointer;
+    transition: all .15s;
+  }
+  .tag.selected { background: var(--gold-dim); border-color: var(--gold); color: var(--gold); }
+
+  .charity-list { display: flex; flex-direction: column; gap: 10px; margin-bottom: 24px; }
+  .charity-item {
+    display: flex; align-items: center; gap: 14px;
+    background: var(--surface); border: 1.5px solid var(--border);
+    border-radius: var(--radius-sm); padding: 14px 16px; cursor: pointer;
+    transition: all .15s;
+  }
+  .charity-item.selected { border-color: var(--gold); background: var(--gold-dim); }
+  .charity-icon { font-size: 24px; }
+  .charity-name { font-size: 14px; font-weight: 700; }
+  .charity-sub { font-size: 12px; color: var(--text-muted); }
+
+  .info-row {
+    display: flex; justify-content: space-between; align-items: center;
+    padding: 14px 0; border-bottom: 1px solid var(--border);
+    font-size: 14px;
+  }
+  .info-label { color: var(--text-muted); }
+  .info-val { font-weight: 700; }
+
+  /* ── ANIMATIONS ── */
+  @keyframes slideUp {
+    from { opacity: 0; transform: translateY(24px); }
+    to { opacity: 1; transform: translateY(0); }
+  }
+  .screen.active > * { animation: slideUp .3s ease both; }
+
+  @keyframes pulse {
+    0%, 100% { box-shadow: 0 0 0 0 #ffd60040; }
+    50% { box-shadow: 0 0 0 12px #ffd60000; }
+  }
+  .pulsing { animation: pulse 2s infinite; }
+
+  /* ── STREAK FLAME ── */
+  .streak-display {
+    display: flex; align-items: center; gap: 6px;
+    font-size: 13px; color: var(--gold); font-weight: 700;
+    margin-top: 6px;
+  }
+
+  .summary-card {
+    margin: 0 20px 20px;
+    background: var(--gold-dim); border: 1px solid var(--gold);
+    border-radius: var(--radius); padding: 18px;
+    display: flex; align-items: center; gap: 16px;
+  }
+  .summary-card .sc-icon { font-size: 36px; }
+  .summary-card .sc-title { font-size: 15px; font-weight: 700; }
+  .summary-card .sc-sub { font-size: 13px; color: var(--text-muted); margin-top: 2px; }
+
+  .profile-section {
+    margin: 0 20px 20px;
+    background: #1c1c38; border: 1px solid #3c3c68;
+    border-radius: var(--radius); padding: 20px;
+    text-align: center;
+  }
+  .profile-avatar-lg {
+    width: 72px; height: 72px; border-radius: 50%;
+    background: linear-gradient(135deg, var(--gold), #ff9800);
+    display: flex; align-items: center; justify-content: center;
+    font-size: 28px; font-weight: 900; color: #000;
+    margin: 0 auto 12px;
+  }
+  .profile-name { font-size: 20px; font-weight: 800; }
+  .profile-handle { font-size: 14px; color: var(--text-muted); margin-top: 4px; }
+  .profile-stats { display: flex; gap: 0; margin-top: 20px; border-top: 1px solid var(--border); padding-top: 18px; }
+  .ps-item { flex: 1; text-align: center; }
+  .ps-item + .ps-item { border-left: 1px solid var(--border); }
+  .ps-val { font-size: 22px; font-weight: 900; }
+  .ps-label { font-size: 11px; color: var(--text-muted); margin-top: 3px; font-weight: 600; text-transform: uppercase; letter-spacing: .5px; }
+
+  .history-item {
+    display: flex; align-items: center; gap: 14px;
+    padding: 14px 0; border-bottom: 1px solid var(--border);
+  }
+  .hi-dot { width: 8px; height: 8px; border-radius: 50%; flex-shrink: 0; }
+  .hi-dot.win { background: var(--green); }
+  .hi-dot.loss { background: var(--red); }
+  .hi-text { flex: 1; font-size: 14px; }
+  .hi-amount { font-size: 14px; font-weight: 700; }
+  .hi-amount.pos { color: var(--green); }
+  .hi-amount.neg { color: var(--red); }
+</style>
+</head>
+<body>
+
+<!-- TOAST -->
+<div class="toast" id="toast"></div>
+
+<!-- ══════════════════════════════════════════════
+     SCREEN 0: WELCOME
+══════════════════════════════════════════════ -->
+<div class="screen active" id="screen-welcome">
+  <div class="logo-mark">🃏</div>
+  <div class="welcome-title">Bet on<br><span>Yourself.</span></div>
+  <div class="welcome-sub">Stake real money on your habits.<br>Complete them — or pay up.</div>
+  <div class="stats-row">
+    <div class="stat-pill"><div class="num">$2.1M</div><div class="label">Committed</div></div>
+    <div class="stat-pill"><div class="num">84%</div><div class="label">Success Rate</div></div>
+    <div class="stat-pill"><div class="num">12K</div><div class="label">Users</div></div>
+  </div>
+
+  <div style="width:100%;background:#1c1c38;border:1px solid #3c3c68;border-radius:16px;padding:20px;margin-bottom:24px;text-align:left">
+    <div style="font-size:13px;font-weight:700;color:var(--text-muted);text-transform:uppercase;letter-spacing:.8px;margin-bottom:16px">How it works</div>
+    <div style="display:flex;flex-direction:column;gap:14px">
+      <div style="display:flex;gap:14px;align-items:flex-start">
+        <div style="width:32px;height:32px;border-radius:50%;background:var(--gold-dim);border:1px solid var(--gold);display:flex;align-items:center;justify-content:center;font-size:14px;font-weight:900;color:var(--gold);flex-shrink:0">1</div>
+        <div><div style="font-size:14px;font-weight:700">Pick a habit & stake</div><div style="font-size:13px;color:var(--text-muted);margin-top:2px">Choose what you'll do and how much you'll lose if you skip it</div></div>
+      </div>
+      <div style="display:flex;gap:14px;align-items:flex-start">
+        <div style="width:32px;height:32px;border-radius:50%;background:var(--gold-dim);border:1px solid var(--gold);display:flex;align-items:center;justify-content:center;font-size:14px;font-weight:900;color:var(--gold);flex-shrink:0">2</div>
+        <div><div style="font-size:14px;font-weight:700">Check in daily</div><div style="font-size:13px;color:var(--text-muted);margin-top:2px">Mark complete — or admit you missed. Loss aversion does the rest.</div></div>
+      </div>
+      <div style="display:flex;gap:14px;align-items:flex-start">
+        <div style="width:32px;height:32px;border-radius:50%;background:var(--gold-dim);border:1px solid var(--gold);display:flex;align-items:center;justify-content:center;font-size:14px;font-weight:900;color:var(--gold);flex-shrink:0">3</div>
+        <div><div style="font-size:14px;font-weight:700">Miss = donate to charity</div><div style="font-size:13px;color:var(--text-muted);margin-top:2px">85% goes to your chosen cause. We take 15% to keep the lights on.</div></div>
+      </div>
+    </div>
+  </div>
+
+  <button class="btn btn-primary pulsing" onclick="goTo('screen-ob1')">Get Started — Free →</button>
+  <button class="btn btn-ghost" style="margin-top:12px" onclick="skipOnboard()">I have an account</button>
+</div>
+
+<!-- ══════════════════════════════════════════════
+     SCREEN 1: NAME YOUR HABIT
+══════════════════════════════════════════════ -->
+<div class="screen onboard-screen" id="screen-ob1">
+  <div class="step-indicator">
+    <div class="step-dot done"></div>
+    <div class="step-dot"></div>
+    <div class="step-dot"></div>
+    <div class="step-dot"></div>
+  </div>
+  <div class="onboard-q">What habit do you want to build?</div>
+  <div class="onboard-hint">Be specific — "Run 2 miles" beats "Exercise"</div>
+  <input class="input-field" id="habit-name-input" type="text" placeholder="e.g. Run 2 miles" maxlength="48">
+  <br><br>
+  <div class="onboard-hint">Pick an emoji</div>
+  <div class="tag-row" id="emoji-picker">
+    🏃 🏋️ 📚 🧘 💊 💧 🛌 🥗 ✍️ 🎯 🎸 🌿 💻 🧠 🚴
+  </div>
+  <div style="margin-top:auto">
+    <button class="btn btn-primary" onclick="ob1Next()">Next →</button>
+  </div>
+</div>
+
+<!-- ══════════════════════════════════════════════
+     SCREEN 2: FREQUENCY
+══════════════════════════════════════════════ -->
+<div class="screen onboard-screen" id="screen-ob2">
+  <div class="step-indicator">
+    <div class="step-dot done"></div>
+    <div class="step-dot done"></div>
+    <div class="step-dot"></div>
+    <div class="step-dot"></div>
+  </div>
+  <div class="onboard-q">How often?</div>
+  <div class="onboard-hint">Miss your target and you lose your stake.</div>
+  <div class="option-grid">
+    <div class="option-card selected" onclick="selectFreq(this,'Every Day')" data-val="Every Day">
+      <div class="opt-icon">🔥</div>
+      <div class="opt-label">Every Day</div>
+      <div class="opt-sub">7 days / week</div>
+    </div>
+    <div class="option-card" onclick="selectFreq(this,'Weekdays')" data-val="Weekdays">
+      <div class="opt-icon">📅</div>
+      <div class="opt-label">Weekdays</div>
+      <div class="opt-sub">5 days / week</div>
+    </div>
+    <div class="option-card" onclick="selectFreq(this,'3× / Week')" data-val="3× / Week">
+      <div class="opt-icon">⚡</div>
+      <div class="opt-label">3× / Week</div>
+      <div class="opt-sub">Custom days</div>
+    </div>
+    <div class="option-card" onclick="selectFreq(this,'Weekly')" data-val="Weekly">
+      <div class="opt-icon">📆</div>
+      <div class="opt-label">Weekly</div>
+      <div class="opt-sub">1 day / week</div>
+    </div>
+  </div>
+  <div style="margin-top:auto">
+    <button class="btn btn-primary" onclick="ob2Next()">Next →</button>
+    <button class="btn btn-ghost" style="margin-top:8px" onclick="goTo('screen-ob1')">← Back</button>
+  </div>
+</div>
+
+<!-- ══════════════════════════════════════════════
+     SCREEN 3: STAKE
+══════════════════════════════════════════════ -->
+<div class="screen onboard-screen" id="screen-ob3">
+  <div class="step-indicator">
+    <div class="step-dot done"></div>
+    <div class="step-dot done"></div>
+    <div class="step-dot done"></div>
+    <div class="step-dot"></div>
+  </div>
+  <div class="onboard-q">Set your stake.</div>
+  <div class="onboard-hint">How much do you lose if you miss a day? Higher = more motivation.</div>
+  <div class="stake-options">
+    <div class="stake-chip" onclick="selectStake(this,'1')">$1</div>
+    <div class="stake-chip selected" onclick="selectStake(this,'5')">$5</div>
+    <div class="stake-chip" onclick="selectStake(this,'10')">$10</div>
+    <div class="stake-chip" onclick="selectStake(this,'25')">$25</div>
+    <div class="stake-chip" onclick="selectStake(this,'50')">$50</div>
+  </div>
+  <div class="onboard-hint" style="margin-top:0">If you fail, where does the money go?</div>
+  <div class="charity-list">
+    <div class="charity-item selected" onclick="selectCharity(this,'Boys & Girls Club')">
+      <div class="charity-icon">🧒</div>
+      <div><div class="charity-name">Boys & Girls Club</div><div class="charity-sub">Youth development</div></div>
+    </div>
+    <div class="charity-item" onclick="selectCharity(this,'Red Cross')">
+      <div class="charity-icon">🏥</div>
+      <div><div class="charity-name">Red Cross</div><div class="charity-sub">Disaster relief</div></div>
+    </div>
+    <div class="charity-item" onclick="selectCharity(this,'No Kid Hungry')">
+      <div class="charity-icon">🍽️</div>
+      <div><div class="charity-name">No Kid Hungry</div><div class="charity-sub">Fighting food insecurity</div></div>
+    </div>
+    <div class="charity-item" onclick="selectCharity(this,'ACLU')">
+      <div class="charity-icon">⚖️</div>
+      <div><div class="charity-name">ACLU</div><div class="charity-sub">Civil liberties</div></div>
+    </div>
+  </div>
+  <div style="margin-top:auto">
+    <button class="btn btn-primary" onclick="ob3Next()">Next →</button>
+    <button class="btn btn-ghost" style="margin-top:8px" onclick="goTo('screen-ob2')">← Back</button>
+  </div>
+</div>
+
+<!-- ══════════════════════════════════════════════
+     SCREEN 4: COMMITMENT
+══════════════════════════════════════════════ -->
+<div class="screen onboard-screen" id="screen-ob4">
+  <div class="step-indicator">
+    <div class="step-dot done"></div>
+    <div class="step-dot done"></div>
+    <div class="step-dot done"></div>
+    <div class="step-dot done"></div>
+  </div>
+  <div class="onboard-q">Your commitment.</div>
+  <div class="onboard-hint">Review and confirm. No going back once you start.</div>
+
+  <div id="commit-summary" style="background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);padding:20px;margin-bottom:24px">
+    <div class="info-row">
+      <span class="info-label">Habit</span>
+      <span class="info-val" id="sum-habit">—</span>
+    </div>
+    <div class="info-row">
+      <span class="info-label">Frequency</span>
+      <span class="info-val" id="sum-freq">—</span>
+    </div>
+    <div class="info-row">
+      <span class="info-label">Daily stake</span>
+      <span class="info-val gold" id="sum-stake" style="color:var(--gold)">—</span>
+    </div>
+    <div class="info-row" style="border:none">
+      <span class="info-label">If I fail, I donate to</span>
+      <span class="info-val" id="sum-charity">—</span>
+    </div>
+  </div>
+
+  <div style="background:var(--red-dim);border:1px solid var(--red)55;border-radius:var(--radius-sm);padding:14px 16px;margin-bottom:24px;font-size:13px;line-height:1.5;color:var(--text-dim)">
+    ⚠️ By starting, you authorize Ante to charge your card <strong id="sum-stake-2">$5</strong> for each missed day. Charges go directly to your chosen charity. Ante takes 15%.
+  </div>
+
+  <div style="margin-top:auto">
+    <button class="btn btn-primary" onclick="commitHabit()" style="background:var(--green);color:#000">🔒 Lock In — I'm Serious</button>
+    <button class="btn btn-ghost" style="margin-top:8px" onclick="goTo('screen-ob3')">← Back</button>
+  </div>
+</div>
+
+<!-- ══════════════════════════════════════════════
+     HOME TAB
+══════════════════════════════════════════════ -->
+<div class="screen" id="screen-home">
+  <div class="topbar">
+    <div class="topbar-title">Ante 🃏</div>
+    <div class="avatar" id="home-avatar" onclick="showTab('stats')">B</div>
+  </div>
+
+  <div class="wallet-card">
+    <div class="wallet-label">Total at stake</div>
+    <div class="wallet-amount">$<span id="wallet-amount">0</span></div>
+    <div class="wallet-sub" id="wallet-sub">0 active habits</div>
+    <div class="wallet-actions">
+      <div class="wallet-btn" onclick="showModal('add-funds-modal')">+ Add Funds</div>
+      <div class="wallet-btn" onclick="showToast('💳 Payouts sent weekly','gold')">Withdraw</div>
+    </div>
+  </div>
+
+  <div class="section-header">
+    <div class="section-title">Today</div>
+    <div class="section-action" onclick="showModal('add-habit-modal')">+ New bet</div>
+  </div>
+
+  <div class="habits-list" id="habits-container">
+    <!-- populated by JS -->
+  </div>
+
+  <button class="fab" onclick="showModal('add-habit-modal')">+</button>
+
+  <div class="bottom-nav">
+    <div class="nav-item active" onclick="showTab('home')">
+      <div class="nav-icon">🏠</div>Home
+    </div>
+    <div class="nav-item" onclick="showTab('feed')">
+      <div class="nav-icon">👥</div>Friends
+    </div>
+    <div class="nav-item" onclick="showTab('stats')">
+      <div class="nav-icon">📊</div>Stats
+    </div>
+  </div>
+</div>
+
+<!-- ══════════════════════════════════════════════
+     FEED TAB
+══════════════════════════════════════════════ -->
+<div class="screen" id="screen-feed">
+  <div class="topbar">
+    <div class="topbar-title">Friends</div>
+    <div class="avatar" style="background:linear-gradient(135deg,#6c63ff,#e040fb)">👥</div>
+  </div>
+
+  <div class="challenge-banner">
+    <div class="cb-label">🔥 Live Challenge</div>
+    <div class="cb-title">30-Day No Junk Food</div>
+    <div class="cb-sub">4 friends in · $10/miss each · Ends Jul 18</div>
+    <button class="btn btn-primary btn-small" onclick="showToast('🎉 Joined! $10 locked in.','green')">Join for $10 →</button>
+  </div>
+
+  <div class="feed-list" id="feed-container"></div>
+
+  <div class="bottom-nav">
+    <div class="nav-item" onclick="showTab('home')">
+      <div class="nav-icon">🏠</div>Home
+    </div>
+    <div class="nav-item active" onclick="showTab('feed')">
+      <div class="nav-icon">👥</div>Friends
+    </div>
+    <div class="nav-item" onclick="showTab('stats')">
+      <div class="nav-icon">📊</div>Stats
+    </div>
+  </div>
+</div>
+
+<!-- ══════════════════════════════════════════════
+     STATS TAB
+══════════════════════════════════════════════ -->
+<div class="screen" id="screen-stats">
+  <div class="topbar">
+    <div class="topbar-title">Your Stats</div>
+    <div class="avatar" onclick="showTab('stats')">B</div>
+  </div>
+
+  <div class="profile-section">
+    <div class="profile-avatar-lg">B</div>
+    <div class="profile-name" id="profile-name">Beckett</div>
+    <div class="profile-handle">@beckett · Member since Jun 2026</div>
+    <div class="profile-stats">
+      <div class="ps-item">
+        <div class="ps-val" id="ps-streak">0</div>
+        <div class="ps-label">Best Streak</div>
+      </div>
+      <div class="ps-item">
+        <div class="ps-val" id="ps-rate">—</div>
+        <div class="ps-label">Success %</div>
+      </div>
+      <div class="ps-item">
+        <div class="ps-val" id="ps-saved">$0</div>
+        <div class="ps-label">Saved (no fines)</div>
+      </div>
+    </div>
+  </div>
+
+  <div class="stats-grid">
+    <div class="stat-card">
+      <div class="s-val green" id="sg-completed">0</div>
+      <div class="s-label">Days completed</div>
+    </div>
+    <div class="stat-card">
+      <div class="s-val red" id="sg-missed">0</div>
+      <div class="s-label">Days missed</div>
+    </div>
+    <div class="stat-card">
+      <div class="s-val gold" id="sg-staked">$0</div>
+      <div class="s-label">Total staked</div>
+    </div>
+    <div class="stat-card">
+      <div class="s-val" id="sg-habits">0</div>
+      <div class="s-label">Active habits</div>
+    </div>
+  </div>
+
+  <div class="chart-card">
+    <div class="chart-title">Last 7 Days</div>
+    <div class="bar-chart" id="week-chart"></div>
+  </div>
+
+  <div class="chart-card">
+    <div class="chart-title" style="margin-bottom:0">Transaction History</div>
+    <div id="tx-history"></div>
+  </div>
+
+  <div class="bottom-nav">
+    <div class="nav-item" onclick="showTab('home')">
+      <div class="nav-icon">🏠</div>Home
+    </div>
+    <div class="nav-item" onclick="showTab('feed')">
+      <div class="nav-icon">👥</div>Friends
+    </div>
+    <div class="nav-item active" onclick="showTab('stats')">
+      <div class="nav-icon">📊</div>Stats
+    </div>
+  </div>
+</div>
+
+<!-- ══════════════════════════════════════════════
+     MODALS
+══════════════════════════════════════════════ -->
+
+<!-- Add Habit Modal -->
+<div class="modal-overlay" id="add-habit-modal" onclick="closeModalIfBg(event,'add-habit-modal')">
+  <div class="modal">
+    <div class="modal-handle"></div>
+    <div class="modal-title">New Bet</div>
+
+    <div class="onboard-hint">Habit name</div>
+    <input class="input-field" id="modal-habit-name" placeholder="e.g. Meditate 10 min" style="margin-bottom:16px">
+
+    <div class="onboard-hint">Emoji</div>
+    <div class="tag-row" id="modal-emoji-picker">🏃 🏋️ 📚 🧘 💊 💧 🛌 🥗 ✍️ 🎯 🎸 🌿 💻 🧠 🚴</div>
+
+    <div class="onboard-hint">Daily stake</div>
+    <div class="stake-options">
+      <div class="stake-chip" onclick="selectStakeModal(this,'1')">$1</div>
+      <div class="stake-chip selected" onclick="selectStakeModal(this,'5')">$5</div>
+      <div class="stake-chip" onclick="selectStakeModal(this,'10')">$10</div>
+      <div class="stake-chip" onclick="selectStakeModal(this,'25')">$25</div>
+    </div>
+
+    <div class="onboard-hint">Frequency</div>
+    <div class="tag-row" id="modal-freq-picker">
+      <div class="tag selected" onclick="selectTag(this,'modal-freq-picker')">Daily</div>
+      <div class="tag" onclick="selectTag(this,'modal-freq-picker')">Weekdays</div>
+      <div class="tag" onclick="selectTag(this,'modal-freq-picker')">3× / Week</div>
+      <div class="tag" onclick="selectTag(this,'modal-freq-picker')">Weekly</div>
+    </div>
+
+    <button class="btn btn-success" onclick="addHabitFromModal()" style="margin-top:8px">🔒 Lock In</button>
+  </div>
+</div>
+
+<!-- Add Funds Modal -->
+<div class="modal-overlay" id="add-funds-modal" onclick="closeModalIfBg(event,'add-funds-modal')">
+  <div class="modal">
+    <div class="modal-handle"></div>
+    <div class="modal-title">Add Funds</div>
+    <div class="onboard-hint">Your wallet balance is used to cover stakes. Add enough to cover misses.</div>
+    <div class="stake-options" style="margin-bottom:24px">
+      <div class="stake-chip selected" onclick="selectFundAmt(this,'10')">$10</div>
+      <div class="stake-chip" onclick="selectFundAmt(this,'25')">$25</div>
+      <div class="stake-chip" onclick="selectFundAmt(this,'50')">$50</div>
+      <div class="stake-chip" onclick="selectFundAmt(this,'100')">$100</div>
+    </div>
+    <div style="background:var(--surface);border:1px solid var(--border);border-radius:var(--radius-sm);padding:16px;margin-bottom:20px;font-size:13px;color:var(--text-muted)">
+      💳 •••• •••• •••• 4242 &nbsp; <span style="color:var(--text)">Visa</span>
+    </div>
+    <button class="btn btn-primary" onclick="addFunds()">Deposit $<span id="fund-amt-display">10</span></button>
+  </div>
+</div>
+
+<!-- Habit Detail Modal -->
+<div class="modal-overlay" id="habit-detail-modal" onclick="closeModalIfBg(event,'habit-detail-modal')">
+  <div class="modal" id="habit-detail-content"></div>
+</div>
+
+<!-- Share / Challenge Modal -->
+<div class="modal-overlay" id="share-modal" onclick="closeModalIfBg(event,'share-modal')">
+  <div class="modal">
+    <div class="modal-handle"></div>
+    <div class="modal-title">Challenge Friends 🔥</div>
+    <div class="onboard-hint">Send your Ante link — they see your stake and can join the same habit bet.</div>
+    <div style="background:#1c1c38;border:1px solid #3c3c68;border-radius:12px;padding:16px;margin-bottom:20px;display:flex;align-items:center;gap:12px">
+      <div style="flex:1;font-size:14px;color:var(--text-dim);font-family:monospace">ante.app/join/<span id="share-code">bk7x2q</span></div>
+      <button class="btn btn-primary btn-small" onclick="copyShareLink()">Copy</button>
+    </div>
+    <div style="display:flex;gap:10px;margin-bottom:24px">
+      <button class="btn btn-secondary" style="flex:1;padding:14px;font-size:13px" onclick="showToast('📲 Shared to Instagram!','gold')">Instagram</button>
+      <button class="btn btn-secondary" style="flex:1;padding:14px;font-size:13px" onclick="showToast('✅ Sent to Messages!','green')">iMessage</button>
+      <button class="btn btn-secondary" style="flex:1;padding:14px;font-size:13px" onclick="showToast('✅ Shared!','green')">More…</button>
+    </div>
+    <div style="background:var(--gold-dim);border:1px solid var(--gold);border-radius:12px;padding:14px 16px;font-size:13px;color:var(--text-dim);line-height:1.5">
+      🏆 <strong style="color:var(--gold)">Group pot mode:</strong> When 2+ friends join the same habit, the person with the highest streak at month end splits the forfeited pot.
+    </div>
+  </div>
+</div>
+
+<script>
+// ─────────────────────────────────────────────
+// STATE
+// ─────────────────────────────────────────────
+const STORAGE_KEY = 'ante_v1';
+let state = {
+  habits: [],
+  walletBalance: 50,
+  totalForfeit: 0,
+  txHistory: [],
+  onboardData: { name: '', emoji: '🏃', freq: 'Every Day', stake: 5, charity: 'Boys & Girls Club' }
+};
+
+function loadState() {
+  const raw = localStorage.getItem(STORAGE_KEY);
+  if (raw) state = { ...state, ...JSON.parse(raw) };
+}
+function saveState() {
+  localStorage.setItem(STORAGE_KEY, JSON.stringify(state));
+}
+loadState();
+
+// ─────────────────────────────────────────────
+// NAVIGATION
+// ─────────────────────────────────────────────
+function goTo(id) {
+  document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
+  document.getElementById(id).classList.add('active');
+  window.scrollTo(0,0);
+}
+
+const TAB_SCREENS = { home: 'screen-home', feed: 'screen-feed', stats: 'screen-stats' };
+function showTab(tab) {
+  // Hide ALL screens first (including onboarding screens)
+  document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
+  // Then activate just the right tab
+  Object.keys(TAB_SCREENS).forEach(t => {
+    const s = document.getElementById(TAB_SCREENS[t]);
+    s.classList.toggle('active', t === tab);
+    document.querySelectorAll(`#${TAB_SCREENS[t]} .nav-item`).forEach((el, i) => {
+      el.classList.toggle('active', ['home','feed','stats'][i] === tab);
+    });
+  });
+  if (tab === 'home') renderHabits();
+  if (tab === 'stats') renderStats();
+  if (tab === 'feed') renderFeed();
+  window.scrollTo(0, 0);
+}
+
+function skipOnboard() {
+  // Demo mode: pre-load habits
+  if (state.habits.length === 0) seedDemoData();
+  showTab('home');
+}
+
+// ─────────────────────────────────────────────
+// ONBOARDING
+// ─────────────────────────────────────────────
+let selectedEmoji = '🏃';
+let selectedFreq = 'Every Day';
+let selectedStake = 5;
+let selectedCharity = 'Boys & Girls Club';
+
+// Build emoji picker
+function buildEmojiPicker(containerId) {
+  const emojis = ['🏃','🏋️','📚','🧘','💊','💧','🛌','🥗','✍️','🎯','🎸','🌿','💻','🧠','🚴'];
+  const container = document.getElementById(containerId);
+  container.innerHTML = '';
+  emojis.forEach((e, i) => {
+    const t = document.createElement('div');
+    t.className = 'tag' + (i === 0 ? ' selected' : '');
+    t.textContent = e;
+    t.onclick = () => {
+      container.querySelectorAll('.tag').forEach(x => x.classList.remove('selected'));
+      t.classList.add('selected');
+      selectedEmoji = e;
+    };
+    container.appendChild(t);
+  });
+}
+buildEmojiPicker('emoji-picker');
+buildEmojiPicker('modal-emoji-picker');
+
+function selectFreq(el, val) {
+  document.querySelectorAll('#screen-ob2 .option-card').forEach(c => c.classList.remove('selected'));
+  el.classList.add('selected');
+  selectedFreq = val;
+}
+function selectStake(el, val) {
+  document.querySelectorAll('#screen-ob3 .stake-chip').forEach(c => c.classList.remove('selected'));
+  el.classList.add('selected');
+  selectedStake = parseInt(val);
+}
+function selectStakeModal(el, val) {
+  document.querySelectorAll('#add-habit-modal .stake-chip').forEach(c => c.classList.remove('selected'));
+  el.classList.add('selected');
+  selectedStake = parseInt(val);
+}
+function selectFundAmt(el, val) {
+  document.querySelectorAll('#add-funds-modal .stake-chip').forEach(c => c.classList.remove('selected'));
+  el.classList.add('selected');
+  document.getElementById('fund-amt-display').textContent = val;
+  state._pendingFund = parseInt(val);
+}
+function selectCharity(el, val) {
+  document.querySelectorAll('.charity-item').forEach(c => c.classList.remove('selected'));
+  el.classList.add('selected');
+  selectedCharity = val;
+}
+function selectTag(el, groupId) {
+  document.querySelectorAll(`#${groupId} .tag`).forEach(t => t.classList.remove('selected'));
+  el.classList.add('selected');
+}
+
+function ob1Next() {
+  const name = document.getElementById('habit-name-input').value.trim();
+  if (!name) { showToast('Name your habit first','red'); return; }
+  state.onboardData.name = name;
+  state.onboardData.emoji = selectedEmoji;
+  goTo('screen-ob2');
+}
+function ob2Next() {
+  state.onboardData.freq = selectedFreq;
+  goTo('screen-ob3');
+}
+function ob3Next() {
+  state.onboardData.stake = selectedStake;
+  state.onboardData.charity = selectedCharity;
+  // Populate summary
+  document.getElementById('sum-habit').textContent = `${state.onboardData.emoji} ${state.onboardData.name}`;
+  document.getElementById('sum-freq').textContent = state.onboardData.freq;
+  document.getElementById('sum-stake').textContent = `$${state.onboardData.stake}/miss`;
+  document.getElementById('sum-stake-2').textContent = `$${state.onboardData.stake}`;
+  document.getElementById('sum-charity').textContent = state.onboardData.charity;
+  goTo('screen-ob4');
+}
+
+function commitHabit() {
+  const h = createHabit(
+    state.onboardData.name,
+    state.onboardData.emoji,
+    state.onboardData.freq,
+    state.onboardData.stake,
+    state.onboardData.charity
+  );
+  state.habits.push(h);
+  saveState();
+  spawnConfetti();
+  showTab('home');
+  setTimeout(() => showToast('🔒 Habit locked in! You\'ve got this.','green'), 300);
+}
+
+// ─────────────────────────────────────────────
+// HABIT MODEL
+// ─────────────────────────────────────────────
+function createHabit(name, emoji, freq, stake, charity) {
+  return {
+    id: Date.now().toString(),
+    name, emoji, freq, stake,
+    charity: charity || 'Boys & Girls Club',
+    createdAt: new Date().toISOString(),
+    completedDays: [],  // ISO date strings
+    missedDays: [],
+    currentStreak: 0,
+    bestStreak: 0
+  };
+}
+
+function todayStr() {
+  return new Date().toISOString().slice(0, 10);
+}
+function isCompletedToday(habit) {
+  return habit.completedDays.includes(todayStr());
+}
+function isMissedToday(habit) {
+  return habit.missedDays.includes(todayStr());
+}
+
+function completeHabit(id) {
+  const h = state.habits.find(x => x.id === id);
+  if (!h || isCompletedToday(h)) return;
+  h.completedDays.push(todayStr());
+  // Update streak
+  h.currentStreak = (h.currentStreak || 0) + 1;
+  h.bestStreak = Math.max(h.bestStreak || 0, h.currentStreak);
+  // Add to tx history
+  state.txHistory.unshift({
+    date: todayStr(),
+    desc: `✅ Completed: ${h.emoji} ${h.name}`,
+    amount: 0,
+    type: 'win'
+  });
+  saveState();
+  renderHabits();
+  spawnConfetti();
+  showToast(`🔥 ${h.currentStreak} day streak! Keep it up.`, 'green');
+}
+
+function missHabit(id) {
+  const h = state.habits.find(x => x.id === id);
+  if (!h || isMissedToday(h) || isCompletedToday(h)) return;
+  h.missedDays.push(todayStr());
+  h.currentStreak = 0;
+  state.walletBalance = Math.max(0, (state.walletBalance || 0) - h.stake);
+  state.totalForfeit = (state.totalForfeit || 0) + h.stake;
+  state.txHistory.unshift({
+    date: todayStr(),
+    desc: `❌ Missed: ${h.emoji} ${h.name} → ${h.charity}`,
+    amount: -h.stake,
+    type: 'loss'
+  });
+  saveState();
+  renderHabits();
+  closeModal('habit-detail-modal');
+  showToast(`💸 $${h.stake} donated to ${h.charity}`, 'red');
+}
+
+function deleteHabit(id) {
+  state.habits = state.habits.filter(h => h.id !== id);
+  saveState();
+  renderHabits();
+  closeModal('habit-detail-modal');
+  showToast('Habit removed', null);
+}
+
+// ─────────────────────────────────────────────
+// RENDER HOME
+// ─────────────────────────────────────────────
+function renderHabits() {
+  const container = document.getElementById('habits-container');
+  const totalStaked = state.habits.reduce((s,h) => s + h.stake, 0);
+  document.getElementById('wallet-amount').textContent = (state.walletBalance || 50).toFixed(2);
+  document.getElementById('wallet-sub').textContent = `${state.habits.length} active habit${state.habits.length !== 1 ? 's' : ''} · $${totalStaked}/day at risk`;
+
+  if (state.habits.length === 0) {
+    container.innerHTML = `
+      <div class="empty-state">
+        <div class="empty-icon">🃏</div>
+        <div class="empty-title">No bets yet</div>
+        <div class="empty-sub">Tap <strong>+ New bet</strong> to stake money on your first habit. The average user is 84% more consistent when money is on the line.</div>
+      </div>`;
+    return;
+  }
+
+  container.innerHTML = state.habits.map(h => {
+    const done = isCompletedToday(h);
+    const missed = isMissedToday(h);
+    const total = h.completedDays.length + h.missedDays.length;
+    const pct = total > 0 ? Math.round((h.completedDays.length / total) * 100) : 100;
+    const streak = h.currentStreak || 0;
+    const statusClass = done ? 'completed-today' : missed ? 'failed' : streak > 2 ? '' : 'at-risk';
+
+    return `
+    <div class="habit-card ${statusClass}" onclick="openHabitDetail('${h.id}')">
+      <div class="habit-top">
+        <div class="habit-emoji">${h.emoji}</div>
+        <div class="habit-stake-badge">$${h.stake}/miss</div>
+      </div>
+      <div class="habit-name">${h.name}</div>
+      <div class="habit-meta">${h.freq} · ${h.charity}</div>
+      ${streak > 0 ? `<div class="streak-display">🔥 ${streak} day streak</div>` : ''}
+      <div class="habit-progress">
+        <div class="progress-bar"><div class="progress-fill" style="width:${pct}%"></div></div>
+        <div class="habit-progress-text">
+          <span>${h.completedDays.length} completed</span>
+          <span>${pct}% success</span>
+        </div>
+      </div>
+      ${done
+        ? `<button class="check-btn done-btn" disabled>✓ Done for today</button>`
+        : missed
+        ? `<button class="check-btn done-btn" style="border-color:var(--red);color:var(--red)" disabled>❌ Missed — $${h.stake} donated</button>`
+        : `<button class="check-btn" onclick="event.stopPropagation();completeHabit('${h.id}')">✓ Mark complete</button>`
+      }
+    </div>`;
+  }).join('');
+}
+
+// ─────────────────────────────────────────────
+// HABIT DETAIL
+// ─────────────────────────────────────────────
+function openHabitDetail(id) {
+  const h = state.habits.find(x => x.id === id);
+  if (!h) return;
+  const done = isCompletedToday(h);
+  const missed = isMissedToday(h);
+  const total = h.completedDays.length + h.missedDays.length;
+  const pct = total > 0 ? Math.round((h.completedDays.length / total) * 100) : 100;
+
+  document.getElementById('habit-detail-content').innerHTML = `
+    <div class="modal-handle"></div>
+    <div style="font-size:48px;text-align:center;margin-bottom:12px">${h.emoji}</div>
+    <div class="modal-title" style="text-align:center">${h.name}</div>
+    <div class="info-row">
+      <span class="info-label">Frequency</span><span class="info-val">${h.freq}</span>
+    </div>
+    <div class="info-row">
+      <span class="info-label">Daily stake</span><span class="info-val" style="color:var(--gold)">$${h.stake}/miss</span>
+    </div>
+    <div class="info-row">
+      <span class="info-label">Current streak</span><span class="info-val">🔥 ${h.currentStreak || 0} days</span>
+    </div>
+    <div class="info-row">
+      <span class="info-label">Best streak</span><span class="info-val">🏆 ${h.bestStreak || 0} days</span>
+    </div>
+    <div class="info-row">
+      <span class="info-label">Success rate</span><span class="info-val">${pct}%</span>
+    </div>
+    <div class="info-row" style="border:none">
+      <span class="info-label">Fines go to</span><span class="info-val">${h.charity}</span>
+    </div>
+    <div style="margin-top:20px;display:flex;flex-direction:column;gap:10px">
+      ${!done && !missed ? `
+        <button class="btn btn-success" onclick="completeHabit('${h.id}');closeModal('habit-detail-modal')">✓ Complete Today</button>
+        <button class="btn btn-danger" onclick="missHabit('${h.id}')">❌ I Missed It — Pay Up</button>
+      ` : done ? `
+        <button class="btn btn-secondary" disabled>✓ Already done today</button>
+      ` : `
+        <button class="btn btn-secondary" disabled>❌ Missed today</button>
+      `}
+      <button class="btn btn-ghost" onclick="openShareModal('${h.id}')">📲 Challenge Friends</button>
+      <button class="btn btn-ghost" style="color:var(--red)" onclick="deleteHabit('${h.id}')">Delete Habit</button>
+    </div>
+  `;
+  showModal('habit-detail-modal');
+}
+
+// ─────────────────────────────────────────────
+// ADD HABIT FROM MODAL
+// ─────────────────────────────────────────────
+let modalSelectedEmoji = '🏃';
+let modalSelectedStake = 5;
+
+function addHabitFromModal() {
+  const name = document.getElementById('modal-habit-name').value.trim();
+  if (!name) { showToast('Enter a habit name','red'); return; }
+  const freqEl = document.querySelector('#modal-freq-picker .tag.selected');
+  const freq = freqEl ? freqEl.textContent : 'Daily';
+  const emojiEl = document.querySelector('#modal-emoji-picker .tag.selected');
+  const emoji = emojiEl ? emojiEl.textContent : '🎯';
+  const stakeEl = document.querySelector('#add-habit-modal .stake-chip.selected');
+  const stake = stakeEl ? parseInt(stakeEl.textContent.replace('$','')) : 5;
+
+  const h = createHabit(name, emoji, freq, stake, 'Boys & Girls Club');
+  state.habits.push(h);
+  document.getElementById('modal-habit-name').value = '';
+  saveState();
+  closeModal('add-habit-modal');
+  renderHabits();
+  spawnConfetti();
+  showToast('🔒 New bet locked in!', 'green');
+}
+
+// ─────────────────────────────────────────────
+// ADD FUNDS
+// ─────────────────────────────────────────────
+function addFunds() {
+  const amt = state._pendingFund || 10;
+  state.walletBalance = (state.walletBalance || 50) + amt;
+  state.txHistory.unshift({
+    date: todayStr(),
+    desc: `💳 Funds added`,
+    amount: amt,
+    type: 'win'
+  });
+  saveState();
+  closeModal('add-funds-modal');
+  renderHabits();
+  showToast(`✅ $${amt} added to wallet`, 'green');
+}
+
+// ─────────────────────────────────────────────
+// RENDER STATS
+// ─────────────────────────────────────────────
+function renderStats() {
+  let totalCompleted = 0, totalMissed = 0, bestStreak = 0;
+  state.habits.forEach(h => {
+    totalCompleted += h.completedDays.length;
+    totalMissed += h.missedDays.length;
+    bestStreak = Math.max(bestStreak, h.bestStreak || 0);
+  });
+  const total = totalCompleted + totalMissed;
+  const rate = total > 0 ? Math.round((totalCompleted / total) * 100) : 0;
+  const saved = (state.habits.reduce((s,h) => s + h.stake * h.completedDays.length, 0));
+
+  document.getElementById('ps-streak').textContent = bestStreak;
+  document.getElementById('ps-rate').textContent = total > 0 ? `${rate}%` : '—';
+  document.getElementById('ps-saved').textContent = `$${saved}`;
+  document.getElementById('sg-completed').textContent = totalCompleted;
+  document.getElementById('sg-missed').textContent = totalMissed;
+  document.getElementById('sg-staked').textContent = `$${state.habits.reduce((s,h)=>s+h.stake,0)}`;
+  document.getElementById('sg-habits').textContent = state.habits.length;
+
+  // Week chart
+  const chart = document.getElementById('week-chart');
+  const days = ['M','T','W','T','F','S','S'];
+  const today = new Date();
+  chart.innerHTML = days.map((d, i) => {
+    const date = new Date(today);
+    date.setDate(today.getDate() - (6 - i));
+    const ds = date.toISOString().slice(0, 10);
+    const done = state.habits.some(h => h.completedDays.includes(ds));
+    const missed = state.habits.some(h => h.missedDays.includes(ds));
+    const ht = done ? 60 : missed ? 20 : 4;
+    const cls = done ? 'done' : missed ? 'missed' : '';
+    return `<div class="bar-wrap">
+      <div class="bar ${cls}" style="height:${ht}px"></div>
+      <div class="bar-day">${d}</div>
+    </div>`;
+  }).join('');
+
+  // TX history
+  const txEl = document.getElementById('tx-history');
+  if (state.txHistory.length === 0) {
+    txEl.innerHTML = '<div style="padding:20px 0;color:var(--text-muted);font-size:14px;text-align:center">No transactions yet</div>';
+  } else {
+    txEl.innerHTML = state.txHistory.slice(0, 20).map(tx => `
+      <div class="history-item">
+        <div class="hi-dot ${tx.type}"></div>
+        <div class="hi-text">${tx.desc}<br><span style="color:var(--text-muted);font-size:12px">${tx.date}</span></div>
+        ${tx.amount !== 0 ? `<div class="hi-amount ${tx.amount > 0 ? 'pos' : 'neg'}">${tx.amount > 0 ? '+' : ''}$${Math.abs(tx.amount)}</div>` : ''}
+      </div>
+    `).join('');
+  }
+}
+
+// ─────────────────────────────────────────────
+// RENDER FEED
+// ─────────────────────────────────────────────
+const FEED_DATA = [
+  { name: 'Marcus K.', initials: 'MK', color: '#6c63ff,#e040fb', time: '2m ago', body: 'Just hit 30 days of cold showers. No way I\'m losing $10 to charity 🧊', stake: 10, result: 'win', streak: 30 },
+  { name: 'Anika R.', initials: 'AR', color: '#00bcd4,#00e676', time: '18m ago', body: 'Missed my run today. $25 to Red Cross 😭 Starting fresh tomorrow.', stake: 25, result: 'loss', streak: 0 },
+  { name: 'Jake T.', initials: 'JT', color: '#ff9800,#ff5722', time: '1h ago', body: 'Week 3 of waking up at 5am. The $50 at risk is a better alarm than any clock', stake: 50, result: 'win', streak: 21 },
+  { name: 'Priya S.', initials: 'PS', color: '#4caf50,#8bc34a', time: '3h ago', body: 'Meditation streak: 7 days straight. $5 bets hit different when you actually want to keep them', stake: 5, result: 'win', streak: 7 },
+];
+
+function renderFeed() {
+  const container = document.getElementById('feed-container');
+  container.innerHTML = FEED_DATA.map(f => `
+    <div class="feed-card">
+      <div class="feed-top">
+        <div class="feed-avatar" style="background:linear-gradient(135deg,${f.color})">${f.initials}</div>
+        <div class="feed-meta">
+          <div class="feed-name">${f.name} <span style="color:var(--text-muted);font-weight:400;font-size:12px">· $${f.stake}/miss</span></div>
+          <div class="feed-time">${f.time}</div>
+        </div>
+      </div>
+      <div class="feed-body">${f.body}</div>
+      <div class="feed-result ${f.result}">${f.result === 'win' ? `🔥 ${f.streak}-day streak` : '💸 Forfeited $' + f.stake}</div>
+    </div>
+  `).join('');
+}
+
+// ─────────────────────────────────────────────
+// MODALS
+// ─────────────────────────────────────────────
+function showModal(id) {
+  document.getElementById(id).classList.add('open');
+}
+function closeModal(id) {
+  document.getElementById(id).classList.remove('open');
+}
+function closeModalIfBg(event, id) {
+  if (event.target === event.currentTarget) closeModal(id);
+}
+
+// ─────────────────────────────────────────────
+// TOAST
+// ─────────────────────────────────────────────
+let toastTimer;
+function showToast(msg, type) {
+  const t = document.getElementById('toast');
+  t.textContent = msg;
+  t.className = 'toast' + (type ? ' ' + type : '');
+  t.classList.add('show');
+  clearTimeout(toastTimer);
+  toastTimer = setTimeout(() => t.classList.remove('show'), 2800);
+}
+
+// ─────────────────────────────────────────────
+// CONFETTI
+// ─────────────────────────────────────────────
+function spawnConfetti() {
+  const colors = ['#ffd600','#00e676','#6c63ff','#ff9800','#e040fb'];
+  for (let i = 0; i < 24; i++) {
+    const el = document.createElement('div');
+    el.className = 'confetti-piece';
+    el.style.cssText = `
+      left: ${10 + Math.random() * 80}%;
+      top: ${Math.random() * 20}%;
+      background: ${colors[Math.floor(Math.random() * colors.length)]};
+      animation-delay: ${Math.random() * .6}s;
+      animation-duration: ${1.5 + Math.random() * 1}s;
+      transform: rotate(${Math.random() * 360}deg);
+    `;
+    document.body.appendChild(el);
+    setTimeout(() => el.remove(), 2500);
+  }
+}
+
+// ─────────────────────────────────────────────
+// DEMO DATA
+// ─────────────────────────────────────────────
+function seedDemoData() {
+  const today = todayStr();
+  const yesterday = new Date(); yesterday.setDate(yesterday.getDate() - 1);
+  const yd = yesterday.toISOString().slice(0, 10);
+  const twoDaysAgo = new Date(); twoDaysAgo.setDate(twoDaysAgo.getDate() - 2);
+  const tda = twoDaysAgo.toISOString().slice(0, 10);
+
+  state.habits = [
+    { ...createHabit('Run 3 miles', '🏃', 'Every Day', 25, 'Boys & Girls Club'),
+      completedDays: [yd, tda], currentStreak: 5, bestStreak: 12 },
+    { ...createHabit('No alcohol', '🚫', 'Every Day', 50, 'Red Cross'),
+      completedDays: [yd, tda], currentStreak: 14, bestStreak: 14 },
+    { ...createHabit('Read 30 min', '📚', 'Weekdays', 10, 'No Kid Hungry'),
+      completedDays: [tda], currentStreak: 3, bestStreak: 7 },
+  ];
+  state.walletBalance = 150;
+  state.txHistory = [
+    { date: yd, desc: '✅ Completed: 🏃 Run 3 miles', amount: 0, type: 'win' },
+    { date: yd, desc: '✅ Completed: 🚫 No alcohol', amount: 0, type: 'win' },
+    { date: tda, desc: '✅ Completed: 🏃 Run 3 miles', amount: 0, type: 'win' },
+    { date: '2026-06-15', desc: '❌ Missed: 📚 Read 30 min → No Kid Hungry', amount: -10, type: 'loss' },
+    { date: '2026-06-15', desc: '💳 Funds added', amount: 100, type: 'win' },
+  ];
+  saveState();
+}
+
+// ─────────────────────────────────────────────
+// SHARE
+// ─────────────────────────────────────────────
+function copyShareLink() {
+  const code = document.getElementById('share-code').textContent;
+  navigator.clipboard?.writeText(`https://ante.app/join/${code}`).catch(() => {});
+  showToast('🔗 Link copied!', 'gold');
+}
+
+function openShareModal(habitId) {
+  const h = state.habits.find(x => x.id === habitId);
+  const code = habitId.slice(-6);
+  document.getElementById('share-code').textContent = code;
+  closeModal('habit-detail-modal');
+  showModal('share-modal');
+}
+
+// ─────────────────────────────────────────────
+// INIT
+// ─────────────────────────────────────────────
+if (state.habits.length > 0) {
+  showTab('home');
+}
+</script>
+</body>
+</html>
