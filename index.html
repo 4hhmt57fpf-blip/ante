@@ -1311,9 +1311,20 @@ function disconnectCanvas(){
   closeModal('canvas-modal');
   showToast('Canvas disconnected', null);
 }
+// Safe JSON GET — surfaces a clear message when the server/tunnel returns HTML or is down.
+function getJSON(url, opt){
+  return fetch(url, opt).then(async r => {
+    const text = await r.text();
+    let j;
+    try { j = JSON.parse(text); }
+    catch(e){ throw new Error("Can't reach the Ante server — make sure it's running and the tunnel is up."); }
+    if (!r.ok || (j && j.error)) throw new Error((j && j.error) || ('HTTP ' + r.status));
+    return j;
+  });
+}
 // Missing-assignment count: prefer extension-synced data, fall back to token proxy.
 function canvasMissingCount(){
-  return fetch('/__canvas_data').then(r => r.json()).then(d => {
+  return getJSON('/__canvas_data').then(d => {
     if (d && Array.isArray(d.missing)) return d.missing.length;
     throw new Error('no extension data');
   }).catch(() => canvasFetch('users/self/missing_submissions?filter[]=submittable')
@@ -1323,7 +1334,7 @@ function canvasMissingCount(){
 function checkCanvasExtension(){
   const status = document.getElementById('canvas-status');
   status.textContent = '⏳ Checking for synced data…';
-  fetch('/__canvas_data').then(r => r.json()).then(d => {
+  getJSON('/__canvas_data').then(d => {
     if (d && d.profile) {
       const miss = Array.isArray(d.missing) ? d.missing.length : 0;
       state.canvas = { host: d.host || '', token: '', connected: true, mode: 'extension',
