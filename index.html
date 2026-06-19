@@ -612,6 +612,44 @@
   }
   /* Per-habit color identity */
   .habit-card::after { background: var(--hc, var(--green)); }
+
+  /* ── Category cards ── */
+  .category-card {
+    display: flex; align-items: center; gap: 14px;
+    background: var(--surface); border: 1px solid var(--border);
+    border-radius: var(--radius-sm); padding: 16px; margin-bottom: 10px;
+    cursor: pointer; transition: all .15s;
+  }
+  .category-card:active { transform: scale(.98); }
+  .category-card.locked { opacity: .45; cursor: not-allowed; }
+  .category-card .cat-emoji {
+    width: 48px; height: 48px; border-radius: 14px;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 24px; flex-shrink: 0;
+  }
+  .category-card .cat-body { flex: 1; min-width: 0; }
+  .category-card .cat-name { font-size: 16px; font-weight: 700; letter-spacing: -.2px; }
+  .category-card .cat-src { font-size: 12px; color: var(--text-muted); margin-top: 3px; }
+  .cat-chevron { color: var(--text-muted); font-size: 18px; flex-shrink: 0; }
+  .cat-back {
+    display: inline-flex; align-items: center; gap: 6px;
+    font-size: 13px; color: var(--gold); font-weight: 600;
+    padding: 0 0 14px; cursor: pointer; letter-spacing: -.1px;
+  }
+  .cat-back:active { opacity: .7; }
+  .cat-heading {
+    font-size: 20px; font-weight: 800; letter-spacing: -.4px;
+    margin-bottom: 14px;
+  }
+
+  /* ── Vault row in wallet card ── */
+  .vault-row {
+    display: flex; justify-content: space-between; align-items: center;
+    margin-top: 12px; padding-top: 10px;
+    border-top: 1px solid var(--border);
+  }
+  .vault-label { font-size: 12px; color: var(--text-muted); font-weight: 600; letter-spacing: .3px; }
+  .vault-amount { font-size: 14px; font-weight: 800; color: var(--gold); }
 </style>
 </head>
 <body>
@@ -640,7 +678,7 @@
       </div>
       <div style="display:flex;gap:14px;align-items:flex-start">
         <div style="width:32px;height:32px;border-radius:50%;background:var(--gold-dim);border:1px solid var(--gold);display:flex;align-items:center;justify-content:center;font-size:14px;font-weight:900;color:var(--gold);flex-shrink:0">3</div>
-        <div><div style="font-size:14px;font-weight:700">Miss = donate to charity</div><div style="font-size:13px;color:var(--text-muted);margin-top:2px">85% goes to your chosen cause. We take 15% to keep the lights on.</div></div>
+        <div><div style="font-size:14px;font-weight:700">Miss = locked into savings</div><div style="font-size:13px;color:var(--text-muted);margin-top:2px">Your stake goes into a locked Savings Vault — still your money, just inaccessible until you turn it around.</div></div>
       </div>
     </div>
   </div>
@@ -681,8 +719,8 @@
     <div class="step-dot"></div>
     <div class="step-dot"></div>
   </div>
-  <div class="onboard-q">Pick a goal we can verify</div>
-  <div class="onboard-hint">Locked goals need their app connected — there's no gameable, type-anything habit.</div>
+  <div class="onboard-q" id="ob2-q">What do you want to improve?</div>
+  <div class="onboard-hint" id="ob2-hint">Pick a category — each one uses a different app to verify you.</div>
   <div id="goal-list"></div>
   <div id="goal-config"></div>
   <div style="margin-top:auto">
@@ -710,24 +748,11 @@
     <div class="stake-chip" onclick="selectStake(this,'25')">$25</div>
     <div class="stake-chip" onclick="selectStake(this,'50')">$50</div>
   </div>
-  <div class="onboard-hint" style="margin-top:0">If you fail, where does the money go?</div>
-  <div class="charity-list">
-    <div class="charity-item selected" onclick="selectCharity(this,'Boys & Girls Club')">
-      <div class="charity-icon">🧒</div>
-      <div><div class="charity-name">Boys & Girls Club</div><div class="charity-sub">Youth development</div></div>
-    </div>
-    <div class="charity-item" onclick="selectCharity(this,'Red Cross')">
-      <div class="charity-icon">🏥</div>
-      <div><div class="charity-name">Red Cross</div><div class="charity-sub">Disaster relief</div></div>
-    </div>
-    <div class="charity-item" onclick="selectCharity(this,'No Kid Hungry')">
-      <div class="charity-icon">🍽️</div>
-      <div><div class="charity-name">No Kid Hungry</div><div class="charity-sub">Fighting food insecurity</div></div>
-    </div>
-    <div class="charity-item" onclick="selectCharity(this,'ACLU')">
-      <div class="charity-icon">⚖️</div>
-      <div><div class="charity-name">ACLU</div><div class="charity-sub">Civil liberties</div></div>
-    </div>
+  <div class="onboard-hint" style="margin-top:0">When you miss a day:</div>
+  <div style="background:var(--surface);border:1px solid var(--border);border-radius:var(--radius-sm);padding:20px;margin-bottom:20px;text-align:center">
+    <div style="font-size:36px;margin-bottom:10px">🔒</div>
+    <div style="font-size:16px;font-weight:700;margin-bottom:6px">Goes to your Savings Vault</div>
+    <div style="font-size:13px;color:var(--text-muted);line-height:1.55">Your stake stays <strong style="color:var(--text)">yours</strong> — just locked. Every missed day is money you're forced to save. Build the habit, unlock your vault.</div>
   </div>
   <div style="margin-top:auto">
     <button class="btn btn-primary" onclick="ob3Next()">Next →</button>
@@ -766,13 +791,13 @@
       <span class="info-val gold" id="sum-stake" style="color:var(--gold)">—</span>
     </div>
     <div class="info-row" style="border:none">
-      <span class="info-label">If I fail, I donate to</span>
-      <span class="info-val" id="sum-charity">—</span>
+      <span class="info-label">If I miss</span>
+      <span class="info-val">🔒 Locked in savings</span>
     </div>
   </div>
 
-  <div style="background:var(--red-dim);border:1px solid var(--red)55;border-radius:var(--radius-sm);padding:14px 16px;margin-bottom:24px;font-size:13px;line-height:1.5;color:var(--text-dim)">
-    🔒 Your progress is checked automatically — no self-reporting. Miss the verified target and <strong id="sum-stake-2">$5</strong> goes to your charity (Ante keeps 15%). Using mock funds for now.
+  <div style="background:var(--gold-dim);border:1px solid rgba(230,185,78,.35);border-radius:var(--radius-sm);padding:14px 16px;margin-bottom:24px;font-size:13px;line-height:1.5;color:var(--text-dim)">
+    🔒 Your progress is checked automatically — no self-reporting. Miss the target and <strong id="sum-stake-2">$5</strong> is locked into your Savings Vault. You keep every dollar you earn back by building the habit.
   </div>
 
   <div style="margin-top:auto">
@@ -791,12 +816,16 @@
   </div>
 
   <div class="wallet-card">
-    <div class="wallet-label">Total at stake</div>
+    <div class="wallet-label">Stake Balance</div>
     <div class="wallet-amount">$<span id="wallet-amount">0</span></div>
     <div class="wallet-sub" id="wallet-sub">0 active habits</div>
+    <div class="vault-row">
+      <div class="vault-label">🔒 Savings Vault</div>
+      <div class="vault-amount">$<span id="vault-amount">0.00</span></div>
+    </div>
     <div class="wallet-actions">
       <div class="wallet-btn" onclick="showModal('add-funds-modal')">+ Add Funds</div>
-      <div class="wallet-btn" onclick="showToast('💳 Payouts sent weekly','gold')">Withdraw</div>
+      <div class="wallet-btn" onclick="showToast('🔒 Savings unlock when you\'re back on track','gold')">View Savings</div>
     </div>
   </div>
 
@@ -997,14 +1026,12 @@
     <div class="modal-handle"></div>
     <div class="modal-title">Challenge Friends 🔥</div>
     <div class="onboard-hint">Send your Ante link — they see your stake and can join the same habit bet.</div>
-    <div style="background:var(--surface);border:1px solid var(--border);border-radius:12px;padding:16px;margin-bottom:20px;display:flex;align-items:center;gap:12px">
-      <div style="flex:1;font-size:14px;color:var(--text-dim);font-family:monospace">ante.app/join/<span id="share-code">bk7x2q</span></div>
-      <button class="btn btn-primary btn-small" onclick="copyShareLink()">Copy</button>
+    <div style="background:var(--surface);border:1px solid var(--border);border-radius:12px;padding:16px;margin-bottom:16px">
+      <input id="share-url-field" readonly onclick="this.select()" style="width:100%;background:transparent;border:none;outline:none;font-size:11px;color:var(--text-dim);font-family:monospace;word-break:break-all;cursor:pointer;margin-bottom:12px;display:block">
+      <button class="btn btn-primary" style="width:100%" onclick="copyShareLink()">📋 Copy Challenge Link</button>
     </div>
-    <div style="display:flex;gap:10px;margin-bottom:24px">
-      <button class="btn btn-secondary" style="flex:1;padding:14px;font-size:13px" onclick="showToast('📲 Shared to Instagram!','gold')">Instagram</button>
-      <button class="btn btn-secondary" style="flex:1;padding:14px;font-size:13px" onclick="showToast('✅ Sent to Messages!','green')">iMessage</button>
-      <button class="btn btn-secondary" style="flex:1;padding:14px;font-size:13px" onclick="showToast('✅ Shared!','green')">More…</button>
+    <div style="margin-bottom:24px">
+      <button class="btn btn-secondary" style="width:100%;padding:14px;font-size:14px" onclick="shareNative()">📲 Share via Messages / AirDrop…</button>
     </div>
     <div style="background:var(--gold-dim);border:1px solid var(--gold);border-radius:12px;padding:14px 16px;font-size:13px;color:var(--text-dim);line-height:1.5">
       🏆 <strong style="color:var(--gold)">Group pot mode:</strong> When 2+ friends join the same habit, the person with the highest streak at month end splits the forfeited pot.
@@ -1042,20 +1069,8 @@
       <div class="tag" onclick="selectTag(this,'edit-freq-picker')">Weekly</div>
     </div>
 
-    <div class="onboard-hint">Charity (if you miss)</div>
-    <div class="charity-list" id="edit-charity-picker">
-      <div class="charity-item" data-val="Boys & Girls Club" onclick="selectTagGeneric(this,'edit-charity-picker','charity-item')">
-        <div class="charity-icon">🧒</div><div><div class="charity-name">Boys & Girls Club</div><div class="charity-sub">Youth development</div></div>
-      </div>
-      <div class="charity-item" data-val="Red Cross" onclick="selectTagGeneric(this,'edit-charity-picker','charity-item')">
-        <div class="charity-icon">🏥</div><div><div class="charity-name">Red Cross</div><div class="charity-sub">Disaster relief</div></div>
-      </div>
-      <div class="charity-item" data-val="No Kid Hungry" onclick="selectTagGeneric(this,'edit-charity-picker','charity-item')">
-        <div class="charity-icon">🍽️</div><div><div class="charity-name">No Kid Hungry</div><div class="charity-sub">Fighting food insecurity</div></div>
-      </div>
-      <div class="charity-item" data-val="ACLU" onclick="selectTagGeneric(this,'edit-charity-picker','charity-item')">
-        <div class="charity-icon">⚖️</div><div><div class="charity-name">ACLU</div><div class="charity-sub">Civil liberties</div></div>
-      </div>
+    <div style="background:var(--surface);border:1px solid var(--border);border-radius:10px;padding:12px 14px;margin-bottom:20px;font-size:13px;color:var(--text-muted)">
+      🔒 Miss a day → stake goes into your <strong style="color:var(--text)">Savings Vault</strong>
     </div>
 
     <button class="btn btn-success" onclick="saveHabitEdit()">Save Changes</button>
@@ -1156,11 +1171,12 @@ let state = {
   habits: [],
   walletBalance: 50,
   totalForfeit: 0,
+  savingsVault: 0,
   txHistory: [],
   connections: { health: false, screentime: false, canvas: false, gps: false, camera: false },
   canvas: { host: '', token: '', connected: false },
   profile: { name: 'Beckett', handle: 'beckett', reminderTime: '20:00', reminderOn: false },
-  onboardData: { goalId: null, name: '', target: null, freq: 'Every Day', stake: 5, charity: 'Boys & Girls Club' }
+  onboardData: { goalId: null, categoryId: null, name: '', target: null, freq: 'Every Day', stake: 5 }
 };
 
 function loadState() {
@@ -1213,7 +1229,6 @@ function skipOnboard() {
 // ─────────────────────────────────────────────
 let selectedFreq = 'Every Day';
 let selectedStake = 5;
-let selectedCharity = 'Boys & Girls Club';
 
 // ─────────────────────────────────────────────
 // INTEGRATIONS + VERIFIABLE GOALS (Forfeit model)
@@ -1227,18 +1242,27 @@ const SOURCES = {
   camera:     { label: 'Photo + AI',    icon: '📸', sub: 'AI checks your photo against your description; a human reviews if unsure.' },
 };
 
+const CATEGORIES = [
+  { id:'fitness',  label:'Fitness',    emoji:'🏃', color:'#4ade80', source:'health',     desc:'Steps, running, and workouts' },
+  { id:'wellness', label:'Wellness',   emoji:'🧘', color:'#a78bfa', source:'health',     desc:'Sleep, meditation, mindfulness' },
+  { id:'digital',  label:'Digital',    emoji:'📱', color:'#f87171', source:'screentime', desc:'Screen time limits enforced by iOS' },
+  { id:'school',   label:'School',     emoji:'📚', color:'#60a5fa', source:'canvas',     desc:'Assignment deadlines, no missing work' },
+  { id:'location', label:'Location',   emoji:'📍', color:'#38bdf8', source:'gps',        desc:'Gym check-ins, avoid certain places' },
+  { id:'custom',   label:'Custom',     emoji:'📸', color:'#e6b94e', source:'camera',     desc:'AI-verified photo proof for anything' },
+];
+
 const GOALS = [
-  { id:'steps',    label:'Walk 10,000 steps',    emoji:'🚶', color:'#34d399', source:'health',     metric:'Steps',           dir:'≥', target:10000, unit:'steps', verify:'auto' },
-  { id:'exercise', label:'30 min of exercise',   emoji:'🏋️', color:'#4ade80', source:'health',     metric:'Exercise',        dir:'≥', target:30,    unit:'min',   verify:'auto' },
-  { id:'run',      label:'Run 3 miles',          emoji:'🏃', color:'#fb923c', source:'health',     metric:'Run distance',    dir:'≥', target:3,     unit:'mi',    verify:'auto' },
-  { id:'meditate', label:'Meditate 10 min',      emoji:'🧘', color:'#a78bfa', source:'health',     metric:'Mindful minutes', dir:'≥', target:10,    unit:'min',   verify:'auto' },
-  { id:'sleep',    label:'Sleep 7+ hours',       emoji:'🛌', color:'#60a5fa', source:'health',     metric:'Sleep',           dir:'≥', target:7,     unit:'hr',    verify:'auto' },
-  { id:'screen',   label:'Limit social apps',    emoji:'📱', color:'#f87171', source:'screentime', metric:'Screen time',     dir:'≤', target:30,    unit:'min',   verify:'auto' },
-  { id:'cv_ontime',label:'Submit assignments on time', emoji:'🎓', color:'#dc2626', source:'canvas', metric:'Canvas',          dir:'',  target:0,     unit:'',      verify:'canvas' },
-  { id:'cv_nomiss',label:'No missing assignments', emoji:'📚', color:'#2563eb', source:'canvas',    metric:'Canvas',          dir:'',  target:0,     unit:'',      verify:'canvas' },
-  { id:'gym',      label:'Get to the gym',       emoji:'📍', color:'#38bdf8', source:'gps',        metric:'Gym check-in',    dir:'',  target:0,     unit:'',      verify:'auto' },
-  { id:'avoid',    label:'Avoid a place',        emoji:'🚫', color:'#94a3b8', source:'gps',        metric:'Stay away',       dir:'',  target:0,     unit:'',      verify:'auto' },
-  { id:'proof',    label:'Custom (photo proof)', emoji:'📸', color:'#e6b94e', source:'camera',     metric:'Photo + AI',      dir:'',  target:0,     unit:'',      verify:'proof' },
+  { id:'steps',    category:'fitness',  label:'Walk 10,000 steps',         emoji:'🚶', color:'#34d399', source:'health',     metric:'Steps',           dir:'≥', target:10000, unit:'steps', verify:'auto' },
+  { id:'exercise', category:'fitness',  label:'30 min of exercise',         emoji:'🏋️', color:'#4ade80', source:'health',     metric:'Exercise',        dir:'≥', target:30,    unit:'min',   verify:'auto' },
+  { id:'run',      category:'fitness',  label:'Run 3 miles',                emoji:'🏃', color:'#fb923c', source:'health',     metric:'Run distance',    dir:'≥', target:3,     unit:'mi',    verify:'auto' },
+  { id:'meditate', category:'wellness', label:'Meditate 10 min',            emoji:'🧘', color:'#a78bfa', source:'health',     metric:'Mindful minutes', dir:'≥', target:10,    unit:'min',   verify:'auto' },
+  { id:'sleep',    category:'wellness', label:'Sleep 7+ hours',             emoji:'🛌', color:'#60a5fa', source:'health',     metric:'Sleep',           dir:'≥', target:7,     unit:'hr',    verify:'auto' },
+  { id:'screen',   category:'digital',  label:'Limit social apps',          emoji:'📱', color:'#f87171', source:'screentime', metric:'Screen time',     dir:'≤', target:30,    unit:'min',   verify:'auto' },
+  { id:'cv_ontime',category:'school',   label:'Submit assignments on time', emoji:'🎓', color:'#dc2626', source:'canvas',     metric:'Canvas',          dir:'',  target:0,     unit:'',      verify:'canvas' },
+  { id:'cv_nomiss',category:'school',   label:'No missing assignments',     emoji:'📚', color:'#2563eb', source:'canvas',     metric:'Canvas',          dir:'',  target:0,     unit:'',      verify:'canvas' },
+  { id:'gym',      category:'location', label:'Get to the gym',             emoji:'📍', color:'#38bdf8', source:'gps',        metric:'Gym check-in',    dir:'',  target:0,     unit:'',      verify:'auto' },
+  { id:'avoid',    category:'location', label:'Avoid a place',              emoji:'🚫', color:'#94a3b8', source:'gps',        metric:'Stay away',       dir:'',  target:0,     unit:'',      verify:'auto' },
+  { id:'proof',    category:'custom',   label:'Custom (photo proof)',       emoji:'📸', color:'#e6b94e', source:'camera',     metric:'Photo + AI',      dir:'',  target:0,     unit:'',      verify:'proof' },
 ];
 
 function goalById(id){ return GOALS.find(g => g.id === id); }
@@ -1410,15 +1434,67 @@ function checkCanvasExtension(){
 function renderGoalList(){
   const el = document.getElementById('goal-list');
   if (!el) return;
-  el.innerHTML = GOALS.map(g => {
-    const connected = state.connections[g.source];
-    const sel = state.onboardData.goalId === g.id;
-    return `<div class="goal-card ${sel?'selected':''} ${connected?'':'locked'}" onclick="${connected?`selectGoal('${g.id}')`:`promptConnect('${g.source}')`}">
-      <div class="goal-emoji" style="background:${hexToRgba(g.color,0.16)};border:1px solid ${hexToRgba(g.color,0.4)}">${g.emoji}</div>
-      <div class="goal-body"><div class="goal-name">${g.label}</div><div class="goal-src">${SOURCES[g.source].icon} ${SOURCES[g.source].label}</div></div>
-      ${connected ? '' : `<div class="goal-lock">🔒 Connect</div>`}
-    </div>`;
-  }).join('');
+  const catId = state.onboardData.categoryId;
+
+  if (!catId) {
+    // Phase 1: category picker
+    const qEl = document.getElementById('ob2-q');
+    const hEl = document.getElementById('ob2-hint');
+    if (qEl) qEl.textContent = 'What do you want to improve?';
+    if (hEl) hEl.textContent = 'Pick a category — each one links a specific app to verify you.';
+    el.innerHTML = CATEGORIES.map(cat => {
+      const connected = cat.source === 'canvas'
+        ? !!(state.canvas && state.canvas.connected)
+        : !!state.connections[cat.source];
+      const col = cat.color;
+      return `<div class="category-card ${connected ? '' : 'locked'}" onclick="${connected ? `selectCategory('${cat.id}')` : `promptConnect('${cat.source}')`}">
+        <div class="cat-emoji" style="background:${hexToRgba(col,0.15)};border:1px solid ${hexToRgba(col,0.4)}">${cat.emoji}</div>
+        <div class="cat-body">
+          <div class="cat-name">${cat.label}</div>
+          <div class="cat-src">${SOURCES[cat.source].icon} ${SOURCES[cat.source].label} · ${cat.desc}</div>
+        </div>
+        ${connected
+          ? `<div class="cat-chevron">›</div>`
+          : `<div class="goal-lock">🔒 Connect</div>`}
+      </div>`;
+    }).join('');
+    document.getElementById('goal-config').innerHTML = '';
+    return;
+  }
+
+  // Phase 2: habit picker within category
+  const cat = CATEGORIES.find(c => c.id === catId);
+  const catGoals = GOALS.filter(g => g.category === catId);
+  const qEl = document.getElementById('ob2-q');
+  const hEl = document.getElementById('ob2-hint');
+  if (qEl) qEl.textContent = cat ? `${cat.emoji} ${cat.label}` : 'Choose your goal';
+  if (hEl) hEl.textContent = 'Select a goal — auto-verified through the connected app. No honor system.';
+
+  el.innerHTML = `<div class="cat-back" onclick="backToCategories()">← All categories</div>` +
+    catGoals.map(g => {
+      const sel = state.onboardData.goalId === g.id;
+      return `<div class="goal-card ${sel ? 'selected' : ''}" onclick="selectGoal('${g.id}')">
+        <div class="goal-emoji" style="background:${hexToRgba(g.color,0.16)};border:1px solid ${hexToRgba(g.color,0.4)}">${g.emoji}</div>
+        <div class="goal-body">
+          <div class="goal-name">${g.label}</div>
+          <div class="goal-src">${SOURCES[g.source].icon} ${SOURCES[g.source].label}</div>
+        </div>
+      </div>`;
+    }).join('');
+}
+
+function selectCategory(id) {
+  state.onboardData.categoryId = id;
+  state.onboardData.goalId = null;
+  renderGoalList();
+  renderGoalConfig();
+}
+
+function backToCategories() {
+  state.onboardData.categoryId = null;
+  state.onboardData.goalId = null;
+  renderGoalList();
+  renderGoalConfig();
 }
 function promptConnect(src){
   showToast(`Connect ${SOURCES[src].label} first`, 'red');
@@ -1468,13 +1544,13 @@ function selectObFreq(elx, f){
   elx.classList.add('selected');
 }
 function startNewBet(){
-  state.onboardData = { goalId: null, name: '', target: null, freq: 'Every Day', stake: 5, charity: 'Boys & Girls Club' };
-  selectedFreq = 'Every Day'; selectedStake = 5; selectedCharity = 'Boys & Girls Club';
+  state.onboardData = { goalId: null, categoryId: null, name: '', target: null, freq: 'Every Day', stake: 5 };
+  selectedFreq = 'Every Day'; selectedStake = 5;
   if (anyConnected()) { renderGoalList(); renderGoalConfig(); goTo('screen-ob2'); }
   else { renderConnectList(); goTo('screen-ob1'); }
 }
 function startOnboarding(){
-  state.onboardData = { goalId: null, name: '', target: null, freq: 'Every Day', stake: 5, charity: 'Boys & Girls Club' };
+  state.onboardData = { goalId: null, categoryId: null, name: '', target: null, freq: 'Every Day', stake: 5 };
   selectedFreq = 'Every Day';
   renderConnectList();
   goTo('screen-ob1');
@@ -1500,11 +1576,6 @@ function selectFundAmt(el, val) {
   el.classList.add('selected');
   document.getElementById('fund-amt-display').textContent = val;
   state._pendingFund = parseInt(val);
-}
-function selectCharity(el, val) {
-  document.querySelectorAll('.charity-item').forEach(c => c.classList.remove('selected'));
-  el.classList.add('selected');
-  selectedCharity = val;
 }
 function selectTag(el, groupId) {
   document.querySelectorAll(`#${groupId} .tag`).forEach(t => t.classList.remove('selected'));
@@ -1534,7 +1605,6 @@ function ob2Next() {
 }
 function ob3Next() {
   state.onboardData.stake = selectedStake;
-  state.onboardData.charity = selectedCharity;
   const g = goalById(state.onboardData.goalId) || {};
   const tgt = g.unit ? ` · ${g.dir==='≤'?'≤':'≥'} ${state.onboardData.target} ${g.unit}` : '';
   document.getElementById('sum-habit').textContent = `${g.emoji || '🎯'} ${state.onboardData.name}${tgt}`;
@@ -1542,7 +1612,6 @@ function ob3Next() {
   document.getElementById('sum-freq').textContent = state.onboardData.freq;
   document.getElementById('sum-stake').textContent = `$${state.onboardData.stake}/miss`;
   document.getElementById('sum-stake-2').textContent = `$${state.onboardData.stake}`;
-  document.getElementById('sum-charity').textContent = state.onboardData.charity;
   goTo('screen-ob4');
 }
 
@@ -1552,7 +1621,7 @@ function commitHabit() {
   saveState();
   spawnConfetti();
   showTab('home');
-  setTimeout(() => showToast('🔒 Bet locked in — auto-verified from now on.','green'), 300);
+  setTimeout(() => showToast('🔒 Bet locked in — misses go to your Savings Vault.','green'), 300);
 }
 
 // ─────────────────────────────────────────────
@@ -1573,7 +1642,6 @@ function createHabit(od) {
     verify: g.verify || 'proof',
     freq: od.freq || 'Every Day',
     stake: od.stake || 5,
-    charity: od.charity || 'Boys & Girls Club',
     createdAt: new Date().toISOString(),
     completedDays: [],  // ISO date strings
     missedDays: [],
@@ -1618,17 +1686,17 @@ function missHabit(id) {
   h.missedDays.push(todayStr());
   h.currentStreak = 0;
   state.walletBalance = Math.max(0, (state.walletBalance || 0) - h.stake);
-  state.totalForfeit = (state.totalForfeit || 0) + h.stake;
+  state.savingsVault = (state.savingsVault || 0) + h.stake;
   state.txHistory.unshift({
     date: todayStr(),
-    desc: `❌ Missed: ${h.emoji} ${h.name} → ${h.charity}`,
+    desc: `❌ Missed: ${h.emoji} ${h.name} → 🔒 Savings Vault`,
     amount: -h.stake,
     type: 'loss'
   });
   saveState();
   renderHabits();
   closeModal('habit-detail-modal');
-  showToast(`💸 $${h.stake} donated to ${h.charity}`, 'red');
+  showToast(`🔒 $${h.stake} locked into your Savings Vault`, 'gold');
 }
 
 function deleteHabit(id) {
@@ -1648,6 +1716,8 @@ function renderHabits() {
   const totalStaked = state.habits.reduce((s,h) => s + h.stake, 0);
   document.getElementById('wallet-amount').textContent = (state.walletBalance || 50).toFixed(2);
   document.getElementById('wallet-sub').textContent = `${state.habits.length} active habit${state.habits.length !== 1 ? 's' : ''} · $${totalStaked}/day at risk`;
+  const vaultEl = document.getElementById('vault-amount');
+  if (vaultEl) vaultEl.textContent = (state.savingsVault || 0).toFixed(2);
 
   if (state.habits.length === 0) {
     container.innerHTML = `
@@ -1830,7 +1900,7 @@ function openHabitDetail(id) {
       <span class="info-label">Success rate</span><span class="info-val">${pct}%</span>
     </div>
     <div class="info-row" style="border:none">
-      <span class="info-label">Fines go to</span><span class="info-val">${h.charity}</span>
+      <span class="info-label">Misses go to</span><span class="info-val">🔒 Savings Vault</span>
     </div>
     <div style="margin-top:18px">
       <div style="font-size:12px;color:var(--text-muted);font-weight:600;text-transform:uppercase;letter-spacing:.5px">Last 5 weeks</div>
@@ -1839,7 +1909,7 @@ function openHabitDetail(id) {
     <div style="margin-top:20px;display:flex;flex-direction:column;gap:10px">
       ${!done && !missed ? `
         <button class="btn btn-success" onclick="closeModal('habit-detail-modal');verifyComplete('${h.id}')">${h.verify==='proof'?'📸 Submit proof':'↻ Verify with '+(SOURCES[h.source]||SOURCES.camera).label}</button>
-        <button class="btn btn-danger" onclick="missHabit('${h.id}')">I missed it — pay up</button>
+        <button class="btn btn-danger" onclick="missHabit('${h.id}')">I missed it — lock into savings</button>
       ` : done ? `
         <button class="btn btn-secondary" disabled>✓ Already done today</button>
       ` : `
@@ -1865,11 +1935,13 @@ function addHabitFromModal() {
   const freqEl = document.querySelector('#modal-freq-picker .tag.selected');
   const freq = freqEl ? freqEl.textContent : 'Daily';
   const emojiEl = document.querySelector('#modal-emoji-picker .tag.selected');
-  const emoji = emojiEl ? emojiEl.textContent : '🎯';
+  const emoji = (emojiEl ? emojiEl.textContent : '🎯').trim();
   const stakeEl = document.querySelector('#add-habit-modal .stake-chip.selected');
   const stake = stakeEl ? parseInt(stakeEl.textContent.replace('$','')) : 5;
 
-  const h = createHabit(name, emoji, freq, stake, 'Boys & Girls Club');
+  const od = { goalId: null, name, target: null, freq, stake, charity: 'Boys & Girls Club' };
+  const h = createHabit(od);
+  h.emoji = emoji;
   state.habits.push(h);
   document.getElementById('modal-habit-name').value = '';
   saveState();
@@ -2039,19 +2111,20 @@ function seedDemoData() {
 
   state.connections = { health: true, screentime: true, gps: false, camera: false };
   state.habits = [
-    { ...createHabit({ goalId:'run', target:3, freq:'Every Day', stake:25, charity:'Boys & Girls Club' }),
+    { ...createHabit({ goalId:'run', target:3, freq:'Every Day', stake:25 }),
       id:'seed1', completedDays: [yd, tda], currentStreak: 5, bestStreak: 12 },
-    { ...createHabit({ goalId:'steps', target:10000, freq:'Every Day', stake:50, charity:'Red Cross' }),
+    { ...createHabit({ goalId:'steps', target:10000, freq:'Every Day', stake:50 }),
       id:'seed2', completedDays: [yd, tda], currentStreak: 14, bestStreak: 14 },
-    { ...createHabit({ goalId:'screen', target:30, freq:'Weekdays', stake:10, charity:'No Kid Hungry' }),
+    { ...createHabit({ goalId:'screen', target:30, freq:'Weekdays', stake:10 }),
       id:'seed3', completedDays: [tda], currentStreak: 3, bestStreak: 7 },
   ];
-  state.walletBalance = 150;
+  state.walletBalance = 140;
+  state.savingsVault = 10;
   state.txHistory = [
     { date: yd, desc: '✅ Verified: 🏃 Run 3 miles', amount: 0, type: 'win' },
     { date: yd, desc: '✅ Verified: 🚶 Walk 10,000 steps', amount: 0, type: 'win' },
     { date: tda, desc: '✅ Verified: 🏃 Run 3 miles', amount: 0, type: 'win' },
-    { date: '2026-06-15', desc: '✕ Missed: 📱 Limit social apps → No Kid Hungry', amount: -10, type: 'loss' },
+    { date: '2026-06-15', desc: '❌ Missed: 📱 Limit social apps → 🔒 Savings Vault', amount: -10, type: 'loss' },
     { date: '2026-06-15', desc: '💳 Funds added', amount: 100, type: 'win' },
   ];
   saveState();
@@ -2060,18 +2133,78 @@ function seedDemoData() {
 // ─────────────────────────────────────────────
 // SHARE
 // ─────────────────────────────────────────────
+function buildChallengeURL(habitId) {
+  const h = state.habits.find(x => x.id === habitId);
+  if (!h) return location.href;
+  const p = state.profile || {};
+  const data = {
+    n: h.name, e: h.emoji, s: h.stake, f: h.freq, c: h.charity,
+    from: p.name || 'Someone', streak: h.currentStreak || 0, goalId: h.goalId || null
+  };
+  const encoded = btoa(unescape(encodeURIComponent(JSON.stringify(data))));
+  return `${location.origin}${location.pathname}#challenge=${encoded}`;
+}
+
 function copyShareLink() {
-  const code = document.getElementById('share-code').textContent;
-  navigator.clipboard?.writeText(`https://ante.app/join/${code}`).catch(() => {});
+  const url = document.getElementById('share-url-field').value;
+  navigator.clipboard?.writeText(url).catch(() => {});
   showToast('🔗 Link copied!', 'gold');
+}
+
+function shareNative() {
+  const url = document.getElementById('share-url-field').value;
+  const h = state._shareHabit;
+  if (navigator.share) {
+    navigator.share({ title: 'Ante Challenge', text: h ? `${h.from || 'I'} challenged you: bet $${h.s || h.stake}/miss on "${h.n || h.name}"` : 'Join my Ante bet!', url }).catch(() => {});
+  } else {
+    copyShareLink();
+  }
 }
 
 function openShareModal(habitId) {
   const h = state.habits.find(x => x.id === habitId);
-  const code = habitId.slice(-6);
-  document.getElementById('share-code').textContent = code;
+  if (!h) return;
+  state._shareHabit = h;
+  const url = buildChallengeURL(habitId);
+  document.getElementById('share-url-field').value = url;
   closeModal('habit-detail-modal');
   showModal('share-modal');
+}
+
+// ── Challenge link: fires when someone opens a shared Ante URL ──
+function checkChallengeLink() {
+  const hash = location.hash;
+  if (!hash.startsWith('#challenge=')) return;
+  try {
+    const data = JSON.parse(decodeURIComponent(escape(atob(hash.slice(11)))));
+    history.replaceState(null, '', location.pathname);
+    showChallengeAccept(data);
+  } catch(e) {}
+}
+
+function showChallengeAccept(data) {
+  const overlay = document.createElement('div');
+  overlay.style.cssText = 'position:fixed;inset:0;background:rgba(0,0,0,.82);z-index:9999;display:flex;align-items:flex-end;justify-content:center';
+  overlay.innerHTML = `
+    <div style="background:var(--bg);border-radius:24px 24px 0 0;padding:32px 24px 40px;width:100%;max-width:480px;text-align:center">
+      <div style="font-size:56px;margin-bottom:12px">${data.e || '🎯'}</div>
+      <div style="font-size:20px;font-weight:800;margin-bottom:6px">${data.from} challenged you</div>
+      <div style="font-size:15px;color:var(--text-muted);margin-bottom:4px">"${data.n}"</div>
+      <div style="font-size:13px;color:var(--text-muted);margin-bottom:24px">${data.f} · $${data.s}/miss → ${data.c}${data.streak > 0 ? ` · 🔥 ${data.streak}-day streak` : ''}</div>
+      <button class="btn btn-primary" style="width:100%;margin-bottom:12px;font-size:16px" onclick="acceptChallenge(this.closest('[data-d]').dataset.d)">Accept Challenge 🤝</button>
+      <button class="btn btn-ghost" style="width:100%" onclick="this.closest('[style]').remove()">Maybe later</button>
+    </div>`;
+  overlay.querySelector('[style*="background:var(--bg)"]').setAttribute('data-d', JSON.stringify(data));
+  overlay.querySelector('[style*="background:var(--bg)"]').style.setProperty('data-d', JSON.stringify(data));
+  // Use closure instead
+  overlay.querySelector('.btn.btn-primary').onclick = () => {
+    overlay.remove();
+    state.onboardData = { goalId: data.goalId, name: data.n, target: null, freq: data.f, stake: data.s, charity: data.c };
+    selectedFreq = data.f; selectedStake = data.s; selectedCharity = data.c;
+    if (anyConnected()) { renderGoalList(); renderGoalConfig(); goTo('screen-ob2'); }
+    else { renderConnectList(); goTo('screen-ob1'); }
+  };
+  document.body.appendChild(overlay);
 }
 
 // ─────────────────────────────────────────────
@@ -2138,8 +2271,6 @@ function openEditHabit(id) {
     c.classList.toggle('selected', parseInt(c.dataset.val) === h.stake));
   document.querySelectorAll('#edit-freq-picker .tag').forEach(t =>
     t.classList.toggle('selected', t.textContent === h.freq));
-  document.querySelectorAll('#edit-charity-picker .charity-item').forEach(c =>
-    c.classList.toggle('selected', c.dataset.val === h.charity));
   showModal('edit-habit-modal');
 }
 function saveHabitEdit() {
@@ -2153,8 +2284,6 @@ function saveHabitEdit() {
   h.stake = editSelectedStake;
   const freqEl = document.querySelector('#edit-freq-picker .tag.selected');
   if (freqEl) h.freq = freqEl.textContent;
-  const charEl = document.querySelector('#edit-charity-picker .charity-item.selected');
-  if (charEl) h.charity = charEl.dataset.val;
   saveState();
   closeModal('edit-habit-modal');
   renderHabits();
@@ -2266,6 +2395,7 @@ function resetAllData() {
 // ─────────────────────────────────────────────
 updateIdentity();
 scheduleReminder();
+checkChallengeLink();
 if (state.habits.length > 0) {
   showTab('home');
 }
