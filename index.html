@@ -2,8 +2,18 @@
 <html lang="en">
 <head>
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, viewport-fit=cover">
 <title>Ante — Bet on Yourself</title>
+
+<!-- PWA / installable -->
+<link rel="manifest" href="manifest.json">
+<meta name="theme-color" content="#080810">
+<link rel="icon" type="image/png" href="assets/icon-192.png">
+<link rel="apple-touch-icon" href="assets/apple-touch-icon.png">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="Ante">
 <style>
   :root {
     --bg: #080810;
@@ -736,7 +746,10 @@
 <div class="screen" id="screen-stats">
   <div class="topbar">
     <div class="topbar-title">Your Stats</div>
-    <div class="avatar" onclick="showTab('stats')">B</div>
+    <div style="display:flex;align-items:center;gap:12px">
+      <div class="avatar" style="background:var(--surface2);border:1px solid var(--border);font-size:18px" onclick="openSettings()">⚙️</div>
+      <div class="avatar" id="stats-avatar" onclick="showTab('stats')">B</div>
+    </div>
   </div>
 
   <div class="profile-section">
@@ -882,6 +895,93 @@
   </div>
 </div>
 
+<!-- Edit Habit Modal -->
+<div class="modal-overlay" id="edit-habit-modal" onclick="closeModalIfBg(event,'edit-habit-modal')">
+  <div class="modal">
+    <div class="modal-handle"></div>
+    <div class="modal-title">Edit Bet</div>
+    <input type="hidden" id="edit-habit-id">
+
+    <div class="onboard-hint">Habit name</div>
+    <input class="input-field" id="edit-habit-name" style="margin-bottom:16px">
+
+    <div class="onboard-hint">Emoji</div>
+    <div class="tag-row" id="edit-emoji-picker">🏃 🏋️ 📚 🧘 💊 💧 🛌 🥗 ✍️ 🎯 🎸 🌿 💻 🧠 🚴 🚫</div>
+
+    <div class="onboard-hint">Daily stake</div>
+    <div class="stake-options" id="edit-stake-picker">
+      <div class="stake-chip" data-val="1" onclick="selectEditStake(this)">$1</div>
+      <div class="stake-chip" data-val="5" onclick="selectEditStake(this)">$5</div>
+      <div class="stake-chip" data-val="10" onclick="selectEditStake(this)">$10</div>
+      <div class="stake-chip" data-val="25" onclick="selectEditStake(this)">$25</div>
+      <div class="stake-chip" data-val="50" onclick="selectEditStake(this)">$50</div>
+    </div>
+
+    <div class="onboard-hint">Frequency</div>
+    <div class="tag-row" id="edit-freq-picker">
+      <div class="tag" onclick="selectTag(this,'edit-freq-picker')">Every Day</div>
+      <div class="tag" onclick="selectTag(this,'edit-freq-picker')">Weekdays</div>
+      <div class="tag" onclick="selectTag(this,'edit-freq-picker')">3× / Week</div>
+      <div class="tag" onclick="selectTag(this,'edit-freq-picker')">Weekly</div>
+    </div>
+
+    <div class="onboard-hint">Charity (if you miss)</div>
+    <div class="charity-list" id="edit-charity-picker">
+      <div class="charity-item" data-val="Boys & Girls Club" onclick="selectTagGeneric(this,'edit-charity-picker','charity-item')">
+        <div class="charity-icon">🧒</div><div><div class="charity-name">Boys & Girls Club</div><div class="charity-sub">Youth development</div></div>
+      </div>
+      <div class="charity-item" data-val="Red Cross" onclick="selectTagGeneric(this,'edit-charity-picker','charity-item')">
+        <div class="charity-icon">🏥</div><div><div class="charity-name">Red Cross</div><div class="charity-sub">Disaster relief</div></div>
+      </div>
+      <div class="charity-item" data-val="No Kid Hungry" onclick="selectTagGeneric(this,'edit-charity-picker','charity-item')">
+        <div class="charity-icon">🍽️</div><div><div class="charity-name">No Kid Hungry</div><div class="charity-sub">Fighting food insecurity</div></div>
+      </div>
+      <div class="charity-item" data-val="ACLU" onclick="selectTagGeneric(this,'edit-charity-picker','charity-item')">
+        <div class="charity-icon">⚖️</div><div><div class="charity-name">ACLU</div><div class="charity-sub">Civil liberties</div></div>
+      </div>
+    </div>
+
+    <button class="btn btn-success" onclick="saveHabitEdit()">Save Changes</button>
+  </div>
+</div>
+
+<!-- Settings Modal -->
+<div class="modal-overlay" id="settings-modal" onclick="closeModalIfBg(event,'settings-modal')">
+  <div class="modal">
+    <div class="modal-handle"></div>
+    <div class="modal-title">Settings</div>
+
+    <div class="onboard-hint">Display name</div>
+    <input class="input-field" id="settings-name" style="margin-bottom:16px" maxlength="24">
+
+    <div class="onboard-hint">Handle</div>
+    <input class="input-field" id="settings-handle" style="margin-bottom:20px" maxlength="20" placeholder="beckett">
+
+    <div class="divider"></div>
+
+    <div class="info-row" style="border:none;padding-top:0">
+      <div>
+        <div style="font-weight:700;font-size:15px">Daily reminder</div>
+        <div style="font-size:13px;color:var(--text-muted)">Get nudged to check in before midnight</div>
+      </div>
+    </div>
+    <div style="display:flex;gap:10px;align-items:center;margin-bottom:8px">
+      <input class="input-field" id="settings-reminder-time" type="time" value="20:00" style="flex:1">
+      <button class="btn btn-secondary btn-small" style="white-space:nowrap" onclick="enableReminder()">Enable</button>
+    </div>
+    <div id="reminder-status" style="font-size:12px;color:var(--text-muted);margin-bottom:20px"></div>
+
+    <div class="divider"></div>
+
+    <button class="btn btn-secondary" style="margin-bottom:10px" onclick="exportData()">⬇️ Export my data (JSON)</button>
+    <button class="btn btn-ghost" style="color:var(--red)" onclick="resetAllData()">Reset everything</button>
+
+    <div style="text-align:center;margin-top:20px;font-size:12px;color:var(--text-muted)">Ante · runs offline · data stored on this device</div>
+
+    <button class="btn btn-primary" style="margin-top:16px" onclick="saveSettings()">Done</button>
+  </div>
+</div>
+
 <script>
 // ─────────────────────────────────────────────
 // STATE
@@ -892,6 +992,7 @@ let state = {
   walletBalance: 50,
   totalForfeit: 0,
   txHistory: [],
+  profile: { name: 'Beckett', handle: 'beckett', reminderTime: '20:00', reminderOn: false },
   onboardData: { name: '', emoji: '🏃', freq: 'Every Day', stake: 5, charity: 'Boys & Girls Club' }
 };
 
@@ -1193,6 +1294,10 @@ function openHabitDetail(id) {
     <div class="info-row" style="border:none">
       <span class="info-label">Fines go to</span><span class="info-val">${h.charity}</span>
     </div>
+    <div style="margin-top:18px">
+      <div style="font-size:12px;color:var(--text-muted);font-weight:600;text-transform:uppercase;letter-spacing:.5px">Last 5 weeks</div>
+      ${historyGrid(h)}
+    </div>
     <div style="margin-top:20px;display:flex;flex-direction:column;gap:10px">
       ${!done && !missed ? `
         <button class="btn btn-success" onclick="completeHabit('${h.id}');closeModal('habit-detail-modal')">✓ Complete Today</button>
@@ -1202,6 +1307,7 @@ function openHabitDetail(id) {
       ` : `
         <button class="btn btn-secondary" disabled>❌ Missed today</button>
       `}
+      <button class="btn btn-secondary" onclick="openEditHabit('${h.id}')">✏️ Edit Bet</button>
       <button class="btn btn-ghost" onclick="openShareModal('${h.id}')">📲 Challenge Friends</button>
       <button class="btn btn-ghost" style="color:var(--red)" onclick="deleteHabit('${h.id}')">Delete Habit</button>
     </div>
@@ -1257,6 +1363,7 @@ function addFunds() {
 // RENDER STATS
 // ─────────────────────────────────────────────
 function renderStats() {
+  updateIdentity();
   let totalCompleted = 0, totalMissed = 0, bestStreak = 0;
   state.habits.forEach(h => {
     totalCompleted += h.completedDays.length;
@@ -1429,10 +1536,208 @@ function openShareModal(habitId) {
 }
 
 // ─────────────────────────────────────────────
+// IDENTITY (name / handle / avatars)
+// ─────────────────────────────────────────────
+function initials(name) {
+  return (name || 'You').trim().split(/\s+/).map(w => w[0]).join('').slice(0, 2).toUpperCase() || 'Y';
+}
+function updateIdentity() {
+  const p = state.profile || {};
+  const ini = initials(p.name);
+  const homeAv = document.getElementById('home-avatar');
+  if (homeAv) homeAv.textContent = ini;
+  const statsAv = document.getElementById('stats-avatar');
+  if (statsAv) statsAv.textContent = ini;
+  const pa = document.querySelector('.profile-avatar-lg');
+  if (pa) pa.textContent = ini;
+  const pn = document.getElementById('profile-name');
+  if (pn) pn.textContent = p.name || 'You';
+  const ph = document.querySelector('.profile-handle');
+  if (ph) ph.textContent = `@${p.handle || 'you'} · Member since Jun 2026`;
+}
+
+// ─────────────────────────────────────────────
+// EDIT HABIT
+// ─────────────────────────────────────────────
+let editSelectedEmoji = '🏃', editSelectedStake = 5;
+
+function buildEditEmojiPicker(current) {
+  const emojis = ['🏃','🏋️','📚','🧘','💊','💧','🛌','🥗','✍️','🎯','🎸','🌿','💻','🧠','🚴','🚫'];
+  const c = document.getElementById('edit-emoji-picker');
+  c.innerHTML = '';
+  emojis.forEach(e => {
+    const t = document.createElement('div');
+    t.className = 'tag' + (e === current ? ' selected' : '');
+    t.textContent = e;
+    t.onclick = () => {
+      c.querySelectorAll('.tag').forEach(x => x.classList.remove('selected'));
+      t.classList.add('selected');
+      editSelectedEmoji = e;
+    };
+    c.appendChild(t);
+  });
+  editSelectedEmoji = current;
+}
+function selectEditStake(el) {
+  document.querySelectorAll('#edit-stake-picker .stake-chip').forEach(c => c.classList.remove('selected'));
+  el.classList.add('selected');
+  editSelectedStake = parseInt(el.dataset.val);
+}
+function selectTagGeneric(el, groupId, itemClass) {
+  document.querySelectorAll(`#${groupId} .${itemClass}`).forEach(t => t.classList.remove('selected'));
+  el.classList.add('selected');
+}
+function openEditHabit(id) {
+  const h = state.habits.find(x => x.id === id);
+  if (!h) return;
+  closeModal('habit-detail-modal');
+  document.getElementById('edit-habit-id').value = id;
+  document.getElementById('edit-habit-name').value = h.name;
+  buildEditEmojiPicker(h.emoji);
+  editSelectedStake = h.stake;
+  document.querySelectorAll('#edit-stake-picker .stake-chip').forEach(c =>
+    c.classList.toggle('selected', parseInt(c.dataset.val) === h.stake));
+  document.querySelectorAll('#edit-freq-picker .tag').forEach(t =>
+    t.classList.toggle('selected', t.textContent === h.freq));
+  document.querySelectorAll('#edit-charity-picker .charity-item').forEach(c =>
+    c.classList.toggle('selected', c.dataset.val === h.charity));
+  showModal('edit-habit-modal');
+}
+function saveHabitEdit() {
+  const id = document.getElementById('edit-habit-id').value;
+  const h = state.habits.find(x => x.id === id);
+  if (!h) return;
+  const name = document.getElementById('edit-habit-name').value.trim();
+  if (!name) { showToast('Enter a habit name', 'red'); return; }
+  h.name = name;
+  h.emoji = editSelectedEmoji;
+  h.stake = editSelectedStake;
+  const freqEl = document.querySelector('#edit-freq-picker .tag.selected');
+  if (freqEl) h.freq = freqEl.textContent;
+  const charEl = document.querySelector('#edit-charity-picker .charity-item.selected');
+  if (charEl) h.charity = charEl.dataset.val;
+  saveState();
+  closeModal('edit-habit-modal');
+  renderHabits();
+  showToast('✅ Bet updated', 'green');
+}
+
+// ─────────────────────────────────────────────
+// HABIT HISTORY HEATMAP (last 5 weeks)
+// ─────────────────────────────────────────────
+function historyGrid(h) {
+  const cells = [];
+  const today = new Date();
+  for (let i = 34; i >= 0; i--) {
+    const d = new Date(today);
+    d.setDate(today.getDate() - i);
+    const ds = d.toISOString().slice(0, 10);
+    let bg = 'var(--border)';
+    if (h.completedDays.includes(ds)) bg = 'var(--green)';
+    else if (h.missedDays.includes(ds)) bg = 'var(--red)';
+    cells.push(`<div title="${ds}" style="width:100%;aspect-ratio:1;border-radius:3px;background:${bg}"></div>`);
+  }
+  return `<div style="display:grid;grid-template-columns:repeat(7,1fr);gap:4px;margin-top:6px">${cells.join('')}</div>`;
+}
+
+// ─────────────────────────────────────────────
+// SETTINGS
+// ─────────────────────────────────────────────
+function openSettings() {
+  const p = state.profile || {};
+  document.getElementById('settings-name').value = p.name || '';
+  document.getElementById('settings-handle').value = p.handle || '';
+  document.getElementById('settings-reminder-time').value = p.reminderTime || '20:00';
+  document.getElementById('reminder-status').textContent =
+    p.reminderOn ? `✅ Reminder on for ${p.reminderTime}` : '';
+  showModal('settings-modal');
+}
+function saveSettings() {
+  state.profile = state.profile || {};
+  const name = document.getElementById('settings-name').value.trim() || 'You';
+  const handle = document.getElementById('settings-handle').value.trim().replace(/^@/, '') || 'you';
+  state.profile.name = name;
+  state.profile.handle = handle;
+  state.profile.reminderTime = document.getElementById('settings-reminder-time').value || '20:00';
+  saveState();
+  updateIdentity();
+  scheduleReminder();
+  closeModal('settings-modal');
+  showToast('✅ Settings saved', 'green');
+}
+function enableReminder() {
+  if (!('Notification' in window)) { showToast('Notifications not supported here', 'red'); return; }
+  Notification.requestPermission().then(perm => {
+    const statusEl = document.getElementById('reminder-status');
+    if (perm === 'granted') {
+      state.profile = state.profile || {};
+      state.profile.reminderOn = true;
+      state.profile.reminderTime = document.getElementById('settings-reminder-time').value || '20:00';
+      saveState();
+      scheduleReminder();
+      statusEl.textContent = `✅ Reminder on for ${state.profile.reminderTime}`;
+      showToast('🔔 Reminder enabled', 'green');
+    } else {
+      statusEl.textContent = '⚠️ Permission denied — enable in browser settings';
+    }
+  });
+}
+let reminderTimer;
+function scheduleReminder() {
+  clearTimeout(reminderTimer);
+  const p = state.profile || {};
+  if (!p.reminderOn || !('Notification' in window) || Notification.permission !== 'granted') return;
+  const [hh, mm] = (p.reminderTime || '20:00').split(':').map(Number);
+  const now = new Date();
+  const next = new Date();
+  next.setHours(hh, mm, 0, 0);
+  if (next <= now) next.setDate(next.getDate() + 1);
+  reminderTimer = setTimeout(() => {
+    const pending = state.habits.filter(h => !isCompletedToday(h) && !isMissedToday(h));
+    if (pending.length) {
+      const atRisk = pending.reduce((s, h) => s + h.stake, 0);
+      new Notification('Ante — check in 🃏', {
+        body: `${pending.length} habit${pending.length > 1 ? 's' : ''} still open. $${atRisk} at risk tonight.`,
+        icon: 'assets/icon-192.png'
+      });
+    }
+    scheduleReminder(); // re-arm for tomorrow
+  }, next - now);
+}
+function exportData() {
+  const blob = new Blob([JSON.stringify(state, null, 2)], { type: 'application/json' });
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement('a');
+  a.href = url;
+  a.download = `ante-backup-${todayStr()}.json`;
+  document.body.appendChild(a);
+  a.click();
+  a.remove();
+  URL.revokeObjectURL(url);
+  showToast('⬇️ Backup downloaded', 'gold');
+}
+function resetAllData() {
+  if (!confirm('Reset everything? This deletes all habits, history, and settings on this device. This cannot be undone.')) return;
+  localStorage.removeItem(STORAGE_KEY);
+  location.reload();
+}
+
+// ─────────────────────────────────────────────
 // INIT
 // ─────────────────────────────────────────────
+updateIdentity();
+scheduleReminder();
 if (state.habits.length > 0) {
   showTab('home');
+}
+
+// ─────────────────────────────────────────────
+// PWA — register service worker for offline use
+// ─────────────────────────────────────────────
+if ('serviceWorker' in navigator) {
+  window.addEventListener('load', () => {
+    navigator.serviceWorker.register('sw.js').catch(() => {});
+  });
 }
 </script>
 </body>
