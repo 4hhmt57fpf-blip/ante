@@ -1125,6 +1125,8 @@
     <button class="btn btn-primary" onclick="testCanvas()">Test &amp; Connect</button>
     <button class="btn btn-ghost" id="canvas-disconnect" style="display:none;color:var(--red);margin-top:8px" onclick="disconnectCanvas()">Disconnect Canvas</button>
 
+    <div id="canvas-upcoming" style="margin-top:14px"></div>
+
     <div class="divider"></div>
 
     <div style="font-size:13px;color:var(--text-dim);line-height:1.5">
@@ -1330,6 +1332,35 @@ function canvasMissingCount(){
   }).catch(() => canvasFetch('users/self/missing_submissions?filter[]=submittable')
     .then(l => Array.isArray(l) ? l.length : 0));
 }
+// Canvas calendar feed (ICS) — reads upcoming assignment due dates SERVER-SIDE,
+// no extension re-run needed (the feed URL was captured at first sync).
+function fmtIcsDate(s){
+  const m = (s || '').match(/^(\d{4})(\d{2})(\d{2})(?:T(\d{2})(\d{2}))?/);
+  if (!m) return null;
+  return new Date(Date.UTC(+m[1], +m[2]-1, +m[3], +(m[4]||0), +(m[5]||0)));
+}
+function loadCanvasUpcoming(){
+  const el = document.getElementById('canvas-upcoming');
+  if (!el) return;
+  el.innerHTML = '<div style="font-size:12px;color:var(--text-muted)">Loading upcoming assignments…</div>';
+  getJSON('/__canvas_ics').then(d => {
+    const now = Date.now();
+    const items = (d.assignments || [])
+      .map(a => ({ title: a.title, due: fmtIcsDate(a.due) }))
+      .filter(a => a.due && a.due.getTime() >= now - 864e5)
+      .sort((a,b) => a.due - b.due)
+      .slice(0, 6);
+    if (!items.length) {
+      el.innerHTML = '<div style="font-size:12px;color:var(--text-muted)">No upcoming items in your Canvas calendar.</div>';
+      return;
+    }
+    el.innerHTML = `<div style="font-size:12px;font-weight:700;color:var(--gold);text-transform:uppercase;letter-spacing:.6px;margin-bottom:8px">📅 Upcoming · from Canvas</div>` +
+      items.map(a => `<div style="display:flex;justify-content:space-between;gap:10px;padding:8px 0;border-bottom:1px solid var(--border);font-size:13px">
+        <span style="color:var(--text)">${a.title}</span>
+        <span style="color:var(--text-muted);white-space:nowrap">${a.due.toLocaleDateString(undefined,{month:'short',day:'numeric'})}</span>
+      </div>`).join('');
+  }).catch(e => { el.innerHTML = `<div style="font-size:12px;color:var(--text-muted)">${e.message}</div>`; });
+}
 // Extension path (for schools like UMich that block personal tokens).
 function checkCanvasExtension(){
   const status = document.getElementById('canvas-status');
@@ -1345,6 +1376,7 @@ function checkCanvasExtension(){
       document.getElementById('canvas-disconnect').style.display = 'block';
       status.textContent = `✅ Synced as ${d.profile.name || 'you'} — ${miss} missing assignment${miss!==1?'s':''}.`;
       showToast('✅ Canvas synced via extension', 'green');
+      loadCanvasUpcoming();
     } else {
       status.textContent = '❌ No sync yet. Open Canvas in Chrome, click the Ante extension → "Sync", then tap this again.';
     }

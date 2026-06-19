@@ -20,7 +20,56 @@ except Exception:
 
 PORT = 3847
 DIRECTORY = os.path.dirname(os.path.abspath(__file__))
-CANVAS_DATA = {}  # latest snapshot pushed by the browser extension
+CANVAS_STORE = os.path.join(DIRECTORY, '.canvas_data.json')  # local only, gitignored
+
+
+def _load_canvas():
+    try:
+        with open(CANVAS_STORE, 'r') as f:
+            return json.load(f)
+    except Exception:
+        return {}
+
+
+def _save_canvas(data):
+    try:
+        with open(CANVAS_STORE, 'w') as f:
+            json.dump(data, f)
+    except Exception:
+        pass
+
+
+CANVAS_DATA = _load_canvas()  # latest snapshot pushed by the browser extension (persisted)
+
+
+def parse_ics(raw):
+    """Minimal RFC5545 VEVENT extractor: returns [{title, due}] for calendar items."""
+    raw = raw.replace('\r\n', '\n').replace('\r', '\n')
+    # unfold continuation lines (leading space/tab)
+    lines = []
+    for line in raw.split('\n'):
+        if line[:1] in (' ', '\t') and lines:
+            lines[-1] += line[1:]
+        else:
+            lines.append(line)
+    events, cur = [], None
+    for line in lines:
+        if line == 'BEGIN:VEVENT':
+            cur = {}
+        elif line == 'END:VEVENT':
+            if cur is not None and cur.get('title'):
+                events.append(cur)
+            cur = None
+        elif cur is not None and ':' in line:
+            key, val = line.split(':', 1)
+            key = key.split(';', 1)[0]
+            if key == 'SUMMARY':
+                cur['title'] = val.replace('\\,', ',').replace('\\;', ';').strip()
+            elif key == 'DTSTART':
+                cur['due'] = val.strip()
+            elif key == 'DTEND':
+                cur.setdefault('due', val.strip())
+    return events
 HOST_RE = re.compile(r'^[A-Za-z0-9.-]+$')  # plain domain only — no scheme, no path
 
 class Handler(http.server.SimpleHTTPRequestHandler):
@@ -35,11 +84,31 @@ class Handler(http.server.SimpleHTTPRequestHandler):
         self.end_headers()
 
     def do_GET(self):
+        if self.path.startswith('/__canvas_ics'):
+            return self.handle_ics()
         if self.path.startswith('/__canvas_data'):
             return self._json(CANVAS_DATA)
         if self.path.startswith('/__canvas'):
             return self.handle_canvas()
         return super().do_GET()
+
+    def handle_ics(self):
+        # Read assignment due-dates from the user's personal Canvas calendar feed (ICS).
+        # No token, no extension re-run — the feed URL is a per-user secret captured at sync.
+        try:
+            q = urllib.parse.urlparse(self.path)
+            params = urllib.parse.parse_qs(q.query)
+            ics_url = params.get('url', [''])[0].strip()
+            if not ics_url:
+                ics_url = (CANVAS_DATA.get('profile', {}).get('calendar', {}) or {}).get('ics', '')
+            if not ics_url or not ics_url.startswith('https://'):
+                return self._json({'error': 'No Canvas calendar feed yet — sync once with the extension.'}, 400)
+            req = urllib.request.Request(ics_url, headers={'User-Agent': 'Ante'})
+            with urllib.request.urlopen(req, timeout=15, context=SSL_CTX) as r:
+                raw = r.read().decode('utf-8', 'replace')
+            self._json({'assignments': parse_ics(raw)})
+        except Exception as e:
+            self._json({'error': str(e)}, 502)
 
     def do_POST(self):
         # The browser extension posts the user's Canvas data here (no token needed —
@@ -51,6 +120,7 @@ class Handler(http.server.SimpleHTTPRequestHandler):
                 data = json.loads(body or b'{}')
                 global CANVAS_DATA
                 CANVAS_DATA = data
+                _save_canvas(data)
                 return self._json({'ok': True})
             except Exception as e:
                 return self._json({'error': str(e)}, 400)
