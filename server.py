@@ -20,6 +20,7 @@ except Exception:
 
 PORT = 3847
 DIRECTORY = os.path.dirname(os.path.abspath(__file__))
+CANVAS_DATA = {}  # latest snapshot pushed by the browser extension
 HOST_RE = re.compile(r'^[A-Za-z0-9.-]+$')  # plain domain only — no scheme, no path
 
 class Handler(http.server.SimpleHTTPRequestHandler):
@@ -29,13 +30,31 @@ class Handler(http.server.SimpleHTTPRequestHandler):
     def do_OPTIONS(self):
         self.send_response(204)
         self.send_header('Access-Control-Allow-Origin', '*')
-        self.send_header('Access-Control-Allow-Headers', 'X-Canvas-Token')
+        self.send_header('Access-Control-Allow-Headers', 'X-Canvas-Token, Content-Type')
+        self.send_header('Access-Control-Allow-Methods', 'GET, POST, OPTIONS')
         self.end_headers()
 
     def do_GET(self):
+        if self.path.startswith('/__canvas_data'):
+            return self._json(CANVAS_DATA)
         if self.path.startswith('/__canvas'):
             return self.handle_canvas()
         return super().do_GET()
+
+    def do_POST(self):
+        # The browser extension posts the user's Canvas data here (no token needed —
+        # it reads through the user's own logged-in Canvas session).
+        if self.path.startswith('/__canvas_data'):
+            try:
+                length = int(self.headers.get('Content-Length', 0))
+                body = self.rfile.read(length) if length else b'{}'
+                data = json.loads(body or b'{}')
+                global CANVAS_DATA
+                CANVAS_DATA = data
+                return self._json({'ok': True})
+            except Exception as e:
+                return self._json({'error': str(e)}, 400)
+        return self._json({'error': 'not found'}, 404)
 
     def handle_canvas(self):
         try:

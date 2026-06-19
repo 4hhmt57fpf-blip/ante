@@ -1125,8 +1125,20 @@
     <button class="btn btn-primary" onclick="testCanvas()">Test &amp; Connect</button>
     <button class="btn btn-ghost" id="canvas-disconnect" style="display:none;color:var(--red);margin-top:8px" onclick="disconnectCanvas()">Disconnect Canvas</button>
 
+    <div class="divider"></div>
+
+    <div style="font-size:13px;color:var(--text-dim);line-height:1.5">
+      <strong style="color:var(--text)">School blocks tokens? (UMich does.)</strong> Use the Ante browser extension instead — it reads your assignments through your logged-in Canvas, no token needed.
+    </div>
+    <div style="margin-top:10px;font-size:12px;color:var(--text-muted);line-height:1.6">
+      <strong style="color:var(--text-dim)">1.</strong>&nbsp; Chrome → <strong>chrome://extensions</strong> → turn on <strong>Developer mode</strong> → <strong>Load unpacked</strong> → select the <code>canvas-extension</code> folder in your Ante project.<br>
+      <strong style="color:var(--text-dim)">2.</strong>&nbsp; Open Canvas, click the <strong>Ante</strong> extension → <strong>Sync my Canvas to Ante</strong>.<br>
+      <strong style="color:var(--text-dim)">3.</strong>&nbsp; Come back and tap below.
+    </div>
+    <button class="btn btn-secondary" style="margin-top:12px" onclick="checkCanvasExtension()">I synced via the extension — check</button>
+
     <div style="margin-top:16px;font-size:12px;color:var(--text-muted);line-height:1.5">
-      🔒 A Canvas token can read your account — keep it private. It's stored only in this browser and never sent anywhere except your school's Canvas. Revoke it anytime in Canvas → Settings. (Needs the Ante server running; some schools disable personal tokens.)
+      🔒 Your Canvas data stays on your machine (browser + local Ante server) and is never sent anywhere else.
     </div>
   </div>
 </div>
@@ -1298,6 +1310,34 @@ function disconnectCanvas(){
   renderConnectList();
   closeModal('canvas-modal');
   showToast('Canvas disconnected', null);
+}
+// Missing-assignment count: prefer extension-synced data, fall back to token proxy.
+function canvasMissingCount(){
+  return fetch('/__canvas_data').then(r => r.json()).then(d => {
+    if (d && Array.isArray(d.missing)) return d.missing.length;
+    throw new Error('no extension data');
+  }).catch(() => canvasFetch('users/self/missing_submissions?filter[]=submittable')
+    .then(l => Array.isArray(l) ? l.length : 0));
+}
+// Extension path (for schools like UMich that block personal tokens).
+function checkCanvasExtension(){
+  const status = document.getElementById('canvas-status');
+  status.textContent = '⏳ Checking for synced data…';
+  fetch('/__canvas_data').then(r => r.json()).then(d => {
+    if (d && d.profile) {
+      const miss = Array.isArray(d.missing) ? d.missing.length : 0;
+      state.canvas = { host: d.host || '', token: '', connected: true, mode: 'extension',
+                       name: d.profile.name || '', missing: miss, syncedAt: d.syncedAt };
+      state.connections.canvas = true;
+      saveState();
+      renderConnectList();
+      document.getElementById('canvas-disconnect').style.display = 'block';
+      status.textContent = `✅ Synced as ${d.profile.name || 'you'} — ${miss} missing assignment${miss!==1?'s':''}.`;
+      showToast('✅ Canvas synced via extension', 'green');
+    } else {
+      status.textContent = '❌ No sync yet. Open Canvas in Chrome, click the Ante extension → "Sync", then tap this again.';
+    }
+  }).catch(e => status.textContent = '❌ ' + e.message);
 }
 
 function renderGoalList(){
@@ -1600,9 +1640,8 @@ function verifyComplete(id){
   if (h.source === 'canvas') {
     if (!(state.canvas && state.canvas.connected)) { showToast('Connect Canvas first', 'red'); return; }
     showToast('🎓 Checking Canvas…', null);
-    canvasFetch('users/self/missing_submissions?filter[]=submittable')
-      .then(list => {
-        const n = Array.isArray(list) ? list.length : 0;
+    canvasMissingCount()
+      .then(n => {
         if (n === 0) { completeHabit(id); showToast('✅ Canvas: nothing missing — verified', 'green'); }
         else { showToast(`⚠️ ${n} missing assignment${n>1?'s':''} on Canvas`, 'red'); }
       })

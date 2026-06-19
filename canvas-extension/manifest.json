@@ -1,0 +1,15 @@
+{
+  "manifest_version": 3,
+  "name": "Ante — Canvas Sync",
+  "version": "1.0.0",
+  "description": "Reads your Canvas assignments through your own logged-in session (no token needed) and syncs them to the Ante app.",
+  "permissions": ["tabs"],
+  "host_permissions": [
+    "https://*.instructure.com/*",
+    "http://localhost:3847/*"
+  ],
+  "action": {
+    "default_popup": "popup.html",
+    "default_title": "Ante — Canvas Sync"
+  }
+}
