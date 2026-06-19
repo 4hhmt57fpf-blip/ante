@@ -1,26 +1,16 @@
 # Ante is LIVE 🃏
 
-## Use it now (on your phone)
+## Install on your phone
 
-**Open this URL on your iPhone (Safari):**
+Once you have a live URL (GitHub Pages or Netlify — see DEPLOY.md), open it in **Safari** on iPhone, then:
 
-> https://44f9ad8f4ab5ac.lhr.life
-
-Then **Add to Home Screen**:
-1. Tap the **Share** button (square with ↑) in Safari
+1. Tap the **Share** button (square with ↑)
 2. Scroll down → **Add to Home Screen** → **Add**
 
 Ante now lives on your home screen as a real app with its own gold "A" icon.
 
-### Why this works even when the tunnel goes down
-Ante is a **PWA (installable web app)** with a service worker. Once you've
-opened it once, it's cached on your phone and runs **fully offline** — all your
-habits, streaks, and history are stored locally on your device. You do **not**
-need the laptop/tunnel running to use it after the first load.
-
-> Note: the `*.lhr.life` link is a free public tunnel to this Mac. It stays up
-> while the dev server + tunnel are running. For a **permanent** link that's
-> always online, see below.
+### Why it works offline
+Ante is a **PWA (installable web app)** with a service worker. Once loaded once, it's cached on your phone and runs **fully offline** — all your habits, streaks, and history are stored locally on your device.
 
 ---
 

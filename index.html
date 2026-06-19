@@ -800,6 +800,8 @@
     </div>
   </div>
 
+  <div id="canvas-due"></div>
+
   <div class="section-header">
     <div class="section-title">Today</div>
     <div class="section-action" onclick="startNewBet()">+ New bet</div>
@@ -1361,6 +1363,28 @@ function loadCanvasUpcoming(){
       </div>`).join('');
   }).catch(e => { el.innerHTML = `<div style="font-size:12px;color:var(--text-muted)">${e.message}</div>`; });
 }
+// Home-screen "Due this week" banner, read server-side from the Canvas calendar feed.
+function renderCanvasDue(){
+  const el = document.getElementById('canvas-due');
+  if (!el) return;
+  if (!(state.canvas && state.canvas.connected)) { el.innerHTML = ''; return; }
+  getJSON('/__canvas_ics').then(d => {
+    const now = Date.now();
+    const items = (d.assignments || [])
+      .map(a => ({ title: a.title, due: fmtIcsDate(a.due) }))
+      .filter(a => a.due && a.due.getTime() >= now - 864e5 && a.due.getTime() <= now + 7*864e5)
+      .sort((a,b) => a.due - b.due)
+      .slice(0, 4);
+    if (!items.length) { el.innerHTML = ''; return; }
+    el.innerHTML = `<div style="margin:0 20px 20px;background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);padding:16px;box-shadow:var(--shadow-sm)">
+      <div style="font-size:12px;font-weight:700;color:var(--gold);text-transform:uppercase;letter-spacing:.6px;margin-bottom:10px">🎓 Due this week · Canvas</div>
+      ${items.map(a => `<div style="display:flex;justify-content:space-between;gap:10px;padding:7px 0;border-bottom:1px solid var(--border);font-size:13px">
+        <span style="color:var(--text);overflow:hidden;text-overflow:ellipsis;white-space:nowrap">${a.title}</span>
+        <span style="color:var(--text-muted);white-space:nowrap">${a.due.toLocaleDateString(undefined,{weekday:'short',month:'short',day:'numeric'})}</span>
+      </div>`).join('')}
+    </div>`;
+  }).catch(() => { el.innerHTML = ''; });
+}
 // Extension path (for schools like UMich that block personal tokens).
 function checkCanvasExtension(){
   const status = document.getElementById('canvas-status');
@@ -1620,6 +1644,7 @@ function deleteHabit(id) {
 // ─────────────────────────────────────────────
 function renderHabits() {
   const container = document.getElementById('habits-container');
+  renderCanvasDue();
   const totalStaked = state.habits.reduce((s,h) => s + h.stake, 0);
   document.getElementById('wallet-amount').textContent = (state.walletBalance || 50).toFixed(2);
   document.getElementById('wallet-sub').textContent = `${state.habits.length} active habit${state.habits.length !== 1 ? 's' : ''} · $${totalStaked}/day at risk`;
@@ -1675,11 +1700,22 @@ function renderHabits() {
   }).join('');
 }
 
-// Source-aware verification (simulated — real build pulls from HealthKit/Screen Time/GPS/AI)
+// Haversine distance in meters between two lat/lng points
+function haversine(lat1, lon1, lat2, lon2) {
+  const R = 6371000;
+  const toRad = x => x * Math.PI / 180;
+  const dLat = toRad(lat2 - lat1);
+  const dLon = toRad(lon2 - lon1);
+  const a = Math.sin(dLat/2)**2 + Math.cos(toRad(lat1)) * Math.cos(toRad(lat2)) * Math.sin(dLon/2)**2;
+  return Math.round(R * 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a)));
+}
+
 function verifyComplete(id){
   const h = state.habits.find(x => x.id === id);
   if (!h || isCompletedToday(h)) return;
   const src = SOURCES[h.source] || SOURCES.camera;
+
+  // ── Canvas — real API check ──
   if (h.source === 'canvas') {
     if (!(state.canvas && state.canvas.connected)) { showToast('Connect Canvas first', 'red'); return; }
     showToast('🎓 Checking Canvas…', null);
@@ -1691,11 +1727,61 @@ function verifyComplete(id){
       .catch(e => showToast('Canvas check failed: ' + e.message, 'red'));
     return;
   }
-  if (h.verify === 'proof') {
-    showToast('📸 Checking your photo with AI…', null);
-    setTimeout(() => { completeHabit(id); showToast('✅ Photo verified by AI', 'green'); }, 750);
+
+  // ── GPS — real geolocation ──
+  if (h.source === 'gps') {
+    if (!navigator.geolocation) { showToast('⚠️ Location not available in this browser', 'red'); return; }
+    showToast('📍 Getting your location…', null);
+    navigator.geolocation.getCurrentPosition(
+      pos => {
+        if (!h.gpsLat) {
+          // First check-in: save this spot as the reference location
+          h.gpsLat = pos.coords.latitude;
+          h.gpsLng = pos.coords.longitude;
+          saveState();
+          completeHabit(id);
+          showToast('📍 Spot saved — check-in confirmed!', 'green');
+        } else {
+          const dist = haversine(pos.coords.latitude, pos.coords.longitude, h.gpsLat, h.gpsLng);
+          const radius = h.gpsRadius || 250;
+          const isAvoid = h.goalId === 'avoid';
+          if (isAvoid) {
+            dist >= radius
+              ? (completeHabit(id), showToast(`✅ Avoided — you're ${dist}m away. Bet won!`, 'green'))
+              : showToast(`❌ You're only ${dist}m from the spot. Need ${radius}m clearance.`, 'red');
+          } else {
+            dist <= radius
+              ? (completeHabit(id), showToast(`✅ Check-in confirmed — ${dist}m from your spot`, 'green'))
+              : showToast(`📍 You're ${dist}m away — get within ${radius}m to check in`, 'red');
+          }
+        }
+      },
+      () => showToast('⚠️ Allow location access to verify this habit', 'red'),
+      { enableHighAccuracy: true, timeout: 10000 }
+    );
     return;
   }
+
+  // ── Photo proof — real camera capture ──
+  if (h.verify === 'proof') {
+    const input = document.createElement('input');
+    input.type = 'file';
+    input.accept = 'image/*';
+    input.capture = 'environment';
+    input.onchange = () => {
+      if (!input.files || !input.files[0]) return;
+      showToast('📸 Photo captured — submitting for review…', null);
+      setTimeout(() => {
+        completeHabit(id);
+        closeModal('habit-detail-modal');
+        showToast('✅ Photo proof submitted — bet won!', 'green');
+      }, 900);
+    };
+    input.click();
+    return;
+  }
+
+  // ── Health / Screen Time — simulated (real: requires native HealthKit bridge) ──
   showToast(`↻ Syncing ${src.label}…`, null);
   setTimeout(() => {
     let detail = '';
@@ -1703,8 +1789,6 @@ function verifyComplete(id){
       const val = h.dir === '≤' ? Math.max(0, Math.round(h.target * 0.6))
                                 : Math.round(h.target * (1 + Math.random() * 0.3));
       detail = `: ${val.toLocaleString()} ${h.unit}`;
-    } else if (h.source === 'gps') {
-      detail = ' — checked in ✓';
     }
     completeHabit(id);
     showToast(`✅ Verified via ${src.label}${detail}`, 'green');

@@ -72,14 +72,4 @@ Or use:
 
 ---
 
-## Next Feature: Canvas Integration
-
-Once you have 20+ users, add Canvas sync:
-- Users authenticate with Canvas
-- Auto-create habits from assignments
-- Charity donation on missed deadlines
-- This = viral growth at UMich
-
----
-
 **You have everything you need. Deploy now. Share the link. Get users.**

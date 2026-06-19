@@ -34,13 +34,12 @@ python3 -m http.server 8000
 2. **Share with 10 UMich friends** – test for 1 week
 3. **Measure retention** – who comes back daily?
 4. **Iterate** based on feedback
-5. **Add Canvas integration** – for academic habits
-6. **Scale to 50 users** – then pitch to YC
+5. **Scale to 50 users** – then pitch to YC
 
 ## Monetization
 
 - **MVP (now)**: Charity donations (85% to Kids & Girls Club, 15% platform)
-- **Future**: Upgrade tier with team challenges, investment lock-up option, Canvas sync
+- **Future**: Upgrade tier with team challenges, investment lock-up option
 
 ---
 
