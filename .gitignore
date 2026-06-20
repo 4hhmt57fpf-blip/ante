@@ -1,1 +1,12 @@
+# Local dev data (Canvas proxy)
 .canvas_data.json
+
+# Node / Capacitor
+node_modules/
+www/
+
+# macOS
+.DS_Store
+
+# Python
+__pycache__/

@@ -1,0 +1,28 @@
+{
+  "name": "ante",
+  "version": "1.0.0",
+  "description": "A habit tracker where you stake money on your commitments. Fail a habit = donation to charity. Win streaks = social proof.",
+  "main": "sw.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "sync:web": "cp index.html manifest.json sw.js www/ && rm -rf www/assets && cp -R assets www/assets && npx cap copy ios",
+    "ios": "npm run sync:web && npx cap open ios"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/4hhmt57fpf-blip/ante.git"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "type": "commonjs",
+  "bugs": {
+    "url": "https://github.com/4hhmt57fpf-blip/ante/issues"
+  },
+  "homepage": "https://github.com/4hhmt57fpf-blip/ante#readme",
+  "dependencies": {
+    "@capacitor/cli": "^8.4.1",
+    "@capacitor/core": "^8.4.1",
+    "@capacitor/ios": "^8.4.1"
+  }
+}
