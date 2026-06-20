@@ -5264,6 +5264,10 @@ if ('serviceWorker' in navigator) {
   vault.tabIndex=0;
   if(reduce){ var pt=prompt&&prompt.querySelector('.av-prompt-text'); if(pt) pt.textContent='Tap to enter'; }
   window.anteVaultOpen=openVault;
+  // Auto-open when running as native Capacitor app (swipe gesture not available on simulator)
+  if(window.location.protocol==='capacitor:' || (window.Capacitor && window.Capacitor.isNativePlatform())){
+    setTimeout(openVault, 2000);
+  }
 })();
 
 /* ===================== SCREEN TRANSITION ENGINE ===================== */
