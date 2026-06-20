@@ -1275,6 +1275,28 @@
      DOM order unchanged so the index-based active highlighting still works */
   .bottom-nav .nav-item:nth-child(2){ order:3; }  /* Friends -> right */
   .bottom-nav .nav-item:nth-child(3){ order:2; }  /* Stats -> middle */
+  /* ===================== VAULT DETAIL SCREEN ===================== */
+  #screen-vault{ padding:0 0 40px; }
+  .vd-top{ display:flex; align-items:center; justify-content:space-between; padding:14px 18px 6px; }
+  .vd-back{ width:36px; height:36px; border:none; border-radius:50%; background:var(--surface2); color:var(--text); font-size:24px; line-height:1; cursor:pointer; }
+  .vd-back:active{ opacity:.6; }
+  .vd-topname{ font-size:16px; font-weight:700; }
+  .vd-hero{ text-align:center; padding:14px 22px 4px; }
+  .vd-label{ font-size:14px; color:var(--text-muted); font-weight:600; letter-spacing:.3px; }
+  .vd-balance{ font-size:46px; font-weight:800; letter-spacing:-2px; margin:6px 0 4px; }
+  .vd-sub{ font-size:13px; color:var(--text-muted); }
+  .vd-actions{ display:flex; justify-content:center; gap:26px; margin:16px 22px;
+    background:var(--glass); -webkit-backdrop-filter:var(--glass-blur); backdrop-filter:var(--glass-blur);
+    border:1px solid var(--glass-border); border-radius:24px; padding:20px; }
+  .vd-act{ display:flex; flex-direction:column; align-items:center; gap:8px; cursor:pointer; background:none; border:none; }
+  .vd-ic{ width:52px; height:52px; border-radius:50%; display:flex; align-items:center; justify-content:center;
+    background:var(--gold); color:#08130d; transition:transform .12s ease; }
+  .vd-act:active .vd-ic{ transform:scale(.9); }
+  .vd-ic svg{ width:22px; height:22px; fill:none; stroke:currentColor; stroke-width:2.2; stroke-linecap:round; stroke-linejoin:round; }
+  .vd-act > span{ font-size:12px; color:var(--text-muted); font-weight:600; }
+  .vd-activity{ padding:6px 22px; }
+  .vd-activity-title{ font-size:13px; font-weight:700; color:var(--text-muted); text-transform:uppercase; letter-spacing:.6px; margin-bottom:10px; }
+
 </style>
 </head>
 <body>
@@ -1469,7 +1491,7 @@
 
   <div class="vaults-stack">
     <!-- MAIN VAULT (mint hero — keeps #walletCard for the 3D tilt + shine) -->
-    <div class="vault-card main wallet-card" id="walletCard" onclick="openAddMoney()">
+    <div class="vault-card main wallet-card" id="walletCard" onclick="openVaultDetail('main')">
       <div class="wallet-shine"></div>
       <div class="vc-head">
         <div>
@@ -1482,7 +1504,7 @@
     </div>
 
     <!-- SAVINGS VAULT (frosted) -->
-    <div class="vault-card" onclick="showToast('🔒 Savings unlock when you\'re back on track','gold')">
+    <div class="vault-card" onclick="openVaultDetail('savings')">
       <div class="vc-head">
         <div>
           <div class="vc-name">Savings Vault</div>
@@ -3373,6 +3395,47 @@ function confirmAddMoney(){
   addFunds();
 }
 
+// ── VAULT DETAIL ──
+var VD_ICONS = {
+  plus:'<path d="M12 5v14M5 12h14"/>',
+  down:'<path d="M12 4v13"/><path d="M6 13l6 6 6-6"/>',
+  target:'<circle cx="12" cy="12" r="9"/><circle cx="12" cy="12" r="4"/>',
+  info:'<circle cx="12" cy="12" r="9"/><path d="M12 11v5"/><path d="M12 8h.01"/>',
+  clock:'<circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 2"/>'
+};
+function vdBtn(a){
+  return '<button class="vd-act" onclick="'+a.fn+'"><span class="vd-ic"><svg viewBox="0 0 24 24">'+VD_ICONS[a.icon]+'</svg></span><span>'+a.label+'</span></button>';
+}
+function openVaultDetail(key){
+  var cfg = {
+    main: { name:'Main Vault', amount:(state.walletBalance||50), sub:'Available to stake',
+      actions:[
+        {label:'Add', icon:'plus', fn:'openAddMoney()'},
+        {label:'Withdraw', icon:'down', fn:"showToast('Withdraw to your bank — coming soon','gold')"},
+        {label:'New Bet', icon:'target', fn:'startNewBet()'}
+      ]},
+    savings: { name:'Savings Vault', amount:(state.savingsVault||0), sub:'Locked — build the habit to unlock',
+      actions:[
+        {label:'How', icon:'info', fn:"showToast('Miss a habit and your stake locks here. Get back on track to unlock it.','gold')"},
+        {label:'History', icon:'clock', fn:"document.getElementById('vd-tx').scrollIntoView({behavior:'smooth'})"}
+      ]}
+  }[key] || {};
+  document.getElementById('vd-topname').textContent = cfg.name || 'Vault';
+  document.getElementById('vd-name').textContent = cfg.name || '';
+  document.getElementById('vd-sub').textContent = cfg.sub || '';
+  var amtEl = document.getElementById('vd-amount'); amtEl.textContent = '0.00';
+  document.getElementById('vd-actions').innerHTML = (cfg.actions||[]).map(vdBtn).join('');
+  var rows = (state.txHistory || []);
+  if(key==='savings') rows = rows.filter(function(t){ var d=(t.desc||''); return d.indexOf('Vault')>-1 || d.indexOf('🔒')>-1 || t.type==='loss'; });
+  var tx = document.getElementById('vd-tx');
+  if(!rows.length){ tx.innerHTML = '<div style="padding:18px 0;color:var(--text-muted);font-size:14px;text-align:center">No activity yet</div>'; }
+  else { tx.innerHTML = rows.slice(0,12).map(function(t){
+      return '<div class="history-item"><div class="hi-dot '+(t.type||'')+'"></div><div class="hi-text">'+t.desc+'<br><span style="color:var(--text-muted);font-size:12px">'+t.date+'</span></div>'+(t.amount?('<div class="hi-amount '+(t.amount>0?'pos':'neg')+'">'+(t.amount>0?'+':'')+'$'+Math.abs(t.amount)+'</div>'):'')+'</div>';
+    }).join(''); }
+  goTo('screen-vault');
+  if(typeof animateCount==='function') animateCount(amtEl, (cfg.amount||0), 600, 2);
+}
+
 // ─────────────────────────────────────────────
 // RENDER STATS
 // ─────────────────────────────────────────────
@@ -4603,6 +4666,25 @@ if ('serviceWorker' in navigator) {
   if (boot) navStack.push(boot.id);
 })();
 </script>
+<!-- ===================== VAULT DETAIL SCREEN ===================== -->
+<div class="screen" id="screen-vault">
+  <div class="vd-top">
+    <button class="vd-back" onclick="showTab('home')" aria-label="Back">&lsaquo;</button>
+    <div class="vd-topname" id="vd-topname">Vault</div>
+    <div style="width:36px"></div>
+  </div>
+  <div class="vd-hero">
+    <div class="vd-label" id="vd-name">Main Vault</div>
+    <div class="vd-balance">$<span id="vd-amount">0.00</span></div>
+    <div class="vd-sub" id="vd-sub"></div>
+  </div>
+  <div class="vd-actions" id="vd-actions"></div>
+  <div class="vd-activity">
+    <div class="vd-activity-title">Recent Activity</div>
+    <div id="vd-tx"></div>
+  </div>
+</div>
+
 <!-- ===================== ADD MONEY KEYPAD SHEET ===================== -->
 <div class="am-sheet" id="add-money-sheet" onclick="if(event.target===this)closeAddMoney()">
   <div class="am-panel">
