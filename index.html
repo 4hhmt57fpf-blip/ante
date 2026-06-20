@@ -1314,6 +1314,12 @@
   .appchip .ac-logo{ display:flex; }
   .appchip .ac-name{ font-size:10.5px; font-weight:700; color:var(--text-muted); text-align:center; line-height:1.15; }
   .appchip.selected .ac-name{ color:var(--text); }
+  .app-search{ margin-top:10px; }
+  .app-results{ display:flex; flex-direction:column; gap:6px; margin-top:8px; }
+  .app-result{ display:flex; align-items:center; gap:10px; padding:10px 12px; background:var(--surface);
+    border:1px solid var(--border); border-radius:12px; cursor:pointer; font-size:14px; font-weight:600; color:var(--text); }
+  .app-result:active{ background:var(--surface2); }
+  .app-result .ac-logo{ display:flex; }
 </style>
 </head>
 <body>
@@ -2100,6 +2106,37 @@ function srcBadge(src, px){
   if (inner) return `<span style="display:inline-flex;vertical-align:-2px;margin-right:1px"><svg viewBox="0 0 48 48" width="${px}" height="${px}" style="border-radius:4px" aria-hidden="true">${inner}</svg></span>`;
   return (SOURCES[src] ? SOURCES[src].icon : '');
 }
+// Badge for ANY app key (catalog entry or custom), with a label fallback + generic monogram.
+function appBadge(key, label, px){
+  px = px || 15;
+  if (SOURCE_LOGOS[key]) return `<span style="display:inline-flex;vertical-align:-2px;margin-right:1px"><svg viewBox="0 0 48 48" width="${px}" height="${px}" style="border-radius:4px" aria-hidden="true">${SOURCE_LOGOS[key]}</svg></span>`;
+  if (SOURCES[key]) return SOURCES[key].icon;
+  const ch = (((label||key||'?')+'').replace(/^custom:/,'').trim()[0]||'?').toUpperCase();
+  return `<span style="display:inline-flex;vertical-align:-2px;margin-right:1px"><svg viewBox="0 0 48 48" width="${px}" height="${px}" style="border-radius:4px" aria-hidden="true"><rect width="48" height="48" rx="11" fill="#3a3a44"/><text x="24" y="33" font-size="24" font-weight="800" text-anchor="middle" fill="#d6d6e6" font-family="-apple-system,Helvetica,sans-serif">${ch}</text></svg></span>`;
+}
+function habitAppLabel(h){ return (SOURCES[h.app] && SOURCES[h.app].label) || h.appLabel || (SOURCES[h.source] && SOURCES[h.source].label) || 'App'; }
+function habitAppBadge(h, px){ return appBadge(h.app || h.source, habitAppLabel(h), px); }
+// Searchable catalog of popular apps (display-only; verification stays the goal's real source).
+const APP_CATALOG = [
+  {key:'health',label:'Apple Health'},{key:'strava',label:'Strava'},{key:'whoop',label:'WHOOP'},{key:'garmin',label:'Garmin'},{key:'fitbit',label:'Fitbit'},{key:'peloton',label:'Peloton'},
+  {key:'nikerun',label:'Nike Run Club'},{key:'mapmyrun',label:'MapMyRun'},{key:'googlefit',label:'Google Fit'},{key:'samsunghealth',label:'Samsung Health'},{key:'myfitnesspal',label:'MyFitnessPal'},{key:'zwift',label:'Zwift'},{key:'applewatch',label:'Apple Watch'},
+  {key:'headspace',label:'Headspace'},{key:'calm',label:'Calm'},{key:'oura',label:'Oura'},{key:'insighttimer',label:'Insight Timer'},{key:'balance',label:'Balance'},{key:'sleepcycle',label:'Sleep Cycle'},{key:'autosleep',label:'AutoSleep'},
+  {key:'kindle',label:'Kindle'},{key:'goodreads',label:'Goodreads'},{key:'storygraph',label:'StoryGraph'},{key:'audible',label:'Audible'},{key:'applebooks',label:'Apple Books'},{key:'libby',label:'Libby'},
+  {key:'duolingo',label:'Duolingo'},{key:'babbel',label:'Babbel'},{key:'busuu',label:'Busuu'},{key:'memrise',label:'Memrise'},{key:'pimsleur',label:'Pimsleur'},{key:'rosetta',label:'Rosetta Stone'},{key:'anki',label:'Anki'},
+  {key:'canvas',label:'Canvas'},{key:'classroom',label:'Google Classroom'},{key:'blackboard',label:'Blackboard'},{key:'schoology',label:'Schoology'},{key:'moodle',label:'Moodle'},{key:'notion',label:'Notion'},
+  {key:'screentime',label:'Screen Time'},{key:'opal',label:'Opal'},{key:'rescuetime',label:'RescueTime'},{key:'freedom',label:'Freedom'},{key:'onesec',label:'one sec'},{key:'forest',label:'Forest'},
+];
+function onAppSearch(q){
+  const el = document.getElementById('app-search-results'); if(!el) return;
+  const raw = (q||'').replace(/[<>]/g,'').trim();
+  const ql = raw.toLowerCase();
+  if(!ql){ el.innerHTML=''; return; }
+  const matches = APP_CATALOG.filter(a => a.label.toLowerCase().indexOf(ql) > -1).slice(0,6);
+  let html = matches.map(a => `<div class="app-result" onclick="selectGoalApp('${a.key}','${a.label.replace(/'/g,'')}')"><span class="ac-logo">${appBadge(a.key,a.label,22)}</span><span>${a.label}</span></div>`).join('');
+  const exact = APP_CATALOG.some(a => a.label.toLowerCase() === ql);
+  if(!exact){ const safe = raw.replace(/'/g,''); html += `<div class="app-result" onclick="selectGoalApp('custom:${safe}','${safe}')"><span class="ac-logo">${appBadge('custom:'+safe, raw, 22)}</span><span>Use \u201C${raw}\u201D</span></div>`; }
+  el.innerHTML = html;
+}
 
 // ── SVG icons (Lucide-style line icons) — replace emojis for tasks/categories ──
 const ICONS = {
@@ -2504,7 +2541,7 @@ function searchGoals(raw){
       kws.forEach(k => { if (k === t) s += 1.5; else if (k.includes(t)) s += 0.4; });
     });
     return { g, s };
-  }).filter(x => x.s > 0).sort((a, b) => b.s - a.s);
+  }).filter(x => x.s >= 1).sort((a, b) => b.s - a.s);   // drop weak partial-only matches
   return scored.map(x => x.g);
 }
 
@@ -2563,13 +2600,15 @@ function renderGoalConfig(){
   if (!el) return;
   const g = goalById(state.onboardData.goalId);
   if (!g) { el.innerHTML = ''; return; }
+  const vsrc0 = state.onboardData.app || g.source;
+  const vlabel = (SOURCES[vsrc0] && SOURCES[vsrc0].label) || state.onboardData.appLabel || (SOURCES[g.source] && SOURCES[g.source].label) || 'your app';
   let inner = '';
   if (g.verify === 'proof') {
     const cur = (state.onboardData.name && state.onboardData.name !== g.label) ? state.onboardData.name : '';
     inner = `<div class="onboard-hint" style="margin-top:18px">What's the goal? The AI checks your photo against this.</div>
       <input class="input-field" id="proof-name" placeholder="e.g. Practice guitar 20 min" value="${cur}" maxlength="48">`;
   } else if (g.unit) {
-    inner = `<div class="onboard-hint" style="margin-top:18px">Daily target — auto-verified via ${SOURCES[state.onboardData.app||g.source].label}</div>
+    inner = `<div class="onboard-hint" style="margin-top:18px">Daily target — auto-verified via ${vlabel}</div>
       <div style="display:flex;align-items:center;gap:10px">
         <span style="font-size:14px;color:var(--text-dim);font-weight:700;white-space:nowrap">${g.dir==='≤'?'Under':'At least'}</span>
         <input class="input-field" id="goal-target" type="number" value="${state.onboardData.target}" style="flex:1;text-align:center;font-weight:800">
@@ -2580,12 +2619,19 @@ function renderGoalConfig(){
               : g.id==='avoid' ? "stay outside the location's radius at the deadline."
               : g.source==='canvas' ? "we read your Canvas submissions and check nothing's missing or late."
               : 'auto-checked.';
-    inner = `<div style="margin-top:18px;background:var(--surface);border:1px solid var(--border);border-radius:var(--radius-sm);padding:14px;font-size:13px;color:var(--text-dim);line-height:1.5">${srcBadge(state.onboardData.app||g.source)} Verified via ${SOURCES[state.onboardData.app||g.source].label} — ${how}</div>`;
+    inner = `<div style="margin-top:18px;background:var(--surface);border:1px solid var(--border);border-radius:var(--radius-sm);padding:14px;font-size:13px;color:var(--text-dim);line-height:1.5">${appBadge(vsrc0, vlabel)} Verified via ${vlabel} — ${how}</div>`;
   }
-  if (g.apps && g.apps.length > 1) {
+  if (g.apps && g.apps.length) {
     const vsrc = state.onboardData.app || g.source;
+    let chips = g.apps.map(a=>`<div class="appchip ${vsrc===a?'selected':''}" onclick="selectGoalApp('${a}')"><span class="ac-logo">${appBadge(a, SOURCES[a]?SOURCES[a].label:a, 26)}</span><span class="ac-name">${SOURCES[a]?SOURCES[a].label:a}</span></div>`).join('');
+    if (vsrc && g.apps.indexOf(vsrc) === -1) {
+      const lbl = habitAppLabel({app:vsrc, appLabel:state.onboardData.appLabel});
+      chips += `<div class="appchip selected" onclick="selectGoalApp('${vsrc}','${(lbl+'').replace(/'/g,'')}')"><span class="ac-logo">${appBadge(vsrc,lbl,26)}</span><span class="ac-name">${lbl}</span></div>`;
+    }
     inner += `<div class="onboard-hint" style="margin-top:18px">Which app verifies you?</div>
-      <div class="appchip-row">${g.apps.map(a=>`<div class="appchip ${vsrc===a?'selected':''}" onclick="selectGoalApp('${a}')"><span class="ac-logo">${srcBadge(a,26)}</span><span class="ac-name">${SOURCES[a]?SOURCES[a].label:a}</span></div>`).join('')}</div>`;
+      <div class="appchip-row">${chips}</div>
+      <input class="input-field app-search" id="app-search" placeholder="Search for another app…" oninput="onAppSearch(this.value)" autocomplete="off">
+      <div id="app-search-results" class="app-results"></div>`;
   }
   inner += `<div class="onboard-hint" style="margin-top:18px">How often?</div>
     <div class="tag-row" id="ob-freq">
@@ -2593,7 +2639,7 @@ function renderGoalConfig(){
     </div>`;
   el.innerHTML = inner;
 }
-function selectGoalApp(a){ state.onboardData.app = a; renderGoalConfig(); }
+function selectGoalApp(a,label){ state.onboardData.app = a; state.onboardData.appLabel = label || (SOURCES[a] && SOURCES[a].label) || null; renderGoalConfig(); }
 function selectEnforce(el,id){ state.onboardData.app=id; document.querySelectorAll('#enforce-row .appchip').forEach(c=>c.classList.remove('selected')); el.classList.add('selected'); }
 function selectObFreq(elx, f){
   selectedFreq = f;
@@ -2863,6 +2909,7 @@ function createHabit(od) {
     category: g.category || '',
     source: g.source || 'camera',
     app: od.app || g.source || 'camera',
+    appLabel: od.appLabel || null,
     metric: g.metric || '',
     dir: g.dir || '',
     target: od.capMinutes != null ? od.capMinutes : (od.target != null ? od.target : (g.target || 0)),
@@ -3220,7 +3267,7 @@ function renderHabits() {
     const src = SOURCES[h.source] || SOURCES.camera;
     const targetStr = h.unit ? `${h.dir==='≤'?'≤':'≥'} ${h.target} ${h.unit}` : '';
     const hc = done ? '#4ade80' : missed ? '#f87171' : color;
-    const verifyLabel = h.verify === 'proof' ? '📸 Submit proof' : `↻ Sync ${(SOURCES[h.app]||src).label}`;
+    const verifyLabel = h.verify === 'proof' ? '📸 Submit proof' : `↻ Sync ${habitAppLabel(h)}`;
 
     return `
     <div class="habit-card" style="--hc:${hc};--stagger:${i*60}ms" onclick="openHabitDetail('${h.id}')">
@@ -3231,7 +3278,7 @@ function renderHabits() {
       <div class="habit-name">${h.name}</div>
       <div class="habit-meta">${h.freq}${targetStr ? ` · ${targetStr}` : ''}</div>
       <div style="margin-top:8px;display:flex;gap:8px;align-items:center;flex-wrap:wrap">
-        <span class="verify-badge">${srcBadge(h.app||h.source)} ${(SOURCES[h.app]||src).label}</span>
+        <span class="verify-badge">${habitAppBadge(h,15)} ${habitAppLabel(h)}</span>
         ${streak > 0 ? `<span class="streak-display" style="margin-top:0">${flameSVG(streak, 18)} ${streak} day streak</span>` : ''}
       </div>
       <div class="habit-progress">
@@ -3435,7 +3482,7 @@ function openHabitDetail(id) {
     <div style="display:flex;justify-content:center;margin-bottom:12px;color:${h.color || '#e6b94e'}">${iconSVG(habitIcon(h), 46, h.color || '#e6b94e')}</div>
     <div class="modal-title" style="text-align:center">${h.name}</div>
     <div class="info-row">
-      <span class="info-label">Verified by</span><span class="info-val">${srcBadge(h.app||h.source)} ${(SOURCES[h.app]||SOURCES[h.source]||SOURCES.camera).label}</span>
+      <span class="info-label">Verified by</span><span class="info-val">${habitAppBadge(h,15)} ${habitAppLabel(h)}</span>
     </div>
     ${h.unit ? `<div class="info-row"><span class="info-label">Target</span><span class="info-val">${h.dir==='≤'?'≤':'≥'} ${h.target} ${h.unit}</span></div>` : ''}
     <div class="info-row">
