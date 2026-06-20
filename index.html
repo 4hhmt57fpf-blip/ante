@@ -1017,7 +1017,7 @@
   .av-core{ position:absolute; inset:9%; border-radius:50%; z-index:1; opacity:0; transform:scale(.72);
     background:radial-gradient(circle at 50% 48%, #d6f7e3 0%, #8ee7b1 18%, #4bbe83 38%, #2f7d57 60%, #163f2c 80%, #0a2018 100%);
     box-shadow:0 0 70px 14px rgba(127,220,164,.45), inset 0 0 50px rgba(0,40,24,.6);
-    transition:opacity .7s ease, transform 1s cubic-bezier(.2,.8,.2,1); }
+    transition:opacity 1s ease .85s, transform 1.4s cubic-bezier(.2,.8,.2,1) .85s; }
   .av-core::before{ content:''; position:absolute; inset:16%; border-radius:50%; border:2px solid rgba(255,255,255,.30);
     box-shadow:0 0 0 10px rgba(127,220,164,.12), inset 0 0 26px rgba(0,30,18,.5); }
   .av-core::after{ content:''; position:absolute; inset:34%; border-radius:50%;
@@ -1026,7 +1026,7 @@
   .av-door{ position:absolute; inset:0; border-radius:50%; z-index:2; transform-origin:18% 50%;
     background:radial-gradient(circle at 38% 30%, #2b3033 0%, #1d2123 45%, #121517 78%, #0b0d0e 100%);
     box-shadow:0 34px 60px rgba(0,0,0,.62), inset 0 2px 3px rgba(255,255,255,.06), inset 0 -14px 26px rgba(0,0,0,.6);
-    transition:transform 1.05s cubic-bezier(.62,0,.2,1), opacity .5s ease; will-change:transform; }
+    transition:transform 2.2s cubic-bezier(.6,0,.18,1) .65s, opacity .7s ease .65s; will-change:transform; }
   .av-ringd{ position:absolute; inset:0; margin:auto; border-radius:50%; will-change:transform;
     background:radial-gradient(circle at 40% 32%, #262b2e, #16191b);
     box-shadow:inset 0 2px 4px rgba(255,255,255,.05), inset 0 -7px 13px rgba(0,0,0,.5), 0 5px 11px rgba(0,0,0,.4); }
@@ -1064,8 +1064,8 @@
   .av-opening .av-wheel-rot{ transform:rotate(300deg); animation:none; }
   .av-opening .av-door{ transform:perspective(1100px) rotateY(-82deg); opacity:1; }
   .av-opening .av-seam-light{ opacity:1; transform:scaleY(1); }
-  .av-opening .av-core{ opacity:1; transform:scale(1); animation:avCorePulse 1.4s ease-in-out .5s infinite; }
-  .av-opening .av-stage{ transition:transform 1s cubic-bezier(.7,0,.84,0) .85s, opacity .6s ease 1.0s; transform:scale(2.6); opacity:0; }
+  .av-opening .av-core{ opacity:1; transform:scale(1); animation:avCorePulse 1.8s ease-in-out 1.5s infinite; }
+  .av-opening .av-stage{ transition:transform 1.4s cubic-bezier(.7,0,.84,0) 2.6s, opacity .9s ease 2.9s; transform:scale(2.7); opacity:0; }
   @media (prefers-reduced-motion: reduce){
     .av-wheel-rot,.av-chev span,.av-core{ animation:none !important; }
     .ante-vault,.av-stage,.av-door{ transition:none; }
@@ -1188,6 +1188,88 @@
   .am-continue:active{ transform:scale(.98); }
   .am-continue:disabled{ opacity:.45; cursor:default; }
   @media (prefers-reduced-motion: reduce){ .am-panel, .am-sheet{ transition:none; } }
+
+  /* ══════════════════════════════════════════════════════════════
+     LUXE DATA — Journey screen (constellation hero + calendar heatmap)
+     Tokens only. --gold is mint (#7fdca4) in this build. j-* namespaced.
+     ══════════════════════════════════════════════════════════════ */
+  .j-pagehead { padding: 4px 20px 2px; }
+  .j-pagehead .j-kicker { font-size: 11px; font-weight: 700; letter-spacing: 1.6px; text-transform: uppercase; color: var(--gold); }
+  .j-pagehead .j-h1 { font-size: 28px; font-weight: 900; letter-spacing: -.8px; margin-top: 6px; color: var(--text); }
+  .j-pagehead .j-sub { font-size: 13px; color: var(--text-muted); margin-top: 4px; font-weight: 600; }
+  .j-section { margin: 28px 0 0; }
+  .j-rule { height: 1px; background: var(--border); margin: 0 20px 16px; }
+  .j-head { display: flex; align-items: flex-end; justify-content: space-between; padding: 0 20px; margin-bottom: 14px; gap: 12px; }
+  .j-head .j-eyebrow { font-size: 11px; font-weight: 700; letter-spacing: 1.4px; text-transform: uppercase; color: var(--gold); display: block; }
+  .j-head .j-title { font-size: 17px; font-weight: 800; letter-spacing: -.3px; color: var(--text); margin-top: 5px; }
+  .j-head .j-title-sub { font-size: 12px; color: var(--text-muted); margin-top: 3px; font-weight: 600; }
+  .j-hero { margin: 0 20px; position: relative; overflow: hidden;
+    background: radial-gradient(120% 80% at 50% -10%, var(--gold-dim) 0%, transparent 55%), linear-gradient(180deg, var(--surface) 0%, var(--bg-2) 100%);
+    border: 1px solid var(--border-strong); border-radius: var(--radius-lg);
+    box-shadow: var(--shadow), inset 0 1px 0 rgba(255,255,255,0.05), inset 0 0 60px rgba(127,220,164,0.04); }
+  .j-hero .map-canvas-wrap { height: 300px; }
+  .j-hero .map-hint { color: var(--text-muted); }
+  .j-hero::after { content: ''; position: absolute; left: 0; right: 0; top: 0; height: 1px; background: linear-gradient(90deg, transparent, rgba(127,220,164,0.35), transparent); }
+  .j-head .map-toggle { align-self: center; background: var(--surface2); border: 1px solid var(--border); border-radius: 9px; padding: 2px; }
+  .j-heatcard { margin: 0 20px; background: linear-gradient(180deg, var(--surface) 0%, var(--bg-2) 140%); border: 1px solid var(--border); border-radius: var(--radius); box-shadow: var(--shadow-sm); padding: 18px 18px 16px; }
+  .j-heat-well { background: var(--bg-2); border: 1px solid var(--border); border-radius: var(--radius-sm); box-shadow: inset 0 2px 10px rgba(0,0,0,0.45), inset 0 0 0 1px rgba(255,255,255,0.015); padding: 12px 12px 10px; }
+  .j-heat-scroll { overflow-x: auto; overflow-y: hidden; -webkit-overflow-scrolling: touch; }
+  .j-heat-scroll::-webkit-scrollbar { height: 0; }
+  .j-heat-months { display: grid; grid-auto-flow: column; gap: 3px; margin: 0 0 6px 21px; min-width: max-content; }
+  .j-heat-months span { font-size: 10px; font-weight: 600; letter-spacing: .3px; color: var(--text-muted); white-space: nowrap; }
+  .j-heat-body { display: flex; gap: 7px; min-width: max-content; }
+  .j-heat-dows { display: grid; grid-template-rows: repeat(7, 13px); gap: 3px; width: 14px; flex-shrink: 0; }
+  .j-heat-dows span { font-size: 9px; color: var(--text-muted); font-weight: 600; display: flex; align-items: center; height: 13px; line-height: 1; }
+  .j-heat-grid { display: grid; grid-auto-flow: column; grid-template-rows: repeat(7, 13px); gap: 3px; min-width: max-content; }
+  .j-cell { width: 13px; height: 13px; border-radius: 3px; background: rgba(255,255,255,0.035); box-shadow: inset 0 0 0 1px rgba(255,255,255,0.02); transition: transform .16s ease, box-shadow .16s ease; opacity: 0; animation: jCellIn .5s ease forwards; animation-delay: calc(var(--i, 0) * 6ms); }
+  @keyframes jCellIn { to { opacity: 1; } }
+  .j-cell.future { background: transparent; box-shadow: none; animation: none; opacity: 1; }
+  .j-cell.l1 { background: rgba(127,220,164,0.16); }
+  .j-cell.l2 { background: rgba(127,220,164,0.34); }
+  .j-cell.l3 { background: rgba(127,220,164,0.62); box-shadow: 0 0 5px rgba(127,220,164,0.20); }
+  .j-cell.l4 { background: var(--gold); box-shadow: 0 0 8px rgba(127,220,164,0.42), inset 0 0 0 1px rgba(255,255,255,0.18); }
+  .j-cell.m1 { background: rgba(248,113,113,0.18); }
+  .j-cell.m2 { background: rgba(248,113,113,0.40); box-shadow: 0 0 5px rgba(248,113,113,0.16); }
+  .j-cell.today { box-shadow: 0 0 0 1.5px var(--gold), 0 0 6px rgba(127,220,164,0.45); }
+  .j-cell:hover, .j-cell:active { transform: scale(1.22); z-index: 2; }
+  .j-heat-legend { display: flex; align-items: center; justify-content: space-between; margin-top: 12px; padding: 0 2px; flex-wrap: wrap; gap: 8px 14px; }
+  .j-leg-keys { display: flex; align-items: center; gap: 14px; }
+  .j-leg-key { display: flex; align-items: center; gap: 6px; font-size: 11px; color: var(--text-muted); font-weight: 600; }
+  .j-leg-dot { width: 9px; height: 9px; border-radius: 2.5px; }
+  .j-leg-dot.kept { background: var(--gold); box-shadow: 0 0 6px rgba(127,220,164,0.4); }
+  .j-leg-dot.missed { background: var(--red); }
+  .j-leg-ramp { display: flex; align-items: center; gap: 5px; font-size: 11px; color: var(--text-muted); font-weight: 600; }
+  .j-leg-swatches { display: flex; gap: 3px; }
+  .j-leg-sw { width: 11px; height: 11px; border-radius: 2.5px; }
+  .j-leg-sw.s0 { background: rgba(255,255,255,0.035); }
+  .j-leg-sw.s1 { background: rgba(127,220,164,0.16); }
+  .j-leg-sw.s2 { background: rgba(127,220,164,0.34); }
+  .j-leg-sw.s3 { background: rgba(127,220,164,0.62); }
+  .j-leg-sw.s4 { background: var(--gold); }
+  .j-heat-empty { display: flex; flex-direction: column; align-items: center; gap: 8px; padding: 34px 20px; color: var(--text-muted); font-size: 14px; text-align: center; }
+  .j-identity { margin: 0 20px; display: flex; background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius); padding: 18px 6px; }
+  .j-id-col { flex: 1; text-align: center; padding: 0 4px; }
+  .j-id-col + .j-id-col { border-left: 1px solid var(--border); }
+  .j-id-val { font-size: 24px; font-weight: 900; letter-spacing: -.8px; color: var(--text); font-variant-numeric: tabular-nums; }
+  .j-id-val.green { color: var(--green); }
+  .j-id-val.gold { color: var(--gold); }
+  .j-id-label { font-size: 10.5px; color: var(--text-muted); margin-top: 5px; font-weight: 600; text-transform: uppercase; letter-spacing: .6px; }
+  .j-section .stats-grid { margin-bottom: 0; }
+  .j-section .chart-card:first-of-type { margin-top: 14px; }
+  .j-mini { margin: 0 20px 8px; position: relative; overflow: hidden; cursor: pointer; display: flex; align-items: center; gap: 14px;
+    background: radial-gradient(90% 120% at 100% 0%, var(--gold-dim) 0%, transparent 60%), linear-gradient(180deg, var(--surface) 0%, var(--bg-2) 130%);
+    border: 1px solid var(--border); border-radius: var(--radius); box-shadow: var(--shadow-sm); padding: 14px 16px; transition: transform .12s ease, border-color .15s ease; }
+  .j-mini:active { transform: scale(.985); border-color: var(--border-strong); }
+  .j-mini-canvaswrap { width: 76px; height: 76px; flex-shrink: 0; border-radius: var(--radius-sm); overflow: hidden;
+    background: radial-gradient(70% 70% at 50% 45%, rgba(127,220,164,0.06), transparent 70%); box-shadow: inset 0 0 0 1px rgba(255,255,255,0.04), inset 0 2px 8px rgba(0,0,0,0.4); display: flex; align-items: center; justify-content: center; }
+  .j-mini-canvaswrap canvas { display: block; }
+  .j-mini-text { flex: 1; min-width: 0; }
+  .j-mini-eyebrow { font-size: 10px; font-weight: 700; letter-spacing: 1.4px; text-transform: uppercase; color: var(--gold); }
+  .j-mini-title { font-size: 16px; font-weight: 800; letter-spacing: -.3px; color: var(--text); margin-top: 3px; }
+  .j-mini-stat { font-size: 12px; color: var(--text-muted); margin-top: 3px; font-weight: 600; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+  .j-mini-chev { flex-shrink: 0; color: var(--text-muted); display: flex; }
+  .j-mini-chev svg { width: 20px; height: 20px; fill: none; stroke: currentColor; stroke-width: 2; stroke-linecap: round; stroke-linejoin: round; }
+  @media (prefers-reduced-motion: reduce) { .j-cell { animation: none; opacity: 1; } }
 </style>
 </head>
 <body>
@@ -1419,6 +1501,21 @@
     </div>
   </div>
 
+  <!-- HOME · non-interactive constellation preview → taps to Journey -->
+  <div class="j-mini" onclick="showTab('stats')" role="button" tabindex="0" aria-label="Open your Journey">
+    <div class="j-mini-canvaswrap">
+      <canvas id="mini-map-canvas" width="76" height="76"></canvas>
+    </div>
+    <div class="j-mini-text">
+      <div class="j-mini-eyebrow">Your Journey</div>
+      <div class="j-mini-title">Who you're becoming</div>
+      <div class="j-mini-stat" id="mini-map-stat">Plant your first habit →</div>
+    </div>
+    <div class="j-mini-chev" aria-hidden="true">
+      <svg viewBox="0 0 24 24"><path d="m9 6 6 6-6 6"/></svg>
+    </div>
+  </div>
+
   <div id="canvas-due"></div>
 
   <div class="section-header" id="today-section">
@@ -1481,74 +1578,118 @@
 ══════════════════════════════════════════════ -->
 <div class="screen" id="screen-stats">
   <div class="topbar">
-    <div class="topbar-title">Your Stats</div>
+    <div class="topbar-title">Journey</div>
     <div style="display:flex;align-items:center;gap:12px">
       <div class="avatar" style="background:var(--surface2);border:1px solid var(--border)" onclick="openSettings()"><svg viewBox="0 0 24 24" style="width:20px;height:20px;stroke:var(--text-dim);fill:none;stroke-width:1.9;stroke-linecap:round;stroke-linejoin:round"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 2.83-2.83l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg></div>
       <div class="avatar" id="stats-avatar" onclick="showTab('stats')">B</div>
     </div>
   </div>
 
-  <div class="profile-section">
-    <div class="profile-avatar-lg">B</div>
-    <div class="profile-name" id="profile-name">Beckett</div>
-    <div class="profile-handle">@beckett · Member since Jun 2026</div>
-    <div class="profile-stats">
-      <div class="ps-item">
-        <div class="ps-val" id="ps-streak">0</div>
-        <div class="ps-label">Best Streak</div>
-      </div>
-      <div class="ps-item">
-        <div class="ps-val" id="ps-rate">—</div>
-        <div class="ps-label">Success %</div>
-      </div>
-      <div class="ps-item">
-        <div class="ps-val" id="ps-saved">$0</div>
-        <div class="ps-label">Saved (no fines)</div>
-      </div>
-    </div>
+  <div class="j-pagehead">
+    <div class="j-kicker">Your Journey</div>
+    <div class="j-h1">Who you're becoming</div>
+    <div class="j-sub" id="j-sub">A map of every day you bet on yourself.</div>
   </div>
 
-  <div class="stats-grid">
-    <div class="stat-card">
-      <div class="s-val green" id="sg-completed">0</div>
-      <div class="s-label">Days completed</div>
-    </div>
-    <div class="stat-card">
-      <div class="s-val red" id="sg-missed">0</div>
-      <div class="s-label">Days missed</div>
-    </div>
-    <div class="stat-card">
-      <div class="s-val gold" id="sg-staked">$0</div>
-      <div class="s-label">Total staked</div>
-    </div>
-    <div class="stat-card">
-      <div class="s-val" id="sg-habits">0</div>
-      <div class="s-label">Active habits</div>
-    </div>
-  </div>
-
-  <div class="chart-card map-card">
-    <div class="map-head">
-      <div class="chart-title">🌌 Routine Map</div>
+  <!-- 1 · CONSTELLATION (hero) — toggle moved into the chapter head -->
+  <div class="j-section">
+    <div class="j-rule"></div>
+    <div class="j-head">
+      <div>
+        <span class="j-eyebrow">The Constellation</span>
+        <div class="j-title">Your routine, mapped</div>
+      </div>
       <div class="map-toggle" id="map-toggle">
         <button class="active" data-mode="2d" onclick="setMapMode('2d')">2D</button>
         <button data-mode="3d" onclick="setMapMode('3d')">3D</button>
       </div>
     </div>
-    <div class="map-canvas-wrap" id="map-wrap">
-      <canvas id="routine-canvas"></canvas>
-      <div class="map-hint" id="map-hint">Drag to explore · bigger glow = longer streak</div>
+    <div class="j-hero map-card">
+      <div class="map-canvas-wrap" id="map-wrap">
+        <canvas id="routine-canvas"></canvas>
+        <div class="map-hint" id="map-hint">Drag a node · bigger glow = longer streak</div>
+      </div>
     </div>
   </div>
 
-  <div class="chart-card">
-    <div class="chart-title">Last 7 Days</div>
-    <div class="bar-chart" id="week-chart"></div>
+  <!-- 2 · CALENDAR HEATMAP -->
+  <div class="j-section">
+    <div class="j-rule"></div>
+    <div class="j-head">
+      <div>
+        <span class="j-eyebrow">Consistency</span>
+        <div class="j-title">Every day, accounted for</div>
+        <div class="j-title-sub">Last 5 months</div>
+      </div>
+    </div>
+    <div class="j-heatcard">
+      <div id="j-heatmap"><!-- renderHeatmap() --></div>
+    </div>
   </div>
 
-  <div class="chart-card">
-    <div class="chart-title" style="margin-bottom:0">Transaction History</div>
-    <div id="tx-history"></div>
+  <!-- 3 · IDENTITY STRIP (reuses ps-streak / ps-rate / ps-saved ids) -->
+  <div class="j-section">
+    <div class="j-rule"></div>
+    <div class="j-head">
+      <div>
+        <span class="j-eyebrow">The Record</span>
+        <div class="j-title">What you've held</div>
+      </div>
+    </div>
+    <div class="j-identity">
+      <div class="j-id-col">
+        <div class="j-id-val gold" id="ps-streak">0</div>
+        <div class="j-id-label">Best Streak</div>
+      </div>
+      <div class="j-id-col">
+        <div class="j-id-val green" id="ps-rate">—</div>
+        <div class="j-id-label">Success %</div>
+      </div>
+      <div class="j-id-col">
+        <div class="j-id-val" id="ps-saved">$0</div>
+        <div class="j-id-label">Saved</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- 4 · THE LEDGER (existing stats-grid + 7-day + transactions) -->
+  <div class="j-section">
+    <div class="j-rule"></div>
+    <div class="j-head">
+      <div>
+        <span class="j-eyebrow">The Ledger</span>
+        <div class="j-title">By the numbers</div>
+      </div>
+    </div>
+
+    <div class="stats-grid">
+      <div class="stat-card">
+        <div class="s-val green" id="sg-completed">0</div>
+        <div class="s-label">Days completed</div>
+      </div>
+      <div class="stat-card">
+        <div class="s-val red" id="sg-missed">0</div>
+        <div class="s-label">Days missed</div>
+      </div>
+      <div class="stat-card">
+        <div class="s-val gold" id="sg-staked">$0</div>
+        <div class="s-label">Total staked</div>
+      </div>
+      <div class="stat-card">
+        <div class="s-val" id="sg-habits">0</div>
+        <div class="s-label">Active habits</div>
+      </div>
+    </div>
+
+    <div class="chart-card">
+      <div class="chart-title">Last 7 Days</div>
+      <div class="bar-chart" id="week-chart"></div>
+    </div>
+
+    <div class="chart-card">
+      <div class="chart-title" style="margin-bottom:0">Transaction History</div>
+      <div id="tx-history"></div>
+    </div>
   </div>
 
   <div class="bottom-nav">
@@ -4195,7 +4336,8 @@ if ('serviceWorker' in navigator) {
   var stage=document.getElementById('avStage');
   var prompt=document.getElementById('avPrompt');
   var reduce=window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches;
-  var opened=false, px=0,py=0,tx=0,ty=0,rafId=null;
+  var opened=false, scrubbing=false, px=0,py=0,tx=0,ty=0,rafId=null;
+  var wheelRot=vault.querySelector('.av-wheel-rot'); var OPENT=92;
   var layers=[
     {sel:'.av-ringd.r1', d:5},
     {sel:'.av-ringd.r2,.av-groove', d:9},
@@ -4221,11 +4363,12 @@ if ('serviceWorker' in navigator) {
   function openVault(){
     if(opened) return; opened=true; cancelAnimationFrame(rafId); rafId=null;
     for(var i=0;i<layers.length;i++) for(var j=0;j<layers[i].nodes.length;j++) layers[i].nodes[j].style.transform='';
+    if(wheelRot){ wheelRot.style.animation='none'; wheelRot.style.transition='transform 1.5s cubic-bezier(.45,0,.15,1)'; wheelRot.style.transform='rotate(630deg)'; }
     if(reduce){ finish(); return; }
     vault.classList.add('av-opening');
     var done=false; function end(){ if(done) return; done=true; finish(); }
     stage.addEventListener('transitionend',function te(ev){ if(ev.target===stage && ev.propertyName==='opacity'){ stage.removeEventListener('transitionend',te); end(); } });
-    setTimeout(end,3000);
+    setTimeout(end,5200);
   }
   function finish(){
     vault.classList.add('av-done'); vault.setAttribute('aria-hidden','true');
@@ -4235,8 +4378,27 @@ if ('serviceWorker' in navigator) {
   }
   var sy=null,sx=null,moved=false;
   function down(e){ var t=(e.touches&&e.touches[0])||e; sy=t.clientY; sx=t.clientX; moved=false; tryGyro(); }
-  function move(e){ if(sy==null) return; var t=(e.touches&&e.touches[0])||e, dy=sy-t.clientY, dx=Math.abs(sx-t.clientX); if(dy>10) moved=true; if(dy>70 && dy>dx){ openVault(); sy=null; } }
-  function up(){ if(sy!=null && !moved) openVault(); sy=null; }
+  function move(e){
+    if(sy==null||opened) return;
+    var t=(e.touches&&e.touches[0])||e, dy=sy-t.clientY, dx=Math.abs(sx-t.clientX);
+    if(dy>6) moved=true;
+    if(dy>0 && dy>=dx){
+      if(!scrubbing){ scrubbing=true; if(wheelRot){ wheelRot.style.animation='none'; wheelRot.style.transition='none'; } }
+      var p=Math.max(0,Math.min(1,dy/OPENT));
+      if(wheelRot) wheelRot.style.transform='rotate('+(p*240).toFixed(1)+'deg)';
+      if(dy>OPENT){ openVault(); sy=null; }
+    }
+  }
+  function up(){
+    if(opened){ sy=null; return; }
+    if(sy!=null && !moved){ openVault(); sy=null; return; }
+    if(scrubbing && wheelRot){
+      wheelRot.style.transition='transform .5s cubic-bezier(.3,1.4,.5,1)';
+      wheelRot.style.transform='rotate(0deg)';
+      setTimeout(function(){ if(!opened && wheelRot){ wheelRot.style.transition=''; wheelRot.style.transform=''; wheelRot.style.animation=''; } },520);
+    }
+    scrubbing=false; sy=null;
+  }
   vault.addEventListener('touchstart',down,{passive:true});
   vault.addEventListener('touchmove',move,{passive:true});
   vault.addEventListener('touchend',up,{passive:true});
