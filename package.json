@@ -21,9 +21,11 @@
   },
   "homepage": "https://github.com/4hhmt57fpf-blip/ante#readme",
   "dependencies": {
+    "@capacitor-community/stripe": "^8.1.1",
     "@capacitor/cli": "^8.4.1",
     "@capacitor/core": "^8.4.1",
     "@capacitor/ios": "^8.4.1",
+    "@stripe/stripe-js": "^8.11.0",
     "capacitor-health": "^8.1.2"
   }
 }

@@ -10,3 +10,7 @@ www/
 
 # Python
 __pycache__/
+
+# Payment backend secrets
+payments-backend/.env
+ios/build/

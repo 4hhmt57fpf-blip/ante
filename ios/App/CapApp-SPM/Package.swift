@@ -12,6 +12,7 @@ let package = Package(
     ],
     dependencies: [
         .package(url: "https://github.com/ionic-team/capacitor-swift-pm.git", exact: "8.4.1"),
+        .package(name: "CapacitorCommunityStripe", path: "../../../node_modules/@capacitor-community/stripe"),
         .package(name: "CapacitorHealth", path: "../../../node_modules/capacitor-health")
     ],
     targets: [
@@ -20,6 +21,7 @@ let package = Package(
             dependencies: [
                 .product(name: "Capacitor", package: "capacitor-swift-pm"),
                 .product(name: "Cordova", package: "capacitor-swift-pm"),
+                .product(name: "CapacitorCommunityStripe", package: "CapacitorCommunityStripe"),
                 .product(name: "CapacitorHealth", package: "CapacitorHealth")
             ]
         )

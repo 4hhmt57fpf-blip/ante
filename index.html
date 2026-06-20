@@ -424,7 +424,10 @@
     from { opacity: 0; transform: translateY(24px); }
     to { opacity: 1; transform: translateY(0); }
   }
-  .screen.active > * { animation: slideUp .3s ease both; }
+  /* fill-mode `backwards` (not `both`): the entrance looks identical, but the
+     animation releases `transform` after it ends so the parallax engine can own
+     the transform of screen-direct children (hero, wallet card, welcome hero). */
+  .screen.active > * { animation: slideUp .3s ease backwards; }
 
   @keyframes pulse {
     0%, 100% { box-shadow: 0 0 0 0 #ffd60040; }
@@ -855,11 +858,31 @@
     transform:translate3d(0,0,0); will-change:transform,opacity;
   }
   .tilt-hint.gone{ opacity:0; }
+
+  /* Home: wallet card tilts in 3D like a metal money card catching light.
+     perspective() lives in the transform (NOT on a parent) so the fixed
+     FAB / bottom-nav are never turned into absolutely-positioned elements. */
+  .wallet-card{ will-change:transform; transition:box-shadow .3s ease; }
+  .wallet-shine{
+    position:absolute; inset:0; border-radius:inherit;
+    overflow:hidden; pointer-events:none; z-index:1;
+  }
+  .wallet-shine::before{
+    content:""; position:absolute; top:-60%; left:var(--shine,-30%);
+    width:58%; height:220%;
+    background:linear-gradient(105deg, transparent, rgba(255,255,255,.10), transparent);
+    transform:rotate(8deg); filter:blur(2px);
+  }
+  /* keep the wallet's own content above its moving sheen */
+  .wallet-card > *:not(.wallet-shine){ position:relative; z-index:2; }
+
   @media (prefers-reduced-motion: reduce){
     .ante-layer{ transform:none !important; }
     .welcome-title, .welcome-sub, .logo-mark{ transform:none !important; }
     .logo-mark .sweep::before{ left:30% !important; }
     .tilt-hint{ display:none; }
+    .wallet-card{ transform:none !important; }
+    .wallet-shine{ display:none; }
   }
 </style>
 </head>
@@ -1034,7 +1057,7 @@
 ══════════════════════════════════════════════ -->
 <div class="screen" id="screen-home">
   <div class="topbar brand-topbar">
-    <div class="brand-lockup">
+    <div class="brand-lockup" data-depth="5">
       <svg class="brand-flame" width="22" height="28" viewBox="0 0 34 50" aria-hidden="true">
         <path d="M17 4 C24 18 29 24 29 34 a12 12 0 0 1-24 0 C5 25 10 20 17 4Z" fill="var(--gold)"/>
         <path d="M17 16 C21 24 23 27 23 33 a6 6 0 0 1-12 0 C11 28 14 23 17 16Z" fill="var(--gold-soft)"/>
@@ -1044,12 +1067,13 @@
     <div class="brand-date" id="home-date" onclick="showTab('stats')"></div>
   </div>
 
-  <div class="hero">
+  <div class="hero" data-depth="8">
     <h1 class="hero-title">Today's <span class="shimmer">Ante</span></h1>
     <p class="hero-sub" id="hero-sub">No bets yet</p>
   </div>
 
-  <div class="wallet-card">
+  <div class="wallet-card" id="walletCard">
+    <div class="wallet-shine"></div>
     <div class="wallet-label">Stake Balance</div>
     <div class="wallet-amount">$<span id="wallet-amount">0</span></div>
     <div class="wallet-sub" id="wallet-sub">0 active habits</div>
@@ -1256,9 +1280,8 @@
       <div class="stake-chip" onclick="selectFundAmt(this,'50')">$50</div>
       <div class="stake-chip" onclick="selectFundAmt(this,'100')">$100</div>
     </div>
-    <div style="background:var(--surface);border:1px solid var(--border);border-radius:var(--radius-sm);padding:16px;margin-bottom:20px;font-size:13px;color:var(--text-muted)">
-      💳 •••• •••• •••• 4242 &nbsp; <span style="color:var(--text)">Visa</span>
-    </div>
+    <button class="btn btn-secondary" onclick="savePaymentMethod()" style="margin-bottom:12px">  Apple Pay / Add card</button>
+    <div class="onboard-hint" style="margin-bottom:18px;font-size:12px">No charge to save a card — you're only charged if you miss a bet.</div>
     <button class="btn btn-primary" onclick="addFunds()">Deposit $<span id="fund-amt-display">10</span></button>
   </div>
 </div>
@@ -1957,6 +1980,111 @@ function deleteHabit(id) {
 }
 
 // ─────────────────────────────────────────────
+// PAYMENTS — Stripe + Apple Pay (save-card-then-charge-on-miss)
+// Native iOS uses @capacitor-community/stripe's PaymentSheet (Apple Pay shows
+// inside the sheet). Web uses Stripe.js (Express Checkout + Payment Element).
+// NO money moves here — this saves a card via a SetupIntent. The real miss-charge
+// happens SERVER-SIDE (payments-backend/). Fill in the two config values below
+// (after deploying payments-backend/ and adding your Stripe key); until then the
+// button explains what's missing. See PAYMENTS.md for the full checklist.
+// ─────────────────────────────────────────────
+const PAYMENTS = {
+  BACKEND_URL: '',                       // e.g. 'https://ante-pay.vercel.app'
+  STRIPE_PK: '',                         // 'pk_live_...' / 'pk_test_...' (backend also returns it)
+  APPLE_MERCHANT_ID: 'merchant.com.ante.app',
+  // Must match the iOS Stripe SDK's API version so the ephemeral key lines up.
+  IOS_STRIPE_API_VERSION: '2025-03-31.basil',
+};
+function anteUserId() {
+  if (!state.profile) state.profile = {};
+  if (!state.profile.anteUserId) {
+    state.profile.anteUserId = 'u_' + Math.random().toString(36).slice(2) + Date.now().toString(36);
+    saveState();
+  }
+  return state.profile.anteUserId;
+}
+async function savePaymentMethod() {
+  if (!PAYMENTS.BACKEND_URL) {
+    showToast('💳 Deploy payments-backend/ and set PAYMENTS.BACKEND_URL + Stripe key to enable real cards (see PAYMENTS.md).', 'gold');
+    return;
+  }
+  try {
+    const native = isNativeApp() && capPlugin('Stripe');
+    showToast('💳 Setting up secure payment…', null);
+    const apiVersion = native ? PAYMENTS.IOS_STRIPE_API_VERSION : undefined;
+    const r = await fetch(PAYMENTS.BACKEND_URL.replace(/\/$/, '') + '/create-setup-intent', {
+      method: 'POST', headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ anteUserId: anteUserId(), email: (state.profile || {}).email, apiVersion }),
+    }).then(x => x.json());
+    if (r.error) throw new Error(r.error);
+    const pk = PAYMENTS.STRIPE_PK || r.publishableKey;
+    if (!pk) throw new Error('No Stripe publishable key configured');
+
+    if (native) {
+      const Stripe = capPlugin('Stripe');
+      await Stripe.initialize({ publishableKey: pk });
+      await Stripe.createPaymentSheet({
+        setupIntentClientSecret: r.setupIntentClientSecret,
+        customerId: r.customerId,
+        customerEphemeralKeySecret: r.ephemeralKey,
+        merchantDisplayName: 'Ante',
+        enableApplePay: true,
+        applePayMerchantId: PAYMENTS.APPLE_MERCHANT_ID,
+      });
+      const res = await Stripe.presentPaymentSheet();
+      if (res && /Completed/i.test(res.paymentResult || '')) {
+        showToast('✅ Card saved — your stakes are now backed.', 'green');
+      } else {
+        showToast('Payment setup canceled', null);
+      }
+    } else {
+      await ensureStripeJs();
+      const stripe = window.Stripe(pk);
+      const elements = stripe.elements({ clientSecret: r.setupIntentClientSecret });
+      openStripeWebSheet(stripe, elements);
+    }
+  } catch (e) {
+    showToast('⚠️ ' + (e.message || 'Payment setup failed'), 'red');
+  }
+}
+function ensureStripeJs() {
+  return new Promise((resolve, reject) => {
+    if (window.Stripe) return resolve();
+    const s = document.createElement('script');
+    s.src = 'https://js.stripe.com/v3/';
+    s.onload = () => resolve();
+    s.onerror = () => reject(new Error('Could not load Stripe.js'));
+    document.head.appendChild(s);
+  });
+}
+function openStripeWebSheet(stripe, elements) {
+  let sheet = document.getElementById('stripe-web-sheet');
+  if (sheet) sheet.remove();
+  sheet = document.createElement('div');
+  sheet.id = 'stripe-web-sheet';
+  sheet.className = 'modal-overlay active';
+  sheet.innerHTML = `<div class="modal" onclick="event.stopPropagation()">
+    <div class="modal-handle"></div>
+    <div class="modal-title">Add a payment method</div>
+    <div class="onboard-hint" style="margin-bottom:14px">No charge now — your card backs your stakes. You're only charged if you miss.</div>
+    <div id="stripe-express"></div>
+    <div id="stripe-payment" style="margin-top:12px"></div>
+    <button class="btn btn-success" id="stripe-save" style="margin-top:16px">Save card</button>
+    <button class="btn btn-ghost" onclick="this.closest('.modal-overlay').remove()">Cancel</button>
+  </div>`;
+  sheet.onclick = () => sheet.remove();
+  document.body.appendChild(sheet);
+  elements.create('expressCheckout').mount('#stripe-express');
+  elements.create('payment').mount('#stripe-payment');
+  const finish = async () => {
+    const { error } = await stripe.confirmSetup({ elements, confirmParams: { return_url: location.href }, redirect: 'if_required' });
+    if (error) showToast('⚠️ ' + error.message, 'red');
+    else { showToast('✅ Card saved — your stakes are now backed.', 'green'); sheet.remove(); }
+  };
+  document.getElementById('stripe-save').onclick = finish;
+}
+
+// ─────────────────────────────────────────────
 // ALIVE — streak flame, count-up, betting animation
 // ─────────────────────────────────────────────
 function prefersReducedMotion() {
@@ -2009,7 +2137,7 @@ function playAnteAnimation(stake) {
   o.className = 'ante-overlay';
   const sparks = prm ? '' : ['--bx:-46px;--by:-40px','--bx:52px;--by:-30px','--bx:-30px;--by:44px','--bx:40px;--by:48px','--bx:0;--by:-58px']
     .map((s, i) => `<span class="ante-spark" style="${s}${i>1 ? ';animation-delay:.55s' : ''}"></span>`).join('');
-  o.innerHTML = `<div class="ante-pot"><div class="ante-chip c3">$${stake}</div><div class="ante-chip c2"></div><div class="ante-chip c1"></div>${sparks}</div>`;
+  o.innerHTML = `<div class="ante-pot"><div class="ante-chip c1"></div><div class="ante-chip c2"></div><div class="ante-chip c3">$${stake}</div>${sparks}</div>`;
   document.body.appendChild(o);
   setTimeout(() => o.remove(), prm ? 1000 : 1600);
 }
@@ -3120,6 +3248,7 @@ if ('serviceWorker' in navigator) {
 
   var logoSweep = document.getElementById("heroLogo");
   var hint = document.getElementById("tiltHint");
+  var walletCard = document.getElementById("walletCard");
 
   function buildChips() {
     var defs = [
@@ -3172,6 +3301,15 @@ if ('serviceWorker' in navigator) {
     if (logoSweep) {
       var s = clamp((cur.x + 1) / 2, 0, 1);
       logoSweep.style.setProperty("--sweep", (s * 140 - 40).toFixed(1) + "%");
+    }
+
+    /* wallet card: subtle 3D tilt + moving light sheen (perspective in-transform) */
+    if (walletCard) {
+      var rx = (-cur.y * 4.5).toFixed(2);
+      var ry = ( cur.x * 5.5).toFixed(2);
+      walletCard.style.transform = "perspective(900px) rotateX(" + rx + "deg) rotateY(" + ry + "deg)";
+      var sh = clamp((cur.x + 1) / 2, 0, 1);
+      walletCard.style.setProperty("--shine", (sh * 150 - 30).toFixed(1) + "%");
     }
 
     if (Math.abs(cur.x - target.x) > 0.0008 ||
@@ -3245,6 +3383,7 @@ if ('serviceWorker' in navigator) {
     target.x = target.y = cur.x = cur.y = 0;
     for (var i = 0; i < layers.length; i++) layers[i].el.style.transform = "";
     if (logoSweep) logoSweep.style.setProperty("--sweep", "30%");
+    if (walletCard) { walletCard.style.transform = ""; walletCard.style.setProperty("--shine", "-30%"); }
   }
 
   buildChips();
