@@ -432,6 +432,65 @@
   }
   .pulsing { animation: pulse 2s infinite; }
 
+  /* ══ ALIVE: streak flame (grows + intensifies with the streak) ══ */
+  .flame { display:inline-flex; align-items:flex-end; justify-content:center; vertical-align:bottom; line-height:0; }
+  .flame svg { overflow:visible; }
+  .flame .fl-layer { transform-origin:50% 92%; animation:flameFlick var(--fl-speed,1.7s) ease-in-out infinite; }
+  .flame .fl-core  { transform-origin:50% 92%; animation:flameFlick calc(var(--fl-speed,1.7s) * .72) ease-in-out infinite .18s; }
+  .flame .fl-tip   { transform-origin:50% 92%; animation:flameTip calc(var(--fl-speed,1.7s) * .6) ease-in-out infinite .3s; }
+  .flame .ember { transform-origin:center; animation:emberRise var(--ember-dur,2.4s) ease-out infinite; opacity:0; }
+  .flame .ember:nth-of-type(2){ animation-delay:.8s; }
+  .flame .ember:nth-of-type(3){ animation-delay:1.5s; }
+  .flame.tier-0 .fl-layer { animation-duration:2.4s; }
+  .flame:nth-of-type(even) .fl-layer { animation-delay:-.6s; }
+  @keyframes flameFlick { 0%,100%{transform:scaleY(1) scaleX(1) rotate(-1.5deg)} 50%{transform:scaleY(1.09) scaleX(.97) rotate(1.5deg)} }
+  @keyframes flameTip { 0%,100%{transform:scaleY(1) translateY(0) rotate(-2.5deg)} 50%{transform:scaleY(1.16) translateY(-1px) rotate(2.5deg)} }
+  @keyframes emberRise { 0%{opacity:0;transform:translateY(0) scale(1)} 20%{opacity:.9} 100%{opacity:0;transform:translateY(-22px) scale(.3)} }
+  @keyframes flBump { 0%{transform:scale(1)} 40%{transform:scale(1.28)} 100%{transform:scale(1)} }
+  .flame.fl-bump { animation:flBump .45s cubic-bezier(.3,1.5,.5,1); }
+
+  /* ══ ALIVE: betting / poker-ante chip slam ══ */
+  .ante-overlay { position:fixed; inset:0; z-index:500; display:flex; align-items:center; justify-content:center; pointer-events:none; animation:anteFade 1.6s ease forwards; }
+  .ante-pot { position:relative; width:120px; height:120px; }
+  .ante-chip { position:absolute; left:50%; bottom:30px; width:64px; height:64px; margin-left:-32px; border-radius:50%; background:radial-gradient(circle at 50% 38%, var(--gold-soft), var(--gold) 60%, #b8882e); border:3px dashed rgba(0,0,0,.28); box-shadow:0 6px 16px rgba(0,0,0,.45); display:flex; align-items:center; justify-content:center; font-weight:900; color:#3a2a05; font-size:15px; }
+  .ante-chip.c1 { animation:chipDrop .55s cubic-bezier(.3,1.4,.5,1) forwards; }
+  .ante-chip.c2 { bottom:44px; animation:chipStack2 .7s cubic-bezier(.3,1.3,.5,1) forwards; }
+  .ante-chip.c3 { bottom:58px; animation:chipStack3 .85s cubic-bezier(.3,1.3,.5,1) forwards; }
+  .ante-spark { position:absolute; left:50%; top:50%; width:7px; height:7px; border-radius:50%; background:var(--gold-soft); animation:goldBurst .8s ease-out forwards; animation-delay:.45s; }
+  @keyframes chipDrop { 0%{transform:translateY(-120px) scale(.6) rotate(-12deg);opacity:0} 55%{transform:translateY(8px) scale(1.05) rotate(2deg);opacity:1} 72%{transform:translateY(-6px) scale(.98)} 100%{transform:translateY(0) scale(1);opacity:1} }
+  @keyframes chipStack2 { 0%,40%{transform:translateY(-120px) scale(.6);opacity:0} 60%{transform:translateY(4px) scale(1.03);opacity:1} 100%{transform:translateY(-6px) scale(1);opacity:1} }
+  @keyframes chipStack3 { 0%,55%{transform:translateY(-120px) scale(.6);opacity:0} 75%{transform:translateY(0) scale(1.02);opacity:1} 100%{transform:translateY(-12px) scale(1);opacity:1} }
+  @keyframes goldBurst { 0%{opacity:0;transform:translate(0,0) scale(.4)} 25%{opacity:1} 100%{opacity:0;transform:translate(var(--bx),var(--by)) scale(.2)} }
+  @keyframes anteFade { 0%{opacity:0} 12%{opacity:1} 82%{opacity:1} 100%{opacity:0} }
+
+  /* ══ ALIVE: ambient micro-motion ══ */
+  @keyframes brandBreathe { 0%,100%{transform:scale(1);opacity:.92} 50%{transform:scale(1.06);opacity:1} }
+  .brand-flame { transform-origin:50% 80%; animation:brandBreathe 3.4s ease-in-out infinite; }
+  @keyframes goldShimmer { 0%{background-position:200% 0} 60%,100%{background-position:-60% 0} }
+  .shimmer { color:var(--gold); background:linear-gradient(105deg, var(--gold) 42%, #fff4cf 50%, var(--gold) 58%); background-size:240% 100%; -webkit-background-clip:text; background-clip:text; -webkit-text-fill-color:transparent; animation:goldShimmer 4.5s ease-in-out infinite; }
+  @keyframes cardRise { from{opacity:0;transform:translateY(16px)} to{opacity:1;transform:translateY(0)} }
+  .habit-card { animation:cardRise .42s cubic-bezier(.2,.8,.2,1) both; animation-delay:var(--stagger,0ms); }
+
+  /* ══ Base44 sample: brand header + hero ══ */
+  .brand-lockup { display:flex; align-items:center; gap:8px; }
+  .brand-word { font-size:22px; font-weight:800; letter-spacing:-.5px; color:var(--text); text-transform:lowercase; }
+  .brand-date { font-size:13px; font-weight:600; color:var(--text-dim); }
+  .hero { padding:2px 20px 14px; }
+  .hero-title { font-size:30px; font-weight:800; letter-spacing:-1px; color:var(--text); margin:0; }
+  .hero-sub { font-size:14px; color:var(--text-dim); margin:5px 0 0; }
+
+  @media (prefers-reduced-motion:reduce) {
+    .flame .fl-layer, .flame .fl-core, .flame .fl-tip, .flame .ember { animation:none !important; }
+    .flame .ember { opacity:0 !important; }
+    .flame.fl-bump { animation:none !important; }
+    .ante-chip.c1, .ante-chip.c2, .ante-chip.c3 { animation:none !important; opacity:1; transform:none; }
+    .ante-spark { display:none !important; }
+    .ante-overlay { animation:anteFade 1s ease forwards; }
+    .brand-flame { animation:none !important; }
+    .shimmer { animation:none !important; }
+    .habit-card { animation:none !important; }
+  }
+
   /* ── STREAK FLAME ── */
   .streak-display {
     display: flex; align-items: center; gap: 6px;
@@ -650,9 +709,172 @@
   }
   .vault-label { font-size: 12px; color: var(--text-muted); font-weight: 600; letter-spacing: .3px; }
   .vault-amount { font-size: 14px; font-weight: 800; color: var(--gold); }
+
+  /* ── Routine Map (habit constellation) ── */
+  .map-card { padding: 0; overflow: hidden; position: relative; }
+  .map-head {
+    display: flex; align-items: center; justify-content: space-between;
+    padding: 16px 16px 10px;
+  }
+  .map-head .chart-title { margin: 0; }
+  .map-toggle {
+    display: inline-flex; background: var(--surface2);
+    border: 1px solid var(--border); border-radius: 9px; padding: 2px;
+  }
+  .map-toggle button {
+    border: none; background: transparent; color: var(--text-muted);
+    font-size: 12px; font-weight: 700; padding: 5px 12px; border-radius: 7px;
+    cursor: pointer; transition: all .18s; letter-spacing: .3px;
+  }
+  .map-toggle button.active { background: var(--gold); color: #000; }
+  .map-canvas-wrap { position: relative; width: 100%; height: 300px; touch-action: none; }
+  #routine-canvas { display: block; width: 100%; height: 100%; cursor: grab; }
+  #routine-canvas:active { cursor: grabbing; }
+  .map-hint {
+    position: absolute; left: 0; right: 0; bottom: 10px; text-align: center;
+    font-size: 11px; color: var(--text-muted); pointer-events: none;
+  }
+  .map-empty {
+    display: flex; flex-direction: column; align-items: center; justify-content: center;
+    height: 300px; color: var(--text-muted); font-size: 14px; text-align: center; padding: 0 30px;
+    gap: 8px;
+  }
+
+  /* ====================================================================
+     ANTE — "Midnight Casino" parallax system
+     ==================================================================== */
+  .ante-parallax{
+    position:fixed;
+    top:0; bottom:0;
+    left:50%;
+    width:100%;
+    max-width:430px;
+    transform:translateX(-50%);
+    overflow:hidden;
+    z-index:0;
+    pointer-events:none;
+    contain:strict;
+    background:radial-gradient(120% 80% at 50% -10%,
+              #15110a 0%, var(--bg-2) 42%, var(--bg) 100%);
+  }
+  .ante-layer{
+    position:absolute;
+    inset:-12%;
+    will-change:transform;
+    transform:translate3d(0,0,0);
+    backface-visibility:hidden;
+  }
+  .ante-rays{
+    background:conic-gradient(from 180deg at 50% -8%,
+      transparent 0deg,
+      rgba(230,185,78,0) 12deg,
+      var(--gold-dim) 20deg,
+      rgba(230,185,78,0) 28deg,
+      transparent 40deg,
+      transparent 320deg,
+      rgba(230,185,78,0) 332deg,
+      rgba(230,185,78,0.08) 340deg,
+      rgba(230,185,78,0) 348deg,
+      transparent 360deg);
+    mix-blend-mode:screen;
+    opacity:.9;
+    filter:blur(2px);
+  }
+  .ante-felt{
+    background:radial-gradient(90% 60% at 50% 38%,
+      rgba(16,46,30,.55) 0%, rgba(11,28,20,.18) 45%, transparent 70%);
+    opacity:.8;
+  }
+  .ante-parallax .chip{
+    position:absolute;
+    border-radius:50%;
+    background:
+      radial-gradient(circle at 38% 32%, rgba(255,255,255,.20), transparent 42%),
+      radial-gradient(circle at 50% 50%, var(--c1) 0 58%, var(--c2) 58% 100%);
+    box-shadow:0 8px 22px rgba(0,0,0,.55), inset 0 0 0 2px rgba(255,255,255,.06);
+    opacity:var(--o,.5);
+  }
+  .ante-parallax .chip::after{
+    content:"";
+    position:absolute;
+    inset:14%;
+    border-radius:50%;
+    border:2px dashed rgba(255,255,255,.16);
+  }
+  .ante-parallax .chip-gold {--c1:#caa23d;--c2:#8a6a1d}
+  .ante-parallax .chip-green{--c1:#2f7d57;--c2:#16402c}
+  .ante-parallax .chip-red  {--c1:#b8413f;--c2:#6e2120}
+  .ante-parallax .chip-dark {--c1:#26262c;--c2:#121215}
+  .ante-parallax .card-glint{
+    position:absolute;
+    width:54px;height:74px;
+    border-radius:8px;
+    background:linear-gradient(135deg, rgba(255,255,255,.10), rgba(255,255,255,.02) 40%, transparent 70%);
+    border:1px solid rgba(255,255,255,.07);
+    box-shadow:0 10px 26px rgba(0,0,0,.5);
+    opacity:.35;
+  }
+  .ante-vignette{
+    position:absolute;inset:0;z-index:2;pointer-events:none;
+    background:radial-gradient(130% 100% at 50% 30%, transparent 52%, rgba(0,0,0,.55) 100%);
+  }
+  .ante-grain{
+    position:absolute;inset:0;z-index:2;pointer-events:none;
+    opacity:.04;mix-blend-mode:overlay;
+    background-image:repeating-conic-gradient(#fff 0 .0006turn, #000 0 .0012turn);
+    background-size:3px 3px;
+  }
+  .screen{ position:relative; z-index:1; }
+  .logo-mark{
+    position:relative;
+    transform:translate3d(0,0,0);
+    will-change:transform;
+  }
+  .logo-mark .sweep{
+    position:absolute; inset:0; border-radius:inherit;
+    overflow:hidden; pointer-events:none;
+  }
+  .logo-mark .sweep::before{
+    content:"";
+    position:absolute; top:-60%; left:var(--sweep,-40%);
+    width:55%; height:220%;
+    background:linear-gradient(105deg, transparent, rgba(255,255,255,.85), transparent);
+    transform:rotate(8deg); filter:blur(1px); opacity:.9;
+  }
+  .welcome-title, .welcome-sub{
+    transform:translate3d(0,0,0);
+    will-change:transform;
+  }
+  .welcome-title span{
+    text-shadow:0 0 30px rgba(230,185,78,.35);
+  }
+  .tilt-hint{
+    margin-top:14px; font-size:12px; letter-spacing:.4px;
+    color:var(--text-muted); text-align:center;
+    transition:opacity .5s ease;
+    transform:translate3d(0,0,0); will-change:transform,opacity;
+  }
+  .tilt-hint.gone{ opacity:0; }
+  @media (prefers-reduced-motion: reduce){
+    .ante-layer{ transform:none !important; }
+    .welcome-title, .welcome-sub, .logo-mark{ transform:none !important; }
+    .logo-mark .sweep::before{ left:30% !important; }
+    .tilt-hint{ display:none; }
+  }
 </style>
 </head>
 <body>
+
+<!-- AMBIENT PARALLAX BACKDROP (Midnight Casino) — fixed + centered, sits behind every screen -->
+<div class="ante-parallax" id="anteParallax" aria-hidden="true">
+  <div class="ante-layer ante-felt"  data-depth="2"></div>
+  <div class="ante-layer"             data-depth="6"  id="chipsFar"></div>
+  <div class="ante-layer"             data-depth="14" id="chipsMid"></div>
+  <div class="ante-layer ante-rays"   data-depth="3"></div>
+  <div class="ante-layer"             data-depth="26" id="chipsNear"></div>
+  <div class="ante-vignette"></div>
+  <div class="ante-grain"></div>
+</div>
 
 <!-- TOAST -->
 <div class="toast" id="toast"></div>
@@ -661,9 +883,9 @@
      SCREEN 0: WELCOME
 ══════════════════════════════════════════════ -->
 <div class="screen active" id="screen-welcome">
-  <div class="logo-mark" style="color:#16120a;font-weight:800">A</div>
-  <div class="welcome-title">Bet on<br><span>Yourself.</span></div>
-  <div class="welcome-sub">Stake real money on your habits.<br>Complete them — or pay up.</div>
+  <div class="logo-mark" id="heroLogo" data-depth="34" style="color:#16120a;font-weight:800">A<div class="sweep"></div></div>
+  <div class="welcome-title" data-depth="20">Bet on<br><span>Yourself.</span></div>
+  <div class="welcome-sub" data-depth="16">Stake real money on your habits.<br>Complete them — or pay up.</div>
 
   <div style="width:100%;background:var(--surface);border:1px solid var(--border);border-radius:16px;padding:20px;margin-bottom:24px;text-align:left">
     <div style="font-size:13px;font-weight:700;color:var(--text-muted);text-transform:uppercase;letter-spacing:.8px;margin-bottom:16px">How it works</div>
@@ -685,6 +907,7 @@
 
   <button class="btn btn-primary" onclick="startOnboarding()">Get Started</button>
   <button class="btn btn-ghost" style="margin-top:12px" onclick="skipOnboard()">I already have habits</button>
+  <p class="tilt-hint" id="tiltHint" data-depth="6">Tilt your phone to feel it</p>
 </div>
 
 <!-- ══════════════════════════════════════════════
@@ -810,9 +1033,20 @@
      HOME TAB
 ══════════════════════════════════════════════ -->
 <div class="screen" id="screen-home">
-  <div class="topbar">
-    <div class="topbar-title">Ante</div>
-    <div class="avatar" id="home-avatar" onclick="showTab('stats')">B</div>
+  <div class="topbar brand-topbar">
+    <div class="brand-lockup">
+      <svg class="brand-flame" width="22" height="28" viewBox="0 0 34 50" aria-hidden="true">
+        <path d="M17 4 C24 18 29 24 29 34 a12 12 0 0 1-24 0 C5 25 10 20 17 4Z" fill="var(--gold)"/>
+        <path d="M17 16 C21 24 23 27 23 33 a6 6 0 0 1-12 0 C11 28 14 23 17 16Z" fill="var(--gold-soft)"/>
+      </svg>
+      <span class="brand-word">ante</span>
+    </div>
+    <div class="brand-date" id="home-date" onclick="showTab('stats')"></div>
+  </div>
+
+  <div class="hero">
+    <h1 class="hero-title">Today's <span class="shimmer">Ante</span></h1>
+    <p class="hero-sub" id="hero-sub">No bets yet</p>
   </div>
 
   <div class="wallet-card">
@@ -934,6 +1168,20 @@
     <div class="stat-card">
       <div class="s-val" id="sg-habits">0</div>
       <div class="s-label">Active habits</div>
+    </div>
+  </div>
+
+  <div class="chart-card map-card">
+    <div class="map-head">
+      <div class="chart-title">🌌 Routine Map</div>
+      <div class="map-toggle" id="map-toggle">
+        <button class="active" data-mode="2d" onclick="setMapMode('2d')">2D</button>
+        <button data-mode="3d" onclick="setMapMode('3d')">3D</button>
+      </div>
+    </div>
+    <div class="map-canvas-wrap" id="map-wrap">
+      <canvas id="routine-canvas"></canvas>
+      <div class="map-hint" id="map-hint">Drag to explore · bigger glow = longer streak</div>
     </div>
   </div>
 
@@ -1619,7 +1867,7 @@ function commitHabit() {
   const h = createHabit(state.onboardData);
   state.habits.push(h);
   saveState();
-  spawnConfetti();
+  playAnteAnimation(state.onboardData.stake);
   showTab('home');
   setTimeout(() => showToast('🔒 Bet locked in — misses go to your Savings Vault.','green'), 300);
 }
@@ -1634,6 +1882,7 @@ function createHabit(od) {
     name: od.name || g.label || 'Goal',
     emoji: g.emoji || '🎯',
     color: g.color || '#e6b94e',
+    category: g.category || '',
     source: g.source || 'camera',
     metric: g.metric || '',
     dir: g.dir || '',
@@ -1708,16 +1957,83 @@ function deleteHabit(id) {
 }
 
 // ─────────────────────────────────────────────
+// ALIVE — streak flame, count-up, betting animation
+// ─────────────────────────────────────────────
+function prefersReducedMotion() {
+  return !!(window.matchMedia && window.matchMedia('(prefers-reduced-motion:reduce)').matches);
+}
+// Streak -> flame intensity. Four tiers "fan the flames": cold ember -> gold ->
+// orange w/ embers -> green-tipped inferno. Size also scales continuously with streak.
+function flameTier(streak) {
+  if (streak <= 0) return { tier:0, fill:'#6c6c75', core:'#5a5a62', tip:'#6c6c75', speed:2.4, embers:0 };
+  if (streak < 7)  return { tier:1, fill:'#e6b94e', core:'#f0cd76', tip:'#f0cd76', speed:1.8, embers:0 };
+  if (streak < 30) return { tier:2, fill:'#f0922e', core:'#e6b94e', tip:'#f0cd76', speed:1.4, embers:2 };
+  return             { tier:3, fill:'#4ade80', core:'#f0cd76', tip:'#ffffff', speed:1.0, embers:3 };
+}
+function flameSVG(streak, base) {
+  const t = flameTier(streak);
+  const grow = 1 + Math.min(streak, 40) / 40 * 0.5;          // 1.0 -> 1.5
+  const h = Math.round(base * grow), w = Math.round(h * 0.68);
+  let embers = '';
+  for (let i = 0; i < t.embers; i++) {
+    embers += `<circle class="ember" cx="${11 + i*6}" cy="${30 - i*4}" r="${(1.3 - i*0.15).toFixed(2)}" fill="${i%2 ? t.tip : t.core}"/>`;
+  }
+  return `<span class="flame tier-${t.tier}" style="--fl-speed:${t.speed}s;--ember-dur:${(t.speed*1.6).toFixed(1)}s" role="img" aria-label="${streak} day streak">`
+    + `<svg width="${w}" height="${h}" viewBox="0 0 34 50">`
+    + `<path class="fl-layer" d="M17 4 C24 18 29 24 29 34 a12 12 0 0 1-24 0 C5 25 10 20 17 4Z" fill="${t.fill}"/>`
+    + `<path class="fl-core" d="M17 16 C21 24 23 27 23 33 a6 6 0 0 1-12 0 C11 28 14 23 17 16Z" fill="${t.core}"/>`
+    + `<path class="fl-tip" d="M17 24 C19 30 20 32 20 36 a3 3 0 0 1-6 0 C14 32 16 28 17 24Z" fill="${t.tip}"/>`
+    + `${embers}</svg></span>`;
+}
+function mountFlame(el, streak, base) { if (el) el.innerHTML = flameSVG(streak, base); }
+
+// Smoothly tween a number element (wallet/vault) toward a value.
+function animateCount(el, to, dur, decimals) {
+  if (!el) return;
+  dur = dur || 600; decimals = decimals == null ? 2 : decimals;
+  const from = parseFloat((el.textContent || '0').replace(/[^0-9.\-]/g, '')) || 0;
+  if (prefersReducedMotion() || from === to) { el.textContent = to.toFixed(decimals); return; }
+  const t0 = performance.now();
+  (function step(now) {
+    const p = Math.min((now - t0) / dur, 1);
+    const e = 1 - Math.pow(1 - p, 3);
+    el.textContent = (from + (to - from) * e).toFixed(decimals);
+    if (p < 1) requestAnimationFrame(step);
+  })(t0);
+}
+
+// Poker "ante" — gold chips slam into the pot when a stake is committed.
+function playAnteAnimation(stake) {
+  const prm = prefersReducedMotion();
+  const o = document.createElement('div');
+  o.className = 'ante-overlay';
+  const sparks = prm ? '' : ['--bx:-46px;--by:-40px','--bx:52px;--by:-30px','--bx:-30px;--by:44px','--bx:40px;--by:48px','--bx:0;--by:-58px']
+    .map((s, i) => `<span class="ante-spark" style="${s}${i>1 ? ';animation-delay:.55s' : ''}"></span>`).join('');
+  o.innerHTML = `<div class="ante-pot"><div class="ante-chip c3">$${stake}</div><div class="ante-chip c2"></div><div class="ante-chip c1"></div>${sparks}</div>`;
+  document.body.appendChild(o);
+  setTimeout(() => o.remove(), prm ? 1000 : 1600);
+}
+
+// ─────────────────────────────────────────────
 // RENDER HOME
 // ─────────────────────────────────────────────
 function renderHabits() {
   const container = document.getElementById('habits-container');
   renderCanvasDue();
   const totalStaked = state.habits.reduce((s,h) => s + h.stake, 0);
-  document.getElementById('wallet-amount').textContent = (state.walletBalance || 50).toFixed(2);
+  animateCount(document.getElementById('wallet-amount'), (state.walletBalance || 50), 600, 2);
   document.getElementById('wallet-sub').textContent = `${state.habits.length} active habit${state.habits.length !== 1 ? 's' : ''} · $${totalStaked}/day at risk`;
   const vaultEl = document.getElementById('vault-amount');
-  if (vaultEl) vaultEl.textContent = (state.savingsVault || 0).toFixed(2);
+  if (vaultEl) animateCount(vaultEl, (state.savingsVault || 0), 600, 2);
+  // Brand header date + hero subtitle
+  const hd = document.getElementById('home-date');
+  if (hd) hd.textContent = new Date().toLocaleDateString('en-US', { weekday:'short', month:'short', day:'numeric' });
+  const heroSub = document.getElementById('hero-sub');
+  if (heroSub) {
+    const doneCount = state.habits.filter(isCompletedToday).length;
+    heroSub.textContent = state.habits.length === 0 ? 'No bets yet — stake your first habit'
+      : `${doneCount} of ${state.habits.length} habit${state.habits.length !== 1 ? 's' : ''} completed`;
+  }
 
   if (state.habits.length === 0) {
     container.innerHTML = `
@@ -1729,7 +2045,7 @@ function renderHabits() {
     return;
   }
 
-  container.innerHTML = state.habits.map(h => {
+  container.innerHTML = state.habits.map((h, i) => {
     const done = isCompletedToday(h);
     const missed = isMissedToday(h);
     const total = h.completedDays.length + h.missedDays.length;
@@ -1742,7 +2058,7 @@ function renderHabits() {
     const verifyLabel = h.verify === 'proof' ? '📸 Submit proof' : `↻ Sync ${src.label}`;
 
     return `
-    <div class="habit-card" style="--hc:${hc}" onclick="openHabitDetail('${h.id}')">
+    <div class="habit-card" style="--hc:${hc};--stagger:${i*60}ms" onclick="openHabitDetail('${h.id}')">
       <div class="habit-top">
         <div class="habit-emoji" style="background:${hexToRgba(color,0.16)};border-color:${hexToRgba(color,0.42)}">${h.emoji}</div>
         <div class="habit-stake-badge">$${h.stake}/miss</div>
@@ -1751,7 +2067,7 @@ function renderHabits() {
       <div class="habit-meta">${h.freq}${targetStr ? ` · ${targetStr}` : ''}</div>
       <div style="margin-top:8px;display:flex;gap:8px;align-items:center;flex-wrap:wrap">
         <span class="verify-badge">${src.icon} ${src.label}</span>
-        ${streak > 0 ? `<span class="streak-display" style="margin-top:0">🔥 ${streak} day streak</span>` : ''}
+        ${streak > 0 ? `<span class="streak-display" style="margin-top:0">${flameSVG(streak, 18)} ${streak} day streak</span>` : ''}
       </div>
       <div class="habit-progress">
         <div class="progress-bar"><div class="progress-fill" style="width:${pct}%;background:${color}"></div></div>
@@ -1964,7 +2280,7 @@ function openHabitDetail(id) {
       <span class="info-label">Daily stake</span><span class="info-val" style="color:var(--gold)">$${h.stake}/miss</span>
     </div>
     <div class="info-row">
-      <span class="info-label">Current streak</span><span class="info-val">🔥 ${h.currentStreak || 0} days</span>
+      <span class="info-label">Current streak</span><span class="info-val">${flameSVG(h.currentStreak || 0, 22)} ${h.currentStreak || 0} days</span>
     </div>
     <div class="info-row">
       <span class="info-label">Best streak</span><span class="info-val">🏆 ${h.bestStreak || 0} days</span>
@@ -2020,7 +2336,7 @@ function addHabitFromModal() {
   saveState();
   closeModal('add-habit-modal');
   renderHabits();
-  spawnConfetti();
+  playAnteAnimation(stake);
   showToast('🔒 New bet locked in!', 'green');
 }
 
@@ -2096,6 +2412,293 @@ function renderStats() {
       </div>
     `).join('');
   }
+
+  renderRoutineMap();
+}
+
+// ─────────────────────────────────────────────
+// ROUTINE MAP — habit constellation (no deps, offline-safe)
+// A self-contained force-directed graph rendered to <canvas>.
+// Nodes: you → categories → habits. Node size = streak, color = category.
+// 2D = draggable flat graph; 3D = auto-orbiting Obsidian-style web.
+// ─────────────────────────────────────────────
+const RMAP = {
+  mode: '2d', nodes: [], links: [], raf: null, canvas: null, ctx: null,
+  w: 0, h: 0, dpr: 1, rotY: 0, drag: null, dragMoved: false, lastSig: ''
+};
+
+function setMapMode(mode) {
+  RMAP.mode = mode;
+  document.querySelectorAll('#map-toggle button').forEach(b =>
+    b.classList.toggle('active', b.dataset.mode === mode));
+  document.getElementById('map-hint').textContent = mode === '3d'
+    ? 'Drag to orbit · auto-rotating' : 'Drag a node · bigger glow = longer streak';
+  buildRoutineGraph();
+}
+
+function categoryOf(h) {
+  // habit.category preferred; fall back to mapping its source to a category
+  if (h.category) return h.category;
+  const c = CATEGORIES.find(c => c.source === h.source);
+  return c ? c.id : 'custom';
+}
+
+function buildRoutineGraph() {
+  const habits = state.habits || [];
+  const nodes = [], links = [];
+  const cx = 0, cy = 0;
+
+  // root node = you
+  const initial = (state.profile && state.profile.name ? state.profile.name[0] : 'B').toUpperCase();
+  nodes.push({ id:'root', type:'root', label:initial, color:'#e6b94e', r:22,
+    x:cx, y:cy, z:0, vx:0, vy:0, vz:0, pin:true });
+
+  // category nodes (only those in use)
+  const cats = {};
+  habits.forEach(h => {
+    const cid = categoryOf(h);
+    if (!cats[cid]) {
+      const meta = CATEGORIES.find(c => c.id === cid) || { label:cid, emoji:'🎯', color:'#888' };
+      cats[cid] = true;
+      const ang = Object.keys(cats).length;
+      nodes.push({ id:'cat:'+cid, type:'cat', label:meta.label, emoji:meta.emoji,
+        color:meta.color, r:14,
+        x:Math.cos(ang)*70, y:Math.sin(ang)*70, z:(Math.random()-.5)*60, vx:0,vy:0,vz:0 });
+      links.push({ s:'root', t:'cat:'+cid });
+    }
+  });
+
+  // habit leaf nodes
+  habits.forEach((h, i) => {
+    const cid = categoryOf(h);
+    const meta = CATEGORIES.find(c => c.id === cid) || { color:h.color };
+    const streak = h.currentStreak || 0;
+    const ang = i * 2.39996; // golden angle scatter
+    nodes.push({ id:'h:'+h.id, type:'habit', label:h.name, emoji:h.emoji,
+      color:h.color || meta.color, streak,
+      r: 9 + Math.min(streak, 30) * 0.55,
+      x:Math.cos(ang)*130, y:Math.sin(ang)*130, z:(Math.random()-.5)*120, vx:0,vy:0,vz:0 });
+    links.push({ s:'cat:'+cid, t:'h:'+h.id });
+  });
+
+  RMAP.nodes = nodes; RMAP.links = links;
+  RMAP.byId = Object.fromEntries(nodes.map(n => [n.id, n]));
+}
+
+function renderRoutineMap() {
+  const wrap = document.getElementById('map-wrap');
+  const canvas = document.getElementById('routine-canvas');
+  if (!canvas || !wrap) return;
+
+  // Empty state: no habits → friendly prompt instead of an empty void
+  if (!state.habits || state.habits.length === 0) {
+    if (RMAP.raf) cancelAnimationFrame(RMAP.raf);
+    wrap.innerHTML = '<div class="map-empty">🌱<div>Your routine map grows here.<br>Add a habit to plant the first node.</div></div>';
+    return;
+  }
+  // Restore canvas markup if it was replaced by empty state
+  if (!document.getElementById('routine-canvas')) {
+    wrap.innerHTML = '<canvas id="routine-canvas"></canvas><div class="map-hint" id="map-hint"></div>';
+  }
+
+  // Only rebuild layout when the habit set changes (preserve positions otherwise)
+  const sig = state.habits.map(h => h.id + (h.currentStreak||0)).join('|') + RMAP.mode;
+  if (sig !== RMAP.lastSig) { buildRoutineGraph(); RMAP.lastSig = sig; }
+
+  setupRoutineCanvas();
+  startRoutineLoop();
+}
+
+function setupRoutineCanvas() {
+  const canvas = document.getElementById('routine-canvas');
+  RMAP.canvas = canvas;
+  RMAP.ctx = canvas.getContext('2d');
+  const resize = () => {
+    const rect = canvas.getBoundingClientRect();
+    RMAP.dpr = window.devicePixelRatio || 1;
+    RMAP.w = rect.width; RMAP.h = rect.height;
+    canvas.width = rect.width * RMAP.dpr;
+    canvas.height = rect.height * RMAP.dpr;
+    RMAP.ctx.setTransform(RMAP.dpr, 0, 0, RMAP.dpr, 0, 0);
+  };
+  resize();
+  if (!RMAP._resizeBound) { window.addEventListener('resize', resize); RMAP._resizeBound = true; }
+  bindRoutinePointer();
+}
+
+// ── physics: repulsion + link springs + centering (runs in 3D, flattened for 2D) ──
+function stepRoutinePhysics() {
+  const ns = RMAP.nodes, ls = RMAP.links, is3d = RMAP.mode === '3d';
+  for (let i = 0; i < ns.length; i++) {
+    const a = ns[i];
+    for (let j = i + 1; j < ns.length; j++) {
+      const b = ns[j];
+      let dx = a.x-b.x, dy = a.y-b.y, dz = is3d ? a.z-b.z : 0;
+      let d2 = dx*dx + dy*dy + dz*dz || 0.01;
+      let d = Math.sqrt(d2);
+      const rep = 1400 / d2;
+      const fx = (dx/d)*rep, fy = (dy/d)*rep, fz = (dz/d)*rep;
+      a.vx += fx; a.vy += fy; a.vz += fz;
+      b.vx -= fx; b.vy -= fy; b.vz -= fz;
+    }
+  }
+  ls.forEach(l => {
+    const a = RMAP.byId[l.s], b = RMAP.byId[l.t];
+    if (!a || !b) return;
+    const target = (a.type==='root'||b.type==='root') ? 78 : 64;
+    let dx = b.x-a.x, dy = b.y-a.y, dz = is3d ? b.z-a.z : 0;
+    let d = Math.sqrt(dx*dx+dy*dy+dz*dz) || 0.01;
+    const f = (d - target) * 0.02;
+    const fx = (dx/d)*f, fy = (dy/d)*f, fz = (dz/d)*f;
+    a.vx += fx; a.vy += fy; a.vz += fz;
+    b.vx -= fx; b.vy -= fy; b.vz -= fz;
+  });
+  ns.forEach(n => {
+    if (n.pin) { n.x=0; n.y=0; n.z=0; n.vx=0; n.vy=0; n.vz=0; return; }
+    n.vx += -n.x * 0.004; n.vy += -n.y * 0.004; n.vz += -n.z * 0.004; // gentle centering
+    n.vx *= 0.82; n.vy *= 0.82; n.vz *= 0.82;                          // damping
+    if (RMAP.drag !== n) { n.x += n.vx; n.y += n.vy; if (is3d) n.z += n.vz; }
+    if (!is3d) { n.z = 0; n.vz = 0; }
+  });
+}
+
+function projectNode(n) {
+  // rotate around Y axis for 3D, then perspective-project
+  const is3d = RMAP.mode === '3d';
+  let x = n.x, z = n.z;
+  if (is3d) {
+    const c = Math.cos(RMAP.rotY), s = Math.sin(RMAP.rotY);
+    x = n.x*c - n.z*s; z = n.x*s + n.z*c;
+  }
+  const focal = 460;
+  const scale = is3d ? focal / (focal + z) : 1;
+  return { sx: RMAP.w/2 + x*scale, sy: RMAP.h/2 + n.y*scale, scale, depth: z };
+}
+
+function drawRoutineMap() {
+  const ctx = RMAP.ctx; if (!ctx) return;
+  ctx.clearRect(0, 0, RMAP.w, RMAP.h);
+  const proj = {};
+  RMAP.nodes.forEach(n => proj[n.id] = projectNode(n));
+
+  // links
+  ctx.lineWidth = 1;
+  RMAP.links.forEach(l => {
+    const a = proj[l.s], b = proj[l.t]; if (!a||!b) return;
+    ctx.strokeStyle = 'rgba(255,255,255,0.10)';
+    ctx.beginPath(); ctx.moveTo(a.sx, a.sy); ctx.lineTo(b.sx, b.sy); ctx.stroke();
+  });
+
+  // nodes back-to-front (depth sort for 3D)
+  const order = RMAP.nodes.map(n => [n, proj[n.id]]).sort((p,q) => p[1].depth - q[1].depth);
+  order.forEach(([n, p]) => {
+    const r = n.r * p.scale;
+    const glow = n.type === 'habit' ? Math.min((n.streak||0)/12, 1.6) : (n.type==='root'?1.2:0.5);
+    if (glow > 0) {
+      const g = ctx.createRadialGradient(p.sx, p.sy, 0, p.sx, p.sy, r*2.6);
+      g.addColorStop(0, hexA(n.color, 0.55*Math.min(glow,1)));
+      g.addColorStop(1, hexA(n.color, 0));
+      ctx.fillStyle = g;
+      ctx.beginPath(); ctx.arc(p.sx, p.sy, r*2.6, 0, 6.2832); ctx.fill();
+    }
+    // node body
+    ctx.beginPath(); ctx.arc(p.sx, p.sy, r, 0, 6.2832);
+    ctx.fillStyle = n.type==='root' ? n.color : hexA(n.color, 0.92);
+    ctx.fill();
+    ctx.lineWidth = 1.5; ctx.strokeStyle = hexA(n.color, 1); ctx.stroke();
+    // label/emoji
+    ctx.globalAlpha = Math.max(0.35, Math.min(1, p.scale));
+    if (n.type === 'root') {
+      ctx.fillStyle = '#000'; ctx.font = `700 ${Math.round(r*0.95)}px -apple-system,sans-serif`;
+      ctx.textAlign='center'; ctx.textBaseline='middle';
+      ctx.fillText(n.label, p.sx, p.sy+1);
+    } else if (n.emoji) {
+      ctx.font = `${Math.round(r*1.1)}px -apple-system,sans-serif`;
+      ctx.textAlign='center'; ctx.textBaseline='middle';
+      ctx.fillText(n.emoji, p.sx, p.sy);
+    }
+    // text label under habit/category nodes
+    if (n.type !== 'root' && p.scale > 0.6) {
+      ctx.fillStyle = 'rgba(245,245,246,'+Math.min(0.85,p.scale)+')';
+      ctx.font = `600 ${n.type==='cat'?11:10}px -apple-system,sans-serif`;
+      ctx.textAlign='center'; ctx.textBaseline='top';
+      const lbl = n.label.length > 16 ? n.label.slice(0,15)+'…' : n.label;
+      ctx.fillText(lbl, p.sx, p.sy + r + 3);
+    }
+    ctx.globalAlpha = 1;
+  });
+}
+
+function hexA(hex, a) {
+  if (!hex) hex = '#888888';
+  if (hex[0] !== '#') return hex;
+  let h = hex.slice(1);
+  if (h.length === 3) h = h.split('').map(c=>c+c).join('');
+  const n = parseInt(h, 16);
+  return `rgba(${(n>>16)&255},${(n>>8)&255},${n&255},${a})`;
+}
+
+let _rmapCool = 0;
+function startRoutineLoop() {
+  if (RMAP.raf) cancelAnimationFrame(RMAP.raf);
+  _rmapCool = 0;
+  const tick = () => {
+    // only run while Stats tab is visible
+    const statsActive = document.getElementById('screen-stats').classList.contains('active');
+    if (!statsActive) { RMAP.raf = null; return; }
+    stepRoutinePhysics();
+    if (RMAP.mode === '3d' && !RMAP.drag) RMAP.rotY += 0.004;
+    drawRoutineMap();
+    RMAP.raf = requestAnimationFrame(tick);
+  };
+  RMAP.raf = requestAnimationFrame(tick);
+}
+
+function bindRoutinePointer() {
+  const canvas = RMAP.canvas;
+  if (canvas._rmapBound) return; canvas._rmapBound = true;
+  const pos = e => {
+    const r = canvas.getBoundingClientRect();
+    const t = e.touches ? e.touches[0] : e;
+    return { x: t.clientX - r.left, y: t.clientY - r.top };
+  };
+  const hit = p => {
+    let found = null, best = 1e9;
+    RMAP.nodes.forEach(n => {
+      const pr = projectNode(n);
+      const d = Math.hypot(pr.sx - p.x, pr.sy - p.y);
+      if (d < n.r*pr.scale + 6 && d < best) { best = d; found = n; }
+    });
+    return found;
+  };
+  const down = e => {
+    const p = pos(e); RMAP.dragMoved = false;
+    if (RMAP.mode === '2d') {
+      const n = hit(p);
+      if (n && !n.pin) { RMAP.drag = n; }
+      else RMAP.drag = '__orbit2d';
+    } else {
+      RMAP.drag = '__orbit'; RMAP._lastX = p.x;
+    }
+  };
+  const move = e => {
+    if (!RMAP.drag) return;
+    e.preventDefault(); RMAP.dragMoved = true;
+    const p = pos(e);
+    if (RMAP.drag === '__orbit') {
+      RMAP.rotY += (p.x - RMAP._lastX) * 0.01; RMAP._lastX = p.x;
+    } else if (RMAP.drag && RMAP.drag !== '__orbit2d') {
+      RMAP.drag.x = p.x - RMAP.w/2; RMAP.drag.y = p.y - RMAP.h/2;
+      RMAP.drag.vx = 0; RMAP.drag.vy = 0;
+    }
+  };
+  const up = () => { RMAP.drag = null; };
+  canvas.addEventListener('mousedown', down);
+  window.addEventListener('mousemove', move, { passive:false });
+  window.addEventListener('mouseup', up);
+  canvas.addEventListener('touchstart', down, { passive:false });
+  canvas.addEventListener('touchmove', move, { passive:false });
+  canvas.addEventListener('touchend', up);
 }
 
 // ─────────────────────────────────────────────
@@ -2481,6 +3084,188 @@ if ('serviceWorker' in navigator) {
     navigator.serviceWorker.register('sw.js').catch(() => {});
   });
 }
+
+/* ====================================================================
+   ANTE — "Midnight Casino" parallax engine (vanilla, no libraries)
+   ==================================================================== */
+(function () {
+  "use strict";
+
+  var root = document.getElementById("anteParallax");
+  if (!root) return;
+
+  var mq = window.matchMedia &&
+           window.matchMedia("(prefers-reduced-motion: reduce)");
+  var reduce = !!(mq && mq.matches);
+
+  var clamp = function (v, a, b) { return v < a ? a : v > b ? b : v; };
+  var lerp  = function (a, b, t) { return a + (b - a) * t; };
+
+  var target = { x: 0, y: 0 };
+  var cur    = { x: 0, y: 0 };
+  var running = false;
+  var gyroOn  = false;
+
+  var layers = [];
+  function collectLayers() {
+    layers = [];
+    var nodes = document.querySelectorAll("[data-depth]");
+    for (var i = 0; i < nodes.length; i++) {
+      layers.push({
+        el: nodes[i],
+        depth: parseFloat(nodes[i].getAttribute("data-depth")) || 0
+      });
+    }
+  }
+
+  var logoSweep = document.getElementById("heroLogo");
+  var hint = document.getElementById("tiltHint");
+
+  function buildChips() {
+    var defs = [
+      { id: "chipsFar",  count: 4, sizeMin: 70, sizeMax: 120, oMin: 0.18, oMax: 0.30, blur: 3.0 },
+      { id: "chipsMid",  count: 5, sizeMin: 46, sizeMax: 84,  oMin: 0.30, oMax: 0.48, blur: 1.4 },
+      { id: "chipsNear", count: 3, sizeMin: 30, sizeMax: 58,  oMin: 0.42, oMax: 0.62, blur: 0.4 }
+    ];
+    var classes = ["chip-gold", "chip-green", "chip-red", "chip-dark", "chip-gold"];
+
+    defs.forEach(function (d) {
+      var host = document.getElementById(d.id);
+      if (!host) return;
+      for (var c = 0; c < d.count; c++) {
+        var chip = document.createElement("div");
+        chip.className = "chip " + classes[(c + d.count) % classes.length];
+        var s = d.sizeMin + Math.random() * (d.sizeMax - d.sizeMin);
+        chip.style.width = chip.style.height = s.toFixed(0) + "px";
+        chip.style.left = (Math.random() * 86 + 2).toFixed(1) + "%";
+        chip.style.top  = (Math.random() * 84 + 4).toFixed(1) + "%";
+        chip.style.setProperty("--o", (d.oMin + Math.random() * (d.oMax - d.oMin)).toFixed(2));
+        chip.style.filter = "blur(" + d.blur.toFixed(1) + "px)";
+        host.appendChild(chip);
+      }
+    });
+
+    var mid = document.getElementById("chipsMid");
+    if (mid) {
+      for (var g = 0; g < 2; g++) {
+        var card = document.createElement("div");
+        card.className = "card-glint";
+        card.style.left = (18 + g * 52) + "%";
+        card.style.top  = (g === 0 ? 16 : 64) + "%";
+        card.style.transform = "rotate(" + (g === 0 ? -14 : 11) + "deg)";
+        mid.appendChild(card);
+      }
+    }
+  }
+
+  function render() {
+    cur.x = lerp(cur.x, target.x, 0.085);
+    cur.y = lerp(cur.y, target.y, 0.085);
+
+    for (var i = 0; i < layers.length; i++) {
+      var L = layers[i];
+      var tx = (-cur.x * L.depth).toFixed(2);
+      var ty = (-cur.y * L.depth).toFixed(2);
+      L.el.style.transform = "translate3d(" + tx + "px," + ty + "px,0)";
+    }
+
+    if (logoSweep) {
+      var s = clamp((cur.x + 1) / 2, 0, 1);
+      logoSweep.style.setProperty("--sweep", (s * 140 - 40).toFixed(1) + "%");
+    }
+
+    if (Math.abs(cur.x - target.x) > 0.0008 ||
+        Math.abs(cur.y - target.y) > 0.0008) {
+      requestAnimationFrame(render);
+    } else {
+      running = false;
+    }
+  }
+
+  function kick() {
+    if (reduce) return;
+    if (!running) { running = true; requestAnimationFrame(render); }
+  }
+
+  function setTarget(nx, ny) {
+    target.x = clamp(nx, -1, 1);
+    target.y = clamp(ny, -1, 1);
+    kick();
+  }
+
+  function onPointer(e) {
+    if (gyroOn) return;
+    var w = window.innerWidth  || 430;
+    var h = window.innerHeight || 800;
+    setTarget((e.clientX / w) * 2 - 1, (e.clientY / h) * 2 - 1);
+    dismissHint();
+  }
+
+  function onScroll() {
+    var max = (document.documentElement.scrollHeight - window.innerHeight) || 1;
+    var p = clamp(window.scrollY / max, 0, 1);
+    setTarget(target.x, (p * 2 - 1) * 0.6);
+  }
+
+  function onOrient(e) {
+    if (e == null || (e.gamma == null && e.beta == null)) return;
+    gyroOn = true;
+    setTarget((e.gamma || 0) / 35, ((e.beta || 0) - 40) / 35);
+    dismissHint();
+  }
+
+  function dismissHint() {
+    if (hint && !hint.classList.contains("gone")) hint.classList.add("gone");
+  }
+
+  var gyroRequested = false;
+  function enableGyro() {
+    if (reduce || gyroOn || gyroRequested) return;
+    var DOE = window.DeviceOrientationEvent;
+    if (DOE && typeof DOE.requestPermission === "function") {
+      gyroRequested = true;
+      DOE.requestPermission().then(function (st) {
+        if (st === "granted") {
+          window.addEventListener("deviceorientation", onOrient, true);
+        }
+      }).catch(function () {});
+    } else if (DOE) {
+      gyroRequested = true;
+      window.addEventListener("deviceorientation", onOrient, true);
+    }
+  }
+  window.anteEnableGyro = enableGyro;
+
+  function applyReduce() {
+    reduce = true;
+    running = false;
+    window.removeEventListener("pointermove", onPointer);
+    window.removeEventListener("scroll", onScroll);
+    window.removeEventListener("deviceorientation", onOrient, true);
+    target.x = target.y = cur.x = cur.y = 0;
+    for (var i = 0; i < layers.length; i++) layers[i].el.style.transform = "";
+    if (logoSweep) logoSweep.style.setProperty("--sweep", "30%");
+  }
+
+  buildChips();
+  collectLayers();
+
+  if (reduce) {
+    if (logoSweep) logoSweep.style.setProperty("--sweep", "30%");
+  } else {
+    window.addEventListener("pointermove", onPointer, { passive: true });
+    window.addEventListener("scroll", onScroll, { passive: true });
+    document.addEventListener("click", enableGyro);
+    document.addEventListener("touchend", enableGyro, { passive: true });
+    kick();
+  }
+
+  if (mq) {
+    var onMQ = function () { if (mq.matches && !reduce) applyReduce(); };
+    if (mq.addEventListener) mq.addEventListener("change", onMQ);
+    else if (mq.addListener) mq.addListener(onMQ);
+  }
+})();
 </script>
 </body>
 </html>
