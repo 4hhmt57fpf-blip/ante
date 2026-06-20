@@ -1972,7 +1972,7 @@ let state = {
   totalForfeit: 0,
   savingsVault: 0,
   txHistory: [],
-  connections: { health: false, screentime: false, canvas: false, gps: false, camera: false },
+  connections: { health: false, screentime: false, canvas: false, gps: false, camera: false, nutrition: false },
   canvas: { host: '', token: '', connected: false },
   profile: { name: 'Beckett', handle: 'beckett', reminderTime: '20:00', reminderOn: false },
   onboardData: { goalId: null, categoryId: null, name: '', target: null, freq: 'Every Day', stake: 5 }
@@ -1981,7 +1981,7 @@ let state = {
 function loadState() {
   const raw = localStorage.getItem(STORAGE_KEY);
   if (raw) state = { ...state, ...JSON.parse(raw) };
-  state.connections = Object.assign({ health:false, screentime:false, canvas:false, gps:false, kindle:false, duolingo:false, camera:false }, state.connections || {});
+  state.connections = Object.assign({ health:false, screentime:false, canvas:false, gps:false, kindle:false, duolingo:false, camera:false, nutrition:false }, state.connections || {});
   state.canvas = Object.assign({ host:'', token:'', connected:false }, state.canvas || {});
   state.connections.canvas = !!state.canvas.connected;
 }
@@ -2041,21 +2041,47 @@ const SOURCES = {
   kindle:     { label: 'Kindle',        icon: '📖', sub: 'Reading time & pages from your Kindle library — verify you actually read.' },
   duolingo:   { label: 'Duolingo',      icon: '🦉', sub: 'Lessons completed and streak kept — verify your daily language practice.' },
   camera:     { label: 'Photo + AI',    icon: '📸', sub: 'AI checks your photo against your description; a human reviews if unsure.' },
+  nutrition:  { label: 'MyFitnessPal',  icon: '🥗', sub: 'Calories & meals — connect MyFitnessPal (or any tracker that syncs to Apple Health) to verify you logged your food.' },
   strava:     { label: 'Strava',        icon: '🟧', sub: 'Runs & rides — syncs to Apple Health for verification.' },
   whoop:      { label: 'WHOOP',         icon: '⌚', sub: 'Strain & workouts — syncs to Apple Health for verification.' },
   garmin:     { label: 'Garmin',        icon: '⌚', sub: 'Watch activity — syncs to Apple Health for verification.' },
   fitbit:     { label: 'Fitbit',        icon: '⌚', sub: 'Steps & activity — syncs to Apple Health for verification.' },
   peloton:    { label: 'Peloton',       icon: '🚴', sub: 'Workouts — sync to Apple Health for verification.' },
+  headspace:  { label: 'Headspace',     icon: '🧘', sub: 'Guided meditation — mindful minutes sync to Apple Health.' },
+  calm:       { label: 'Calm',          icon: '🌙', sub: 'Meditation & sleep — mindful minutes sync to Apple Health.' },
+  oura:       { label: 'Oura',          icon: '💍', sub: 'Sleep & recovery from the Oura Ring — syncs to Apple Health.' },
+  classroom:  { label: 'Google Classroom', icon: '🎒', sub: 'Assignment due dates from Google Classroom.' },
+  blackboard: { label: 'Blackboard',    icon: '🎓', sub: 'Assignment deadlines from Blackboard Learn.' },
+  goodreads:  { label: 'Goodreads',     icon: '📚', sub: 'Reading progress & updates from Goodreads.' },
+  storygraph: { label: 'StoryGraph',    icon: '📊', sub: 'Reading stats & pages from The StoryGraph.' },
+  audible:    { label: 'Audible',       icon: '🎧', sub: 'Listening time from Audible audiobooks.' },
+  babbel:     { label: 'Babbel',        icon: '🗣️', sub: 'Lessons completed in Babbel.' },
+  busuu:      { label: 'Busuu',         icon: '🌐', sub: 'Lessons completed in Busuu.' },
+  opal:       { label: 'Opal',          icon: '🔮', sub: 'App blocking & focus sessions, enforced by Opal.' },
+  rescuetime: { label: 'RescueTime',    icon: '⏳', sub: 'Automatic time tracking & focus from RescueTime.' },
 };
 
 // Real brand logos for sources that map to an actual app (id-free + gradient-free
 // so they can render many times inline without duplicate-ID collisions). Others keep emoji.
 const SOURCE_LOGOS = {
+  headspace: '<rect width="48" height="48" rx="11" fill="#F47D31"/><text x="24" y="33" font-size="23" font-weight="800" text-anchor="middle" fill="#fff" font-family="-apple-system,Helvetica,sans-serif">H</text>',
+  calm: '<rect width="48" height="48" rx="11" fill="#2C5BB4"/><text x="24" y="33" font-size="23" font-weight="800" text-anchor="middle" fill="#fff" font-family="-apple-system,Helvetica,sans-serif">C</text>',
+  oura: '<rect width="48" height="48" rx="11" fill="#0B0B0C"/><circle cx="24" cy="24" r="9" fill="none" stroke="#fff" stroke-width="3.4"/>',
+  classroom: '<rect width="48" height="48" rx="11" fill="#0F9D58"/><text x="24" y="33" font-size="22" font-weight="800" text-anchor="middle" fill="#fff" font-family="-apple-system,Helvetica,sans-serif">C</text>',
+  blackboard: '<rect width="48" height="48" rx="11" fill="#1A1A1A"/><text x="24" y="32" font-size="18" font-weight="800" text-anchor="middle" fill="#fff" font-family="-apple-system,Helvetica,sans-serif">Bb</text>',
+  goodreads: '<rect width="48" height="48" rx="11" fill="#553B08"/><text x="24" y="35" font-size="27" font-weight="800" text-anchor="middle" fill="#fff" font-family="Georgia,serif">g</text>',
+  storygraph: '<rect width="48" height="48" rx="11" fill="#1B4D3E"/><text x="24" y="33" font-size="23" font-weight="800" text-anchor="middle" fill="#fff" font-family="-apple-system,Helvetica,sans-serif">S</text>',
+  audible: '<rect width="48" height="48" rx="11" fill="#F8991C"/><text x="24" y="35" font-size="27" font-weight="800" text-anchor="middle" fill="#fff" font-family="-apple-system,Helvetica,sans-serif">a</text>',
+  babbel: '<rect width="48" height="48" rx="11" fill="#FF6E00"/><text x="24" y="33" font-size="23" font-weight="800" text-anchor="middle" fill="#fff" font-family="-apple-system,Helvetica,sans-serif">B</text>',
+  busuu: '<rect width="48" height="48" rx="11" fill="#0A7CFF"/><text x="24" y="35" font-size="27" font-weight="800" text-anchor="middle" fill="#fff" font-family="-apple-system,Helvetica,sans-serif">b</text>',
+  opal: '<rect width="48" height="48" rx="11" fill="#6C5CE7"/><text x="24" y="33" font-size="23" font-weight="800" text-anchor="middle" fill="#fff" font-family="-apple-system,Helvetica,sans-serif">O</text>',
+  rescuetime: '<rect width="48" height="48" rx="11" fill="#1B98E0"/><text x="24" y="33" font-size="23" font-weight="800" text-anchor="middle" fill="#fff" font-family="-apple-system,Helvetica,sans-serif">R</text>',
   strava: '<rect width="48" height="48" rx="11" fill="#FC4C02"/><text x="24" y="33" font-size="23" font-weight="800" text-anchor="middle" fill="#fff" font-family="-apple-system,Helvetica,sans-serif">S</text>',
   whoop: '<rect width="48" height="48" rx="11" fill="#101113"/><text x="24" y="32" font-size="20" font-weight="800" text-anchor="middle" fill="#fff" font-family="-apple-system,Helvetica,sans-serif">W</text>',
   garmin: '<rect width="48" height="48" rx="11" fill="#0072B5"/><text x="24" y="33" font-size="23" font-weight="800" text-anchor="middle" fill="#fff" font-family="-apple-system,Helvetica,sans-serif">G</text>',
   fitbit: '<rect width="48" height="48" rx="11" fill="#00B0B9"/><text x="24" y="33" font-size="24" font-weight="800" text-anchor="middle" fill="#fff" font-family="-apple-system,Helvetica,sans-serif">f</text>',
   peloton: '<rect width="48" height="48" rx="11" fill="#181A1D"/><text x="24" y="33" font-size="23" font-weight="800" text-anchor="middle" fill="#fff" font-family="-apple-system,Helvetica,sans-serif">P</text>',
+  nutrition: '<rect width="48" height="48" rx="11" fill="#0070EB"/><text x="24" y="33" font-size="23" font-weight="800" text-anchor="middle" fill="#fff" font-family="-apple-system,Helvetica,sans-serif">M</text>',
   health: '<rect width="48" height="48" rx="11" fill="#fdfdfd"/><path d="M24 35.2c-.55 0-1.06-.2-1.45-.55C16.9 29.6 13.2 26.25 13.2 21.6c0-3.05 2.35-5.4 5.35-5.4 1.95 0 3.6 1.05 4.55 2.65l.9 1.5.9-1.5c.95-1.6 2.6-2.65 4.55-2.65 3 0 5.35 2.35 5.35 5.4 0 4.65-3.7 8-9.35 13.05-.39.35-.9.55-1.45.55z" fill="#fb1c40"/>',
   canvas: '<rect width="48" height="48" rx="11" fill="#E72429"/><g fill="#ffffff"><circle cx="24" cy="11.5" r="3.1"/><circle cx="24" cy="36.5" r="3.1"/><circle cx="11.5" cy="24" r="3.1"/><circle cx="36.5" cy="24" r="3.1"/><circle cx="15.16" cy="15.16" r="2.7"/><circle cx="32.84" cy="32.84" r="2.7"/><circle cx="15.16" cy="32.84" r="2.7"/><circle cx="32.84" cy="15.16" r="2.7"/></g><circle cx="24" cy="24" r="4.6" fill="none" stroke="#ffffff" stroke-width="2.3"/>'
 };
@@ -2111,6 +2137,7 @@ const PICKER_ICONS = ['dumbbell','footprints','activity','leaf','heart','droplet
 const CATEGORIES = [
   { id:'fitness',  label:'Fitness',    icon:'activity',        emoji:'🏃', color:'#4ade80', source:'health',     desc:'Steps, running, and workouts' },
   { id:'wellness', label:'Wellness',   icon:'heart',           emoji:'🧘', color:'#a78bfa', source:'health',     desc:'Sleep, meditation, mindfulness' },
+  { id:'nutrition',label:'Nutrition',  icon:'utensils',        emoji:'🥗', color:'#34d399', source:'nutrition',  desc:'Log meals & calories, via MyFitnessPal' },
   { id:'digital',  label:'Digital',    icon:'smartphone',      emoji:'📱', color:'#f87171', source:'screentime', desc:'Cap the apps that eat your time' },
   { id:'school',   label:'School',     icon:'graduation-cap',  emoji:'📚', color:'#60a5fa', source:'canvas',     desc:'Assignment deadlines, no missing work' },
   { id:'location', label:'Places',     icon:'map-pin',         emoji:'📍', color:'#38bdf8', source:'gps',        desc:'Gym check-ins, avoid certain places' },
@@ -2123,16 +2150,18 @@ const GOALS = [
   { id:'steps',    category:'fitness',  label:'Walk 10,000 steps',         icon:'footprints',   emoji:'🚶', color:'#34d399', source:'health',     metric:'Steps',           dir:'≥', target:10000, unit:'steps', apps:['health','fitbit','garmin'], verify:'auto' },
   { id:'exercise', category:'fitness',  label:'30 min of exercise',         icon:'dumbbell',     emoji:'🏋️', color:'#4ade80', source:'health',     metric:'Exercise',        dir:'≥', target:30,    unit:'min',   apps:['health','whoop','peloton'], verify:'auto' },
   { id:'run',      category:'fitness',  label:'Run 3 miles',                icon:'activity',     emoji:'🏃', color:'#fb923c', source:'health',     metric:'Run distance',    dir:'≥', target:3,     unit:'mi',    apps:['strava','garmin','health'], verify:'auto' },
-  { id:'meditate', category:'wellness', label:'Meditate 10 min',            icon:'leaf',         emoji:'🧘', color:'#a78bfa', source:'health',     metric:'Mindful minutes', dir:'≥', target:10,    unit:'min',   verify:'auto' },
-  { id:'sleep',    category:'wellness', label:'Sleep 7+ hours',             icon:'moon',         emoji:'🛌', color:'#60a5fa', source:'health',     metric:'Sleep',           dir:'≥', target:7,     unit:'hr',    verify:'auto' },
+  { id:'meditate', category:'wellness', label:'Meditate 10 min',            icon:'leaf',         emoji:'🧘', color:'#a78bfa', source:'health',     metric:'Mindful minutes', dir:'≥', target:10,    unit:'min',   apps:['health','headspace','calm'], verify:'auto' },
+  { id:'sleep',    category:'wellness', label:'Sleep 7+ hours',             icon:'moon',         emoji:'🛌', color:'#60a5fa', source:'health',     metric:'Sleep',           dir:'≥', target:7,     unit:'hr',    apps:['health','oura','whoop'], verify:'auto' },
+  { id:'food_log', category:'nutrition',label:'Log all your meals',         icon:'utensils',     emoji:'🥗', color:'#34d399', source:'nutrition',  metric:'Meals logged',    dir:'',  target:0,     unit:'',      apps:['nutrition','health'], verify:'auto' },
+  { id:'food_cal', category:'nutrition',label:'Stay under your calories',   icon:'utensils',     emoji:'🔥', color:'#fb923c', source:'nutrition',  metric:'Calories',        dir:'≤', target:2000,  unit:'kcal',  apps:['nutrition','health'], verify:'auto' },
   { id:'screen',   category:'digital',  label:'Cap your time-sink apps',     icon:'smartphone',   emoji:'📱', color:'#f87171', source:'screentime', metric:'Screen time',     dir:'≤', target:30,    unit:'min',   verify:'auto' },
-  { id:'cv_ontime',category:'school',   label:'Submit assignments on time', icon:'circle-check', emoji:'🎓', color:'#dc2626', source:'canvas',     metric:'Canvas',          dir:'',  target:0,     unit:'',      verify:'canvas' },
-  { id:'cv_nomiss',category:'school',   label:'No missing assignments',     icon:'book-open',    emoji:'📚', color:'#2563eb', source:'canvas',     metric:'Canvas',          dir:'',  target:0,     unit:'',      verify:'canvas' },
+  { id:'cv_ontime',category:'school',   label:'Submit assignments on time', icon:'circle-check', emoji:'🎓', color:'#dc2626', source:'canvas',     metric:'Canvas',          dir:'',  target:0,     unit:'',      apps:['canvas','classroom','blackboard'], verify:'canvas' },
+  { id:'cv_nomiss',category:'school',   label:'No missing assignments',     icon:'book-open',    emoji:'📚', color:'#2563eb', source:'canvas',     metric:'Canvas',          dir:'',  target:0,     unit:'',      apps:['canvas','classroom','blackboard'], verify:'canvas' },
   { id:'gym',      category:'location', label:'Get to the gym',             icon:'dumbbell',     emoji:'📍', color:'#38bdf8', source:'gps',        metric:'Gym check-in',    dir:'',  target:0,     unit:'',      verify:'auto' },
   { id:'avoid',    category:'location', label:'Avoid a place',              icon:'ban',          emoji:'🚫', color:'#94a3b8', source:'gps',        metric:'Stay away',       dir:'',  target:0,     unit:'',      verify:'auto' },
-  { id:'read_min', category:'reading',  label:'Read 20 minutes',            icon:'book',         emoji:'📖', color:'#f59e0b', source:'kindle',     metric:'Reading time',    dir:'≥', target:20,    unit:'min',   verify:'auto' },
-  { id:'read_pg',  category:'reading',  label:'Read 25 pages',              icon:'book',         emoji:'📖', color:'#fb923c', source:'kindle',     metric:'Pages read',      dir:'≥', target:25,    unit:'pages', verify:'auto' },
-  { id:'duo',      category:'learning', label:'Complete a Duolingo lesson', icon:'globe',        emoji:'🦉', color:'#22c55e', source:'duolingo',   metric:'Lessons',         dir:'≥', target:1,     unit:'lesson',verify:'auto' },
+  { id:'read_min', category:'reading',  label:'Read 20 minutes',            icon:'book',         emoji:'📖', color:'#f59e0b', source:'kindle',     metric:'Reading time',    dir:'≥', target:20,    unit:'min',   apps:['kindle','audible','goodreads'], verify:'auto' },
+  { id:'read_pg',  category:'reading',  label:'Read 25 pages',              icon:'book',         emoji:'📖', color:'#fb923c', source:'kindle',     metric:'Pages read',      dir:'≥', target:25,    unit:'pages', apps:['kindle','goodreads','storygraph'], verify:'auto' },
+  { id:'duo',      category:'learning', label:'Complete a Duolingo lesson', icon:'globe',        emoji:'🦉', color:'#22c55e', source:'duolingo',   metric:'Lessons',         dir:'≥', target:1,     unit:'lesson',apps:['duolingo','babbel','busuu'], verify:'auto' },
   { id:'proof',    category:'custom',   label:'Create your own goal',       icon:'camera',       emoji:'📸', color:'#e6b94e', source:'camera',     metric:'Photo + AI',      dir:'',  target:0,     unit:'',      verify:'proof' },
 ];
 
@@ -2476,6 +2505,7 @@ function renderGoalConfig(){
   el.innerHTML = inner;
 }
 function selectGoalApp(a){ state.onboardData.app = a; renderGoalConfig(); }
+function selectEnforce(el,id){ state.onboardData.app=id; document.querySelectorAll('#enforce-row .appchip').forEach(c=>c.classList.remove('selected')); el.classList.add('selected'); }
 function selectObFreq(elx, f){
   selectedFreq = f;
   document.querySelectorAll('#ob-freq .tag').forEach(t=>t.classList.remove('selected'));
@@ -2521,6 +2551,14 @@ const APP_PICKER_HTML = `
     <button class="cap-step-btn" onclick="stepCap(5)" aria-label="Increase">+</button>
   </div>
 </div>
+<div class="cap-block" style="padding-top:4px">
+  <div class="onboard-hint cap-label">Enforced by</div>
+  <div class="appchip-row" id="enforce-row">
+    <div class="appchip selected" onclick="selectEnforce(this,'screentime')"><span class="ac-logo">${srcBadge('screentime',26)}</span><span class="ac-name">Screen Time</span></div>
+    <div class="appchip" onclick="selectEnforce(this,'opal')"><span class="ac-logo">${srcBadge('opal',26)}</span><span class="ac-name">Opal</span></div>
+    <div class="appchip" onclick="selectEnforce(this,'rescuetime')"><span class="ac-logo">${srcBadge('rescuetime',26)}</span><span class="ac-name">RescueTime</span></div>
+  </div>
+</div>
 <div class="cap-preview" id="cap-preview">
   <span class="cap-preview-lock">🔒</span>
   <span id="cap-preview-text">Pick at least one app to cap.</span>
@@ -2529,6 +2567,7 @@ const APP_PICKER_HTML = `
 function renderAppPicker(){
   const el = document.getElementById('goal-list');
   if (!el) return;
+  state.onboardData.app = state.onboardData.app || 'screentime';
   const qEl = document.getElementById('ob2-q');
   const hEl = document.getElementById('ob2-hint');
   if (qEl) qEl.innerHTML = '<span style="display:inline-flex;vertical-align:middle;margin-right:7px">'
