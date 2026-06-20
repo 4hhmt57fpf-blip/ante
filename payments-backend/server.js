@@ -26,8 +26,10 @@
 
 import express from 'express';
 import Stripe from 'stripe';
+import Anthropic from '@anthropic-ai/sdk';
 
 const stripe = new Stripe(process.env.STRIPE_SECRET_KEY);
+const anthropic = new Anthropic(); // reads ANTHROPIC_API_KEY from env
 const ALLOWED_ORIGIN = process.env.ALLOWED_ORIGIN || 'https://4hhmt57fpf-blip.github.io';
 const app = express();
 
@@ -171,5 +173,33 @@ app.post('/charge-on-miss', async (req, res) => {
   }
 });
 
+// ── Ante AI help chatbot (Claude) ──────────────────────────────────────────
+// The app's Help section POSTs the conversation here; we call Claude with a
+// scoped system prompt and return the reply. The ANTHROPIC_API_KEY never leaves
+// this server. Swap the model to 'claude-haiku-4-5' for a cheaper/faster bot.
+const ANTE_SYSTEM = `You are Ante AI, the in-app help assistant for Ante — a money-staked habit tracker. Users stake real money ($1–$100/day) on daily habits; completing a habit (auto-verified through a connected app like Apple Health, Screen Time, Canvas, Location, Kindle, or Duolingo) keeps their money, while missing it locks the stake into their personal Savings Vault — still their money, just inaccessible until they rebuild the habit. Be concise, friendly, and practical. Answer questions about how Ante works, setting up habits, connecting apps, staking, and the Savings Vault. If asked for personalized financial or investment advice, explain you can't give that. Keep replies under ~120 words.`;
+
+app.post('/ai-chat', async (req, res) => {
+  try {
+    const raw = Array.isArray(req.body.messages) ? req.body.messages : [];
+    const messages = raw.slice(-20).map(m => ({
+      role: m.role === 'assistant' ? 'assistant' : 'user',
+      content: String(m.content || '').slice(0, 4000),
+    })).filter(m => m.content);
+    if (!messages.length) return res.status(400).json({ error: 'No message provided' });
+
+    const response = await anthropic.messages.create({
+      model: 'claude-opus-4-8',
+      max_tokens: 1024,
+      system: ANTE_SYSTEM,
+      messages,
+    });
+    const reply = response.content.filter(b => b.type === 'text').map(b => b.text).join('').trim();
+    res.json({ reply });
+  } catch (e) {
+    res.status(500).json({ error: e.message || 'AI request failed' });
+  }
+});
+
 const port = process.env.PORT || 3000;
-app.listen(port, () => console.log(`Ante Stripe backend on :${port}`));
+app.listen(port, () => console.log(`Ante backend (Stripe + AI) on :${port}`));
