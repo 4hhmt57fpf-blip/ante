@@ -129,7 +129,7 @@
   }
   .step-dot.done { background: var(--gold); }
 
-  .onboard-q { font-size: 26px; font-weight: 800; letter-spacing: -.5px; line-height: 1.2; margin-bottom: 8px; }
+  .onboard-q { font-size: 21px; font-weight: 800; letter-spacing: -.4px; line-height: 1.25; margin-bottom: 6px; }
   .onboard-hint { color: var(--text-muted); font-size: 15px; margin-bottom: 28px; }
 
   .input-field {
@@ -721,6 +721,21 @@
   .category-card .cat-name { font-size: 16px; font-weight: 700; letter-spacing: -.2px; }
   .category-card .cat-src { font-size: 12px; color: var(--text-muted); margin-top: 3px; }
   .cat-chevron { color: var(--text-muted); font-size: 18px; flex-shrink: 0; }
+
+  /* Compact 2-up category grid — all categories visible at once, no scroll */
+  .category-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 9px; }
+  .cat-tile {
+    background: var(--surface); border: 1px solid var(--border);
+    border-radius: var(--radius-sm); padding: 13px 13px 12px;
+    cursor: pointer; transition: transform .12s ease, border-color .15s ease;
+  }
+  .cat-tile:active { transform: scale(.97); border-color: var(--border-strong); }
+  .cat-tile .cat-emoji {
+    width: 36px; height: 36px; border-radius: 11px;
+    display: flex; align-items: center; justify-content: center; margin-bottom: 9px;
+  }
+  .cat-tile .cat-name { font-size: 15px; font-weight: 700; letter-spacing: -.2px; }
+  .cat-tile .cat-sub { font-size: 10.5px; color: var(--text-muted); margin-top: 2px; display: flex; align-items: center; gap: 4px; overflow: hidden; white-space: nowrap; text-overflow: ellipsis; }
   .cat-back {
     display: inline-flex; align-items: center; gap: 6px;
     font-size: 13px; color: var(--gold); font-weight: 600;
@@ -1307,7 +1322,8 @@
 
   /* fitness goal → choose verifying app */
   .appchip-row{ display:flex; gap:8px; margin-top:10px; }
-  .appchip{ flex:1; display:flex; flex-direction:column; align-items:center; gap:7px; padding:12px 4px;
+  .appchip-row{ flex-wrap:wrap; }
+  .appchip{ flex:1 1 calc(33.33% - 6px); display:flex; flex-direction:column; align-items:center; gap:7px; padding:12px 4px;
     background:var(--surface); border:1.5px solid var(--border); border-radius:14px; cursor:pointer; transition:all .15s; }
   .appchip:active{ transform:scale(.97); }
   .appchip.selected{ border-color:var(--gold); background:var(--gold-dim); }
@@ -1320,6 +1336,11 @@
     border:1px solid var(--border); border-radius:12px; cursor:pointer; font-size:14px; font-weight:600; color:var(--text); }
   .app-result:active{ background:var(--surface2); }
   .app-result .ac-logo{ display:flex; }
+  .app-search-cap{ font-size:12px; color:var(--text-muted); margin:14px 2px 8px; line-height:1.45; }
+  .app-result.app-noverify{ opacity:.7; cursor:default; }
+  .app-result.app-checking{ opacity:.8; cursor:default; }
+  .ac-verify-ok{ color:#7fdca4; font-size:11px; }
+  .ac-verify-no{ color:var(--text-muted); font-size:11px; }
 </style>
 </head>
 <body>
@@ -2056,6 +2077,7 @@ const SOURCES = {
   duolingo:   { label: 'Duolingo',      icon: '🦉', sub: 'Lessons completed and streak kept — verify your daily language practice.' },
   camera:     { label: 'Photo + AI',    icon: '📸', sub: 'AI checks your photo against your description; a human reviews if unsure.' },
   nutrition:  { label: 'MyFitnessPal',  icon: '🥗', sub: 'Calories & meals — connect MyFitnessPal (or any tracker that syncs to Apple Health) to verify you logged your food.' },
+  calai:      { label: 'Cal AI',        icon: '📸', sub: 'Snap a photo of your meal — Cal AI logs the calories and syncs to Apple Health.' },
   strava:     { label: 'Strava',        icon: '🟧', sub: 'Runs & rides — syncs to Apple Health for verification.' },
   whoop:      { label: 'WHOOP',         icon: '⌚', sub: 'Strain & workouts — syncs to Apple Health for verification.' },
   garmin:     { label: 'Garmin',        icon: '⌚', sub: 'Watch activity — syncs to Apple Health for verification.' },
@@ -2095,6 +2117,7 @@ const SOURCE_LOGOS = {
   garmin: '<rect width="48" height="48" rx="11" fill="#0072B5"/><text x="24" y="33" font-size="23" font-weight="800" text-anchor="middle" fill="#fff" font-family="-apple-system,Helvetica,sans-serif">G</text>',
   fitbit: '<rect width="48" height="48" rx="11" fill="#00B0B9"/><text x="24" y="33" font-size="24" font-weight="800" text-anchor="middle" fill="#fff" font-family="-apple-system,Helvetica,sans-serif">f</text>',
   peloton: '<rect width="48" height="48" rx="11" fill="#181A1D"/><text x="24" y="33" font-size="23" font-weight="800" text-anchor="middle" fill="#fff" font-family="-apple-system,Helvetica,sans-serif">P</text>',
+  calai: '<rect width="48" height="48" rx="11" fill="#11D17E"/><text x="24" y="33" font-size="21" font-weight="800" text-anchor="middle" fill="#04231A" font-family="-apple-system,Helvetica,sans-serif">Cal</text>',
   nutrition: '<rect width="48" height="48" rx="11" fill="#0070EB"/><text x="24" y="33" font-size="23" font-weight="800" text-anchor="middle" fill="#fff" font-family="-apple-system,Helvetica,sans-serif">M</text>',
   health: '<rect width="48" height="48" rx="11" fill="#fdfdfd"/><path d="M24 35.2c-.55 0-1.06-.2-1.45-.55C16.9 29.6 13.2 26.25 13.2 21.6c0-3.05 2.35-5.4 5.35-5.4 1.95 0 3.6 1.05 4.55 2.65l.9 1.5.9-1.5c.95-1.6 2.6-2.65 4.55-2.65 3 0 5.35 2.35 5.35 5.4 0 4.65-3.7 8-9.35 13.05-.39.35-.9.55-1.45.55z" fill="#fb1c40"/>',
   canvas: '<rect width="48" height="48" rx="11" fill="#E72429"/><g fill="#ffffff"><circle cx="24" cy="11.5" r="3.1"/><circle cx="24" cy="36.5" r="3.1"/><circle cx="11.5" cy="24" r="3.1"/><circle cx="36.5" cy="24" r="3.1"/><circle cx="15.16" cy="15.16" r="2.7"/><circle cx="32.84" cy="32.84" r="2.7"/><circle cx="15.16" cy="32.84" r="2.7"/><circle cx="32.84" cy="15.16" r="2.7"/></g><circle cx="24" cy="24" r="4.6" fill="none" stroke="#ffffff" stroke-width="2.3"/>'
@@ -2119,23 +2142,74 @@ function habitAppBadge(h, px){ return appBadge(h.app || h.source, habitAppLabel(
 // Searchable catalog of popular apps (display-only; verification stays the goal's real source).
 const APP_CATALOG = [
   {key:'health',label:'Apple Health'},{key:'strava',label:'Strava'},{key:'whoop',label:'WHOOP'},{key:'garmin',label:'Garmin'},{key:'fitbit',label:'Fitbit'},{key:'peloton',label:'Peloton'},
-  {key:'nikerun',label:'Nike Run Club'},{key:'mapmyrun',label:'MapMyRun'},{key:'googlefit',label:'Google Fit'},{key:'samsunghealth',label:'Samsung Health'},{key:'myfitnesspal',label:'MyFitnessPal'},{key:'zwift',label:'Zwift'},{key:'applewatch',label:'Apple Watch'},
+  {key:'nikerun',label:'Nike Run Club'},{key:'mapmyrun',label:'MapMyRun'},{key:'googlefit',label:'Google Fit'},{key:'samsunghealth',label:'Samsung Health'},{key:'myfitnesspal',label:'MyFitnessPal'},{key:'calai',label:'Cal AI'},{key:'loseit',label:'Lose It!'},{key:'cronometer',label:'Cronometer'},{key:'macrofactor',label:'MacroFactor'},{key:'zwift',label:'Zwift'},{key:'applewatch',label:'Apple Watch'},
   {key:'headspace',label:'Headspace'},{key:'calm',label:'Calm'},{key:'oura',label:'Oura'},{key:'insighttimer',label:'Insight Timer'},{key:'balance',label:'Balance'},{key:'sleepcycle',label:'Sleep Cycle'},{key:'autosleep',label:'AutoSleep'},
   {key:'kindle',label:'Kindle'},{key:'goodreads',label:'Goodreads'},{key:'storygraph',label:'StoryGraph'},{key:'audible',label:'Audible'},{key:'applebooks',label:'Apple Books'},{key:'libby',label:'Libby'},
   {key:'duolingo',label:'Duolingo'},{key:'babbel',label:'Babbel'},{key:'busuu',label:'Busuu'},{key:'memrise',label:'Memrise'},{key:'pimsleur',label:'Pimsleur'},{key:'rosetta',label:'Rosetta Stone'},{key:'anki',label:'Anki'},
   {key:'canvas',label:'Canvas'},{key:'classroom',label:'Google Classroom'},{key:'blackboard',label:'Blackboard'},{key:'schoology',label:'Schoology'},{key:'moodle',label:'Moodle'},{key:'notion',label:'Notion'},
   {key:'screentime',label:'Screen Time'},{key:'opal',label:'Opal'},{key:'rescuetime',label:'RescueTime'},{key:'freedom',label:'Freedom'},{key:'onesec',label:'one sec'},{key:'forest',label:'Forest'},
 ];
+function appLabelOf(key, fallback){
+  if (SOURCES[key] && SOURCES[key].label) return SOURCES[key].label;
+  const c = APP_CATALOG.find(a => a.key === key);
+  if (c) return c.label;
+  return fallback || (''+key).replace(/^custom:/,'');
+}
 function onAppSearch(q){
   const el = document.getElementById('app-search-results'); if(!el) return;
   const raw = (q||'').replace(/[<>]/g,'').trim();
   const ql = raw.toLowerCase();
-  if(!ql){ el.innerHTML=''; return; }
-  const matches = APP_CATALOG.filter(a => a.label.toLowerCase().indexOf(ql) > -1).slice(0,6);
+  if(!ql){ el.innerHTML=''; el._tok=0; return; }
+  const matches = APP_CATALOG.filter(a => a.label.toLowerCase().indexOf(ql) > -1).slice(0,5);
   let html = matches.map(a => `<div class="app-result" onclick="selectGoalApp('${a.key}','${a.label.replace(/'/g,'')}')"><span class="ac-logo">${appBadge(a.key,a.label,22)}</span><span>${a.label}</span></div>`).join('');
   const exact = APP_CATALOG.some(a => a.label.toLowerCase() === ql);
-  if(!exact){ const safe = raw.replace(/'/g,''); html += `<div class="app-result" onclick="selectGoalApp('custom:${safe}','${safe}')"><span class="ac-logo">${appBadge('custom:'+safe, raw, 22)}</span><span>Use \u201C${raw}\u201D</span></div>`; }
+  if(!exact){
+    const tok = (el._tok||0)+1; el._tok = tok;
+    const safe = raw.replace(/'/g,'');
+    html += `<div class="app-result app-checking" id="app-ai-row"><span class="ac-logo">${appBadge('custom:'+safe, raw, 22)}</span><span>Checking if <b>${raw}</b> can verify you...</span></div>`;
+    el.innerHTML = html;
+    aiVerifyApp(raw).then(function(res){
+      if(el._tok!==tok) return;
+      const row = document.getElementById('app-ai-row'); if(!row) return;
+      if(res && res.verifiable){
+        const src = res.source || (goalById(state.onboardData.goalId)||{}).source || 'health';
+        const slabel = (SOURCES[src] && SOURCES[src].label) || src;
+        row.className = 'app-result';
+        row.setAttribute('onclick', `selectGoalApp('${src}','${safe}')`);
+        row.innerHTML = `<span class="ac-logo">${appBadge(src, raw, 22)}</span><span>${raw}<span class="ac-verify-ok"> &middot; verifiable via ${slabel}</span></span>`;
+      } else {
+        row.className = 'app-result app-noverify';
+        row.innerHTML = `<span class="ac-logo">${appBadge('custom:'+safe, raw, 22)}</span><span>${raw}<span class="ac-verify-no"> &middot; can't be auto-verified — pick an app that syncs to Apple Health</span></span>`;
+      }
+    });
+    return;
+  }
   el.innerHTML = html;
+}
+
+async function aiVerifyApp(name){
+  try{
+    if (window.HELP && HELP.BACKEND_URL){
+      const r = await fetch(HELP.BACKEND_URL.replace(/\/$/,'') + '/ai-chat', {
+        method:'POST', headers:{'Content-Type':'application/json'},
+        body: JSON.stringify({ mode:'verify-app', app:name })
+      });
+      if(r.ok){ const d = await r.json(); if(d && typeof d.verifiable==='boolean') return d; }
+    }
+  }catch(e){}
+  return classifyApp(name);
+}
+function classifyApp(name){
+  const n = (name||'').toLowerCase();
+  const has = function(){ for(var i=0;i<arguments.length;i++){ if(n.indexOf(arguments[i])>-1) return true; } return false; };
+  if (has('run','jog','fit','health','workout','gym','strava','step','walk','cycle','bike','peloton','garmin','whoop','watch','exercise','train','move','active','sport','cardio')) return {verifiable:true, source:'health'};
+  if (has('sleep','meditat','calm','mindful','breath','headspace','oura','rest','yoga')) return {verifiable:true, source:'health'};
+  if (has('read','book','kindle','audible','libby','novel','story')) return {verifiable:true, source:'kindle'};
+  if (has('duolingo','babbel','language','lesson','learn','memrise','anki','vocab')) return {verifiable:true, source:'duolingo'};
+  if (has('calorie','meal','food','nutrition','diet','macro','myfitnesspal','eat')) return {verifiable:true, source:'nutrition'};
+  if (has('canvas','classroom','blackboard','school','assignment','course','moodle','homework','study')) return {verifiable:true, source:'canvas'};
+  if (has('screen','focus','block','opal','rescuetime','freedom','forest','distract')) return {verifiable:true, source:'screentime'};
+  return {verifiable:false};
 }
 
 // ── SVG icons (Lucide-style line icons) — replace emojis for tasks/categories ──
@@ -2192,21 +2266,21 @@ const CATEGORIES = [
 ];
 
 const GOALS = [
-  { id:'steps',    category:'fitness',  label:'Walk 10,000 steps',         icon:'footprints',   emoji:'🚶', color:'#34d399', source:'health',     metric:'Steps',           dir:'≥', target:10000, unit:'steps', apps:['health','fitbit','garmin'], verify:'auto' },
-  { id:'exercise', category:'fitness',  label:'30 min of exercise',         icon:'dumbbell',     emoji:'🏋️', color:'#4ade80', source:'health',     metric:'Exercise',        dir:'≥', target:30,    unit:'min',   apps:['health','whoop','peloton'], verify:'auto' },
-  { id:'run',      category:'fitness',  label:'Run 3 miles',                icon:'activity',     emoji:'🏃', color:'#fb923c', source:'health',     metric:'Run distance',    dir:'≥', target:3,     unit:'mi',    apps:['strava','garmin','health'], verify:'auto' },
-  { id:'meditate', category:'wellness', label:'Meditate 10 min',            icon:'leaf',         emoji:'🧘', color:'#a78bfa', source:'health',     metric:'Mindful minutes', dir:'≥', target:10,    unit:'min',   apps:['health','headspace','calm'], verify:'auto' },
-  { id:'sleep',    category:'wellness', label:'Sleep 7+ hours',             icon:'moon',         emoji:'🛌', color:'#60a5fa', source:'health',     metric:'Sleep',           dir:'≥', target:7,     unit:'hr',    apps:['health','oura','whoop'], verify:'auto' },
-  { id:'food_log', category:'nutrition',label:'Log all your meals',         icon:'utensils',     emoji:'🥗', color:'#34d399', source:'nutrition',  metric:'Meals logged',    dir:'',  target:0,     unit:'',      apps:['nutrition','health'], verify:'auto' },
-  { id:'food_cal', category:'nutrition',label:'Stay under your calories',   icon:'utensils',     emoji:'🔥', color:'#fb923c', source:'nutrition',  metric:'Calories',        dir:'≤', target:2000,  unit:'kcal',  apps:['nutrition','health'], verify:'auto' },
+  { id:'steps',    category:'fitness',  label:'Walk 10,000 steps',         icon:'footprints',   emoji:'🚶', color:'#34d399', source:'health',     metric:'Steps',           dir:'≥', target:10000, unit:'steps', apps:['health','fitbit','garmin','samsunghealth','googlefit'], verify:'auto' },
+  { id:'exercise', category:'fitness',  label:'30 min of exercise',         icon:'dumbbell',     emoji:'🏋️', color:'#4ade80', source:'health',     metric:'Exercise',        dir:'≥', target:30,    unit:'min',   apps:['health','whoop','strava','peloton','nikerun'], verify:'auto' },
+  { id:'run',      category:'fitness',  label:'Run 3 miles',                icon:'activity',     emoji:'🏃', color:'#fb923c', source:'health',     metric:'Run distance',    dir:'≥', target:3,     unit:'mi',    apps:['strava','garmin','health','nikerun','mapmyrun'], verify:'auto' },
+  { id:'meditate', category:'wellness', label:'Meditate 10 min',            icon:'leaf',         emoji:'🧘', color:'#a78bfa', source:'health',     metric:'Mindful minutes', dir:'≥', target:10,    unit:'min',   apps:['health','headspace','calm','insighttimer','balance'], verify:'auto' },
+  { id:'sleep',    category:'wellness', label:'Sleep 7+ hours',             icon:'moon',         emoji:'🛌', color:'#60a5fa', source:'health',     metric:'Sleep',           dir:'≥', target:7,     unit:'hr',    apps:['health','oura','whoop','sleepcycle','autosleep'], verify:'auto' },
+  { id:'food_log', category:'nutrition',label:'Log all your meals',         icon:'utensils',     emoji:'🥗', color:'#34d399', source:'nutrition',  metric:'Meals logged',    dir:'',  target:0,     unit:'',      apps:['nutrition','calai','loseit','cronometer','health'], verify:'auto' },
+  { id:'food_cal', category:'nutrition',label:'Stay under your calories',   icon:'utensils',     emoji:'🔥', color:'#fb923c', source:'nutrition',  metric:'Calories',        dir:'≤', target:2000,  unit:'kcal',  apps:['nutrition','calai','loseit','cronometer','health'], verify:'auto' },
   { id:'screen',   category:'digital',  label:'Cap your time-sink apps',     icon:'smartphone',   emoji:'📱', color:'#f87171', source:'screentime', metric:'Screen time',     dir:'≤', target:30,    unit:'min',   verify:'auto' },
-  { id:'cv_ontime',category:'school',   label:'Submit assignments on time', icon:'circle-check', emoji:'🎓', color:'#dc2626', source:'canvas',     metric:'Canvas',          dir:'',  target:0,     unit:'',      apps:['canvas','classroom','blackboard'], verify:'canvas' },
-  { id:'cv_nomiss',category:'school',   label:'No missing assignments',     icon:'book-open',    emoji:'📚', color:'#2563eb', source:'canvas',     metric:'Canvas',          dir:'',  target:0,     unit:'',      apps:['canvas','classroom','blackboard'], verify:'canvas' },
+  { id:'cv_ontime',category:'school',   label:'Submit assignments on time', icon:'circle-check', emoji:'🎓', color:'#dc2626', source:'canvas',     metric:'Canvas',          dir:'',  target:0,     unit:'',      apps:['canvas','classroom','blackboard','schoology','moodle'], verify:'canvas' },
+  { id:'cv_nomiss',category:'school',   label:'No missing assignments',     icon:'book-open',    emoji:'📚', color:'#2563eb', source:'canvas',     metric:'Canvas',          dir:'',  target:0,     unit:'',      apps:['canvas','classroom','blackboard','schoology','moodle'], verify:'canvas' },
   { id:'gym',      category:'location', label:'Get to the gym',             icon:'dumbbell',     emoji:'📍', color:'#38bdf8', source:'gps',        metric:'Gym check-in',    dir:'',  target:0,     unit:'',      verify:'auto' },
   { id:'avoid',    category:'location', label:'Avoid a place',              icon:'ban',          emoji:'🚫', color:'#94a3b8', source:'gps',        metric:'Stay away',       dir:'',  target:0,     unit:'',      verify:'auto' },
-  { id:'read_min', category:'reading',  label:'Read 20 minutes',            icon:'book',         emoji:'📖', color:'#f59e0b', source:'kindle',     metric:'Reading time',    dir:'≥', target:20,    unit:'min',   apps:['kindle','audible','goodreads'], verify:'auto' },
-  { id:'read_pg',  category:'reading',  label:'Read 25 pages',              icon:'book',         emoji:'📖', color:'#fb923c', source:'kindle',     metric:'Pages read',      dir:'≥', target:25,    unit:'pages', apps:['kindle','goodreads','storygraph'], verify:'auto' },
-  { id:'duo',      category:'learning', label:'Complete a Duolingo lesson', icon:'globe',        emoji:'🦉', color:'#22c55e', source:'duolingo',   metric:'Lessons',         dir:'≥', target:1,     unit:'lesson',apps:['duolingo','babbel','busuu'], verify:'auto' },
+  { id:'read_min', category:'reading',  label:'Read 20 minutes',            icon:'book',         emoji:'📖', color:'#f59e0b', source:'kindle',     metric:'Reading time',    dir:'≥', target:20,    unit:'min',   apps:['kindle','audible','goodreads','storygraph','applebooks'], verify:'auto' },
+  { id:'read_pg',  category:'reading',  label:'Read 25 pages',              icon:'book',         emoji:'📖', color:'#fb923c', source:'kindle',     metric:'Pages read',      dir:'≥', target:25,    unit:'pages', apps:['kindle','goodreads','storygraph','applebooks','libby'], verify:'auto' },
+  { id:'duo',      category:'learning', label:'Complete a Duolingo lesson', icon:'globe',        emoji:'🦉', color:'#22c55e', source:'duolingo',   metric:'Lessons',         dir:'≥', target:1,     unit:'lesson',apps:['duolingo','babbel','busuu','memrise','pimsleur'], verify:'auto' },
   { id:'proof',    category:'custom',   label:'Create your own goal',       icon:'camera',       emoji:'📸', color:'#e6b94e', source:'camera',     metric:'Photo + AI',      dir:'',  target:0,     unit:'',      verify:'proof' },
 ];
 
@@ -2217,17 +2291,49 @@ function anyConnected(){ return Object.values(state.connections || {}).some(Bool
 function renderConnectList(){
   const el = document.getElementById('connect-list');
   if (!el) return;
-  el.innerHTML = Object.entries(SOURCES).map(([k,s]) => {
-    const isCanvas = k === 'canvas';
-    const on = isCanvas ? !!(state.canvas && state.canvas.connected) : state.connections[k];
-    const action = isCanvas ? 'openCanvasSetup()' : (k === 'health' ? 'connectHealth()' : `toggleConnect('${k}')`);
-    const label = isCanvas ? (on ? 'Connected ✓' : 'Set up') : (on ? 'Connected ✓' : 'Connect');
-    return `<div class="connect-card ${on?'connected':''}">
-      <div class="ci">${s.icon}</div>
-      <div class="cc-body"><div class="cc-name">${s.label}</div><div class="cc-sub">${s.sub}</div></div>
-      <button class="connect-btn" onclick="${action}">${label}</button>
-    </div>`;
-  }).join('');
+  const g = goalById(state.onboardData.goalId);
+  const realSource = onboardNeededSource();
+  // show only the apps relevant to the chosen goal (its top options); fall back to all sources
+  let keys;
+  if (g && g.apps && g.apps.length) keys = g.apps.slice();
+  else if (realSource) keys = [realSource];
+  else keys = Object.keys(SOURCES);
+  const chosen = state.onboardData.app;
+  if (chosen && keys.indexOf(chosen) === -1) keys.unshift(chosen);
+  const connectedSrc = realSource === 'canvas' ? !!(state.canvas && state.canvas.connected) : !!(realSource && state.connections[realSource]);
+  el.innerHTML = keys.map(k => connectCardHTML(k, realSource, connectedSrc)).join('')
+    + `<input class="input-field app-search" id="connect-search" placeholder="Search for another app…" oninput="onConnectSearch(this.value)" autocomplete="off"><div id="connect-search-results" class="app-results"></div>`;
+}
+function connectCardHTML(k, realSource, connectedSrc){
+  const label = appLabelOf(k);
+  const sub = (SOURCES[k] && SOURCES[k].sub) || 'Verifies this habit automatically — no honor system.';
+  const isChosen = (state.onboardData.app || realSource) === k;
+  const on = connectedSrc && isChosen;
+  return `<div class="connect-card ${on?'connected':''}">
+    <div class="ci">${appBadge(k, label, 28)}</div>
+    <div class="cc-body"><div class="cc-name">${label}</div><div class="cc-sub">${sub}</div></div>
+    <button class="connect-btn" onclick="connectGoalApp('${k}','${(label+'').replace(/'/g,'')}')">${on?'Connected ✓':'Connect'}</button>
+  </div>`;
+}
+function connectGoalApp(k, label){
+  state.onboardData.app = k;
+  state.onboardData.appLabel = label || appLabelOf(k);
+  const src = onboardNeededSource();
+  if (src === 'health') { connectHealth(); return; }
+  if (src === 'canvas') { openCanvasSetup(); return; }
+  state.connections[src] = true; saveState();
+  renderConnectList();
+  showToast('✅ ' + (state.onboardData.appLabel || 'Connected'), 'green');
+}
+function onConnectSearch(q){
+  const el = document.getElementById('connect-search-results'); if(!el) return;
+  const raw = (q||'').replace(/[<>]/g,'').trim(); const ql = raw.toLowerCase();
+  if(!ql){ el.innerHTML=''; return; }
+  const matches = APP_CATALOG.filter(a => a.label.toLowerCase().indexOf(ql) > -1).slice(0,6);
+  let html = matches.map(a => `<div class="app-result" onclick="connectGoalApp('${a.key}','${a.label.replace(/'/g,'')}')"><span class="ac-logo">${appBadge(a.key,a.label,22)}</span><span>${a.label}</span></div>`).join('');
+  const exact = APP_CATALOG.some(a => a.label.toLowerCase() === ql);
+  if(!exact){ const safe = raw.replace(/'/g,''); html += `<div class="app-result" onclick="connectGoalApp('custom:${safe}','${safe}')"><span class="ac-logo">${appBadge('custom:'+safe, raw, 22)}</span><span>Use \u201C${raw}\u201D</span></div>`; }
+  el.innerHTML = html;
 }
 function toggleConnect(k){
   state.connections[k] = !state.connections[k];
@@ -2435,18 +2541,15 @@ function renderGoalList(){
     const qEl = document.getElementById('ob2-q');
     const hEl = document.getElementById('ob2-hint');
     if (qEl) qEl.textContent = 'What do you want to work on?';
-    if (hEl) hEl.textContent = "Pick a habit — you'll connect the app that verifies it next.";
-    el.innerHTML = CATEGORIES.map(cat => {
+    if (hEl) hEl.textContent = 'Pick a focus — or search above.';
+    el.innerHTML = '<div class="category-grid">' + CATEGORIES.map(cat => {
       const col = cat.color;
-      return `<div class="category-card" onclick="selectCategory('${cat.id}')">
-        <div class="cat-emoji" style="background:${hexToRgba(col,0.15)};border:1px solid ${hexToRgba(col,0.4)};color:${col}">${iconSVG(cat.icon, 24, col)}</div>
-        <div class="cat-body">
-          <div class="cat-name">${cat.label}</div>
-          <div class="cat-src">${srcBadge(cat.source)} ${SOURCES[cat.source].label} · ${cat.desc}</div>
-        </div>
-        <div class="cat-chevron">›</div>
+      return `<div class="cat-tile" onclick="selectCategory('${cat.id}')">
+        <div class="cat-emoji" style="background:${hexToRgba(col,0.15)};border:1px solid ${hexToRgba(col,0.4)};color:${col}">${iconSVG(cat.icon, 21, col)}</div>
+        <div class="cat-name">${cat.label}</div>
+        <div class="cat-sub">${srcBadge(cat.source, 13)} ${SOURCES[cat.source].label}</div>
       </div>`;
-    }).join('');
+    }).join('') + '</div>';
     document.getElementById('goal-config').innerHTML = '';
     startSearchPlaceholder();
     return;
@@ -2623,14 +2726,15 @@ function renderGoalConfig(){
   }
   if (g.apps && g.apps.length) {
     const vsrc = state.onboardData.app || g.source;
-    let chips = g.apps.map(a=>`<div class="appchip ${vsrc===a?'selected':''}" onclick="selectGoalApp('${a}')"><span class="ac-logo">${appBadge(a, SOURCES[a]?SOURCES[a].label:a, 26)}</span><span class="ac-name">${SOURCES[a]?SOURCES[a].label:a}</span></div>`).join('');
+    let chips = g.apps.map(a=>`<div class="appchip ${vsrc===a?'selected':''}" onclick="selectGoalApp('${a}','${appLabelOf(a).replace(/'/g,'')}')"><span class="ac-logo">${appBadge(a, appLabelOf(a), 26)}</span><span class="ac-name">${appLabelOf(a)}</span></div>`).join('');
     if (vsrc && g.apps.indexOf(vsrc) === -1) {
       const lbl = habitAppLabel({app:vsrc, appLabel:state.onboardData.appLabel});
       chips += `<div class="appchip selected" onclick="selectGoalApp('${vsrc}','${(lbl+'').replace(/'/g,'')}')"><span class="ac-logo">${appBadge(vsrc,lbl,26)}</span><span class="ac-name">${lbl}</span></div>`;
     }
     inner += `<div class="onboard-hint" style="margin-top:18px">Which app verifies you?</div>
       <div class="appchip-row">${chips}</div>
-      <input class="input-field app-search" id="app-search" placeholder="Search for another app…" oninput="onAppSearch(this.value)" autocomplete="off">
+      <div class="app-search-cap">If you haven't found your app, search here — Ante only lets through apps it can actually verify.</div>
+      <input class="input-field app-search" id="app-search" placeholder="Search any app" oninput="onAppSearch(this.value)" autocomplete="off">
       <div id="app-search-results" class="app-results"></div>`;
   }
   inner += `<div class="onboard-hint" style="margin-top:18px">How often?</div>
@@ -4488,9 +4592,12 @@ function resetAllData() {
 updateIdentity();
 scheduleReminder();
 checkChallengeLink();
-if (state.habits.length > 0) {
+// Returning users skip the "what is Ante" intro — once you've been in, you stay in.
+if (state.hasLaunched || state.habits.length > 0) {
   showTab('home');
 }
+state.hasLaunched = true;
+saveState();
 
 // ─────────────────────────────────────────────
 // PWA — register service worker for offline use
