@@ -1525,6 +1525,7 @@
     </div>
     <div style="display:flex;align-items:center;gap:14px">
       <button class="ai-btn" onclick="openHelp()" aria-label="Ask Ante AI"><svg width="15" height="15" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M12 2l1.7 4.8L18.5 8.5l-4.8 1.7L12 15l-1.7-4.8L5.5 8.5l4.8-1.7z"/><path d="M19 13.5l.9 2.4 2.6 1-2.6.9-.9 2.6-.9-2.6-2.6-.9 2.6-1z"/></svg>Ask AI</button>
+      <button class="help-btn" onclick="openSponsor()" aria-label="Sponsor someone"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="8" width="18" height="4" rx="1"/><path d="M12 8v13"/><path d="M19 12v9H5v-9"/><path d="M7.5 8a2.5 2.5 0 0 1 0-5C11 3 12 8 12 8z"/><path d="M16.5 8a2.5 2.5 0 0 0 0-5C13 3 12 8 12 8z"/></svg></button>
       <button class="help-btn" onclick="openHelp()" aria-label="Help"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><path d="M9.09 9a3 3 0 0 1 5.83 1c0 2-3 3-3 3"/><path d="M12 17h.01"/></svg></button>
       <div class="brand-date" id="home-date" onclick="showTab('stats')"></div>
     </div>
@@ -1838,6 +1839,16 @@
 </div>
 
 <!-- Help + AI chatbot -->
+<!-- Sponsor someone (sponsored stakes) -->
+<div class="modal-overlay" id="sponsor-modal" onclick="closeModalIfBg(event,'sponsor-modal')">
+  <div class="modal" onclick="event.stopPropagation()">
+    <div class="modal-handle"></div>
+    <div class="modal-title">Sponsor</div>
+    <div class="onboard-hint" style="margin-bottom:14px">Bet on someone else's habits. They do it → it's theirs to spend. They miss → it's saved for their future. You never lose.</div>
+    <div id="sponsor-body"></div>
+  </div>
+</div>
+
 <div class="modal-overlay" id="help-modal" onclick="closeModalIfBg(event,'help-modal')">
   <div class="modal" onclick="event.stopPropagation()">
     <div class="modal-handle"></div>
@@ -2023,6 +2034,7 @@ function loadState() {
   const raw = localStorage.getItem(STORAGE_KEY);
   if (raw) state = { ...state, ...JSON.parse(raw) };
   state.connections = Object.assign({ health:false, screentime:false, canvas:false, gps:false, kindle:false, duolingo:false, camera:false }, state.connections || {});
+  state.sponsored = state.sponsored || { members: [], stakes: [] };
   state.canvas = Object.assign({ host:'', token:'', connected:false }, state.canvas || {});
   state.connections.canvas = !!state.canvas.connected;
 }
@@ -3091,6 +3103,91 @@ const HELP = {
 };
 let helpChat = [];   // [{role:'user'|'assistant', content}]
 function chatEscape(s){ return String(s).replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c])); }
+// ─────────────────────────────────────────────
+// SPONSOR — bet on someone else's habits (parent → kid, coach → client…).
+// Win → released to them (spendable); miss → locked into their Future Savings.
+// MVP: members + invite codes + sponsored stakes + a dashboard, all on-device.
+// Real two-account invites + the custodial Future Account need Supabase + a
+// custodial partner (DriveWealth/Atomic) — see SPONSORED_STAKES.md.
+// ─────────────────────────────────────────────
+function ensureSponsored(){
+  state.sponsored = state.sponsored || { members: [], stakes: [] };
+  state.sponsored.members = state.sponsored.members || [];
+  state.sponsored.stakes = state.sponsored.stakes || [];
+  return state.sponsored;
+}
+function sponsorCode(){ return 'ANTE-' + Math.random().toString(36).slice(2, 7).toUpperCase(); }
+function openSponsor(){ ensureSponsored(); renderSponsor(); showModal('sponsor-modal'); }
+function addSponsoredMember(){
+  const inp = document.getElementById('sp-new-name');
+  const name = ((inp && inp.value) || '').trim();
+  if (!name) { showToast('Enter a name', 'red'); return; }
+  ensureSponsored().members.push({ id: 'm' + Date.now(), name, code: sponsorCode(), spendable: 0, future: 0, streak: 0 });
+  if (inp) inp.value = '';
+  saveState(); renderSponsor();
+  showToast(`Invite ${name} with their code`, 'gold');
+}
+function addSponsoredStake(memberId){
+  const habit = ((document.getElementById('sp-habit-' + memberId) || {}).value || '').trim();
+  const amt = parseInt((document.getElementById('sp-amt-' + memberId) || {}).value || '5') || 5;
+  if (!habit) { showToast('Name the habit', 'red'); return; }
+  ensureSponsored().stakes.push({ id: 's' + Date.now(), memberId, habit, amount: amt, missTo: 'future' });
+  saveState(); renderSponsor();
+}
+function sponsorMark(stakeId, done){
+  const sp = ensureSponsored();
+  const st = sp.stakes.find(x => x.id === stakeId); if (!st) return;
+  const m = sp.members.find(x => x.id === st.memberId); if (!m) return;
+  if (done) { m.spendable = (m.spendable || 0) + st.amount; m.streak = (m.streak || 0) + 1; showToast(`✅ $${st.amount} released to ${m.name}`, 'green'); }
+  else { m.future = (m.future || 0) + st.amount; m.streak = 0; showToast(`🔒 $${st.amount} saved for ${m.name}'s future`, 'gold'); }
+  saveState(); renderSponsor();
+}
+function renderSponsor(){
+  const sp = ensureSponsored();
+  const el = document.getElementById('sponsor-body'); if (!el) return;
+  const released = sp.members.reduce((s, m) => s + (m.spendable || 0), 0);
+  const saved = sp.members.reduce((s, m) => s + (m.future || 0), 0);
+  let html = `<div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:16px">
+    <div style="background:var(--surface);border:1px solid var(--border);border-radius:var(--radius-sm);padding:12px">
+      <div style="font-size:11px;color:var(--text-muted);text-transform:uppercase;letter-spacing:.5px">Released to them</div>
+      <div style="font-size:22px;font-weight:800;color:var(--green)">$${released}</div>
+    </div>
+    <div style="background:var(--surface);border:1px solid var(--border);border-radius:var(--radius-sm);padding:12px">
+      <div style="font-size:11px;color:var(--text-muted);text-transform:uppercase;letter-spacing:.5px">🔒 Saved for future</div>
+      <div style="font-size:22px;font-weight:800;color:var(--gold)">$${saved}</div>
+    </div>
+  </div>`;
+  if (!sp.members.length) html += `<div class="onboard-hint" style="text-align:center;margin:8px 0 16px">No one yet — add a kid, client, or friend below.</div>`;
+  html += sp.members.map(m => {
+    const stakes = sp.stakes.filter(s => s.memberId === m.id);
+    return `<div style="background:var(--surface);border:1px solid var(--border);border-radius:var(--radius-sm);padding:14px;margin-bottom:12px">
+      <div style="display:flex;align-items:center;justify-content:space-between">
+        <div style="font-weight:700">${m.name}</div>
+        <div style="font-size:11px;color:var(--text-muted)">code ${m.code} · 🔥 ${m.streak || 0}</div>
+      </div>
+      <div style="display:flex;gap:14px;font-size:12px;color:var(--text-dim);margin-top:4px">
+        <span>Spendable <b style="color:var(--green)">$${m.spendable || 0}</b></span>
+        <span>Future <b style="color:var(--gold)">$${m.future || 0}</b></span>
+      </div>
+      ${stakes.map(st => `<div style="display:flex;align-items:center;gap:8px;margin-top:10px">
+        <div style="flex:1"><div style="font-size:13px;font-weight:600">${st.habit}</div><div style="font-size:11px;color:var(--text-muted)">$${st.amount}/day · miss → future savings</div></div>
+        <button class="btn btn-success btn-small" style="padding:6px 12px" onclick="sponsorMark('${st.id}',true)">Done</button>
+        <button class="btn btn-ghost btn-small" style="padding:6px 12px;color:var(--red)" onclick="sponsorMark('${st.id}',false)">Miss</button>
+      </div>`).join('')}
+      <div style="display:flex;gap:8px;margin-top:12px">
+        <input class="input-field" id="sp-habit-${m.id}" placeholder="New habit (e.g. Read 20 min)" style="flex:2">
+        <input class="input-field" id="sp-amt-${m.id}" type="number" value="5" style="flex:1;text-align:center">
+        <button class="btn btn-secondary btn-small" style="white-space:nowrap" onclick="addSponsoredStake('${m.id}')">+ Bet</button>
+      </div>
+    </div>`;
+  }).join('');
+  html += `<div class="divider"></div>
+    <div style="display:flex;gap:8px">
+      <input class="input-field" id="sp-new-name" placeholder="Add someone (kid, client, friend)" style="flex:1">
+      <button class="btn btn-primary btn-small" style="white-space:nowrap" onclick="addSponsoredMember()">Add</button>
+    </div>`;
+  el.innerHTML = html;
+}
 function openHelp(){
   showModal('help-modal');
   renderChat();
