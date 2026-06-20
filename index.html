@@ -307,6 +307,31 @@
   .feed-result.win { background: var(--green-dim); color: var(--green); }
   .feed-result.loss { background: var(--red-dim); color: var(--red); }
 
+  /* ── CHALLENGE INBOX ── */
+  .challenge-inbox { margin: 0 20px 8px; display: flex; flex-direction: column; gap: 12px; }
+  .ch-card {
+    background: linear-gradient(135deg, rgba(230,185,78,0.10), rgba(230,185,78,0.04));
+    border: 1px solid rgba(230,185,78,0.35); border-radius: var(--radius);
+    padding: 16px 18px; position: relative; overflow: hidden;
+  }
+  .ch-card::before { content:''; position:absolute; top:0; left:0; right:0; height:2px; background:var(--gold); border-radius:2px 2px 0 0; }
+  .ch-eyebrow { font-size: 10px; font-weight: 800; letter-spacing: 1.2px; text-transform: uppercase; color: var(--gold); margin-bottom: 7px; display: flex; align-items: center; gap: 6px; }
+  .ch-title { font-size: 16px; font-weight: 700; margin-bottom: 3px; }
+  .ch-meta { font-size: 13px; color: var(--text-muted); margin-bottom: 4px; }
+  .ch-msg { font-size: 13px; color: var(--text-dim); font-style: italic; margin-bottom: 14px; line-height: 1.4; }
+  .ch-actions { display: flex; gap: 10px; }
+  .ch-accept { flex: 1; padding: 11px; background: var(--gold); color: #000; font-weight: 700; font-size: 14px; border: none; border-radius: var(--radius-sm); cursor: pointer; }
+  .ch-decline { padding: 11px 16px; background: transparent; color: var(--text-muted); font-size: 14px; border: 1px solid var(--border); border-radius: var(--radius-sm); cursor: pointer; }
+  /* "Funded by" badge on habit cards */
+  .ch-funded-badge { font-size: 11px; font-weight: 700; color: var(--gold); background: rgba(230,185,78,0.12); border: 1px solid rgba(230,185,78,0.3); border-radius: 6px; padding: 2px 8px; display: inline-flex; align-items: center; gap: 4px; }
+  /* Send Challenge modal — goal picker */
+  .ch-goal-list { display: flex; flex-direction: column; gap: 8px; max-height: 220px; overflow-y: auto; margin-bottom: 16px; }
+  .ch-goal-row { display: flex; align-items: center; gap: 12px; padding: 10px 12px; background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius-sm); cursor: pointer; }
+  .ch-goal-row.selected { border-color: var(--gold); background: rgba(230,185,78,0.08); }
+  .ch-goal-row .cg-icon { width: 36px; height: 36px; border-radius: 10px; display: flex; align-items: center; justify-content: center; flex-shrink: 0; }
+  .ch-goal-row .cg-name { font-size: 14px; font-weight: 600; }
+  .ch-goal-row .cg-cat { font-size: 11px; color: var(--text-muted); text-transform: capitalize; }
+
   .challenge-banner {
     margin: 0 20px 16px;
     background: linear-gradient(135deg, var(--surface), var(--surface2));
@@ -1607,6 +1632,9 @@
     </div>
     <div style="display:flex;align-items:center;gap:14px">
       <div class="brand-date" id="home-date" onclick="showTab('stats')"></div>
+      <button class="help-btn" onclick="openHelp()" aria-label="AI Assistant" title="Ask Ante AI">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><path d="M9.09 9a3 3 0 0 1 5.83 1c0 2-3 3-3 3"/><path d="M12 17h.01"/></svg>
+      </button>
     </div>
   </div>
 
@@ -1670,6 +1698,9 @@
   </div>
 
   <div id="canvas-due"></div>
+
+  <!-- Challenge inbox — populated by renderChallengeInbox() -->
+  <div id="challenge-inbox"></div>
 
   <div class="section-header" id="today-section">
     <div class="section-title">Today</div>
@@ -1977,6 +2008,36 @@
   </div>
 </div>
 
+<!-- Send Challenge Modal -->
+<div class="modal-overlay" id="send-challenge-modal" onclick="closeModalIfBg(event,'send-challenge-modal')">
+  <div class="modal">
+    <div class="modal-handle"></div>
+    <div class="modal-title">⚡ Challenge <span id="ch-to-name">a friend</span></div>
+    <input type="hidden" id="ch-friend-id">
+    <div class="onboard-hint">Pick a goal to challenge them on</div>
+    <div class="ch-goal-list" id="ch-goal-list"></div>
+    <div class="onboard-hint">Daily stake if they miss</div>
+    <div class="stake-options" id="ch-stake-picker" style="margin-bottom:16px">
+      <div class="stake-chip" data-val="5" onclick="selectChStake(this)">$5</div>
+      <div class="stake-chip selected" data-val="10" onclick="selectChStake(this)">$10</div>
+      <div class="stake-chip" data-val="25" onclick="selectChStake(this)">$25</div>
+      <div class="stake-chip" data-val="50" onclick="selectChStake(this)">$50</div>
+    </div>
+    <div class="onboard-hint">Duration</div>
+    <div class="tag-row" id="ch-duration-picker" style="margin-bottom:16px">
+      <div class="tag" onclick="selectTag(this,'ch-duration-picker')">7 days</div>
+      <div class="tag selected" onclick="selectTag(this,'ch-duration-picker')">30 days</div>
+      <div class="tag" onclick="selectTag(this,'ch-duration-picker')">90 days</div>
+    </div>
+    <div class="onboard-hint">Add a message (optional)</div>
+    <textarea id="ch-message" class="input-field" rows="2" placeholder="e.g. Let's see you actually do it 💪" style="resize:none;margin-bottom:20px"></textarea>
+    <div style="background:var(--gold-dim);border:1px solid rgba(230,185,78,.3);border-radius:10px;padding:12px 14px;font-size:13px;color:var(--text-dim);margin-bottom:20px;line-height:1.5">
+      ⚡ <strong style="color:var(--gold)">How it works:</strong> You set the goal and stake. They accept. If they miss a day, the money goes to charity — not back to you. That's the accountability.
+    </div>
+    <button class="btn btn-primary" onclick="sendChallenge()" style="background:var(--gold);color:#000">Send Challenge</button>
+  </div>
+</div>
+
 <!-- Edit Habit Modal -->
 <div class="modal-overlay" id="edit-habit-modal" onclick="closeModalIfBg(event,'edit-habit-modal')">
   <div class="modal">
@@ -2111,6 +2172,7 @@ let state = {
   totalForfeit: 0,
   savingsVault: 0,
   txHistory: [],
+  challenges: [],
   connections: { health: false, screentime: false, canvas: false, gps: false, camera: false, nutrition: false },
   canvas: { host: '', token: '', connected: false },
   profile: { name: 'Beckett', handle: 'beckett', reminderTime: '20:00', reminderOn: false },
@@ -2123,11 +2185,37 @@ function loadState() {
   state.connections = Object.assign({ health:false, screentime:false, canvas:false, gps:false, kindle:false, duolingo:false, camera:false, nutrition:false }, state.connections || {});
   state.canvas = Object.assign({ host:'', token:'', connected:false }, state.canvas || {});
   state.connections.canvas = !!state.canvas.connected;
+  if (!Array.isArray(state.challenges)) state.challenges = [];
+}
+
+function seedDemoChallenge() {
+  // Only seed once, only if no pending challenges exist yet
+  if (state.challenges.some(c => c.direction === 'incoming' && c.status === 'pending')) return;
+  if (localStorage.getItem('ante_challenge_seeded')) return;
+  localStorage.setItem('ante_challenge_seeded', '1');
+  state.challenges.push({
+    id: 'chal_demo_' + Date.now(),
+    direction: 'incoming',
+    fromName: 'Dad',
+    fromHandle: '@dad',
+    goalId: 'exercise',
+    goalLabel: 'Work out for the day',
+    goalIcon: 'dumbbell',
+    goalColor: '#4ade80',
+    stake: 10,
+    days: 30,
+    message: "Let's see you actually do it. $10/day on the line — no excuses 💪",
+    createdAt: new Date().toISOString(),
+    status: 'pending',
+    habitId: null
+  });
+  saveState();
 }
 function saveState() {
   localStorage.setItem(STORAGE_KEY, JSON.stringify(state));
 }
 loadState();
+seedDemoChallenge();
 
 // Skip login if user is already authenticated
 (function checkAuth() {
@@ -3515,6 +3603,7 @@ function renderHabits() {
   const container = document.getElementById('habits-container');
   renderCanvasDue();
   renderMiniMap();
+  renderChallengeInbox();
   const totalStaked = state.habits.reduce((s,h) => s + h.stake, 0);
   const doneToday = state.habits.filter(isCompletedToday).length;
   animateCount(document.getElementById('wallet-amount'), (state.walletBalance || 50), 600, 2);
@@ -3570,6 +3659,7 @@ function renderHabits() {
         <div class="habit-stake-badge">$${h.stake}/miss</div>
       </div>
       <div class="habit-name">${h.name}</div>
+      ${h.challengeFrom ? `<div class="ch-funded-badge" style="margin-bottom:6px"><svg width="11" height="11" viewBox="0 0 24 24" fill="currentColor"><path d="m13 2-2 6.9H3l6 4.4-2.3 7 6.3-4.5 6.3 4.5-2.3-7 6-4.4H15Z"/></svg> Funded by ${h.challengeFrom} · $${h.stake}/miss</div>` : ''}
       <div class="habit-meta">${h.freq}${targetStr ? ` · ${targetStr}` : ''}</div>
       <div style="margin-top:8px;display:flex;gap:8px;align-items:center;flex-wrap:wrap">
         <span class="verify-badge">${habitAppBadge(h,15)} ${habitAppLabel(h)}</span>
@@ -4555,12 +4645,155 @@ function addFriend(id) {
   renderFriends();
 }
 
+// ─────────────────────────────────────────────
+// CHALLENGES
+// ─────────────────────────────────────────────
+
+// Featured goals shown in the send-challenge modal (one per category)
+var CHALLENGE_GOALS = [
+  { id:'exercise', label:'Work out for the day',      icon:'dumbbell', color:'#4ade80', category:'fitness'   },
+  { id:'run',      label:'Go for a run',              icon:'activity', color:'#fb923c', category:'fitness'   },
+  { id:'steps',    label:'Get your steps in',         icon:'footprints',color:'#34d399',category:'fitness'   },
+  { id:'meditate', label:'Meditate daily',            icon:'moon',     color:'#818cf8', category:'wellness'  },
+  { id:'sleep',    label:"Get a full night's sleep",  icon:'moon',     color:'#6366f1', category:'wellness'  },
+  { id:'water',    label:'Drink enough water',        icon:'droplet',  color:'#38bdf8', category:'nutrition' },
+  { id:'read_min', label:'Read every day',            icon:'book',     color:'#f59e0b', category:'reading'   },
+  { id:'study',    label:'Put in a study session',    icon:'briefcase',color:'#a78bfa', category:'school'    },
+  { id:'duo',      label:'Do your language lesson',   icon:'globe',    color:'#22d3ee', category:'learning'  },
+  { id:'noalc',    label:'No alcohol today',          icon:'slash',    color:'#f87171', category:'wellness'  },
+];
+
+var _chSelectedGoal = null;
+var _chSelectedStake = 10;
+
 function challengeFriend(id) {
   const f = (state.friends || []).find(p => p.id === id) || FRIEND_ROSTER.find(r => r.id === id);
   if (!f) return;
-  const hab = state.habits && state.habits[0];
-  if (!hab) { showToast('Add a habit first to start a challenge!', ''); return; }
-  showToast('Challenge sent to ' + f.name + ' 🔥', 'green');
+  document.getElementById('ch-to-name').textContent = f.name;
+  document.getElementById('ch-friend-id').value = id;
+  document.getElementById('ch-message').value = '';
+  _chSelectedGoal = null;
+  _chSelectedStake = 10;
+  // Reset stake chip selection
+  document.querySelectorAll('#ch-stake-picker .stake-chip').forEach(c => {
+    c.classList.toggle('selected', c.dataset.val === '10');
+  });
+  // Reset duration
+  document.querySelectorAll('#ch-duration-picker .tag').forEach((t,i) => {
+    t.classList.toggle('selected', i === 1);
+  });
+  // Render goal list
+  const gl = document.getElementById('ch-goal-list');
+  gl.innerHTML = CHALLENGE_GOALS.map(g => `
+    <div class="ch-goal-row" onclick="selectChGoal('${g.id}',this)" data-goal="${g.id}">
+      <div class="cg-icon" style="background:${hexToRgba(g.color,0.16)};border:1px solid ${hexToRgba(g.color,0.4)};color:${g.color}">${iconSVG(g.icon,18,g.color)}</div>
+      <div><div class="cg-name">${g.label}</div><div class="cg-cat">${g.category}</div></div>
+    </div>`).join('');
+  showModal('send-challenge-modal');
+}
+
+function selectChGoal(id, el) {
+  _chSelectedGoal = id;
+  document.querySelectorAll('#ch-goal-list .ch-goal-row').forEach(r => r.classList.remove('selected'));
+  el.classList.add('selected');
+}
+
+function selectChStake(el) {
+  _chSelectedStake = parseInt(el.dataset.val, 10);
+  document.querySelectorAll('#ch-stake-picker .stake-chip').forEach(c => c.classList.remove('selected'));
+  el.classList.add('selected');
+}
+
+function sendChallenge() {
+  if (!_chSelectedGoal) { showToast('Pick a goal first', 'red'); return; }
+  const friendId = document.getElementById('ch-friend-id').value;
+  const f = (state.friends || []).find(p => p.id === friendId) || FRIEND_ROSTER.find(r => r.id === friendId);
+  const goal = CHALLENGE_GOALS.find(g => g.id === _chSelectedGoal);
+  const durEl = document.querySelector('#ch-duration-picker .tag.selected');
+  const days = durEl ? parseInt(durEl.textContent) : 30;
+  const msg = (document.getElementById('ch-message').value || '').trim();
+
+  state.challenges.push({
+    id: 'chal_out_' + Date.now(),
+    direction: 'outgoing',
+    fromName: state.profile.name || 'You',
+    toName: f ? f.name : 'Friend',
+    goalId: goal.id,
+    goalLabel: goal.label,
+    goalIcon: goal.icon,
+    goalColor: goal.color,
+    stake: _chSelectedStake,
+    days: days,
+    message: msg,
+    createdAt: new Date().toISOString(),
+    status: 'pending',
+    habitId: null
+  });
+  saveState();
+  closeModal('send-challenge-modal');
+  showToast('⚡ Challenge sent to ' + (f ? f.name : 'your friend') + '!', 'green');
+}
+
+function renderChallengeInbox() {
+  const inbox = document.getElementById('challenge-inbox');
+  if (!inbox) return;
+  const pending = (state.challenges || []).filter(c => c.direction === 'incoming' && c.status === 'pending');
+  if (pending.length === 0) { inbox.innerHTML = ''; return; }
+  inbox.innerHTML = `<div class="challenge-inbox">${pending.map(c => `
+    <div class="ch-card">
+      <div class="ch-eyebrow">
+        <svg width="12" height="12" viewBox="0 0 24 24" fill="var(--gold)"><path d="m13 2-2 6.9H3l6 4.4-2.3 7 6.3-4.5 6.3 4.5-2.3-7 6-4.4H15Z"/></svg>
+        Challenge from ${c.fromName}
+      </div>
+      <div class="ch-title">${c.goalLabel}</div>
+      <div class="ch-meta">$${c.stake}/day · ${c.days} days · miss = to charity</div>
+      ${c.message ? `<div class="ch-msg">"${c.message}"</div>` : '<div style="margin-bottom:14px"></div>'}
+      <div class="ch-actions">
+        <button class="ch-accept" onclick="acceptChallenge('${c.id}')">Accept — I'm in</button>
+        <button class="ch-decline" onclick="declineChallenge('${c.id}')">Decline</button>
+      </div>
+    </div>`).join('')}
+  </div>`;
+}
+
+function acceptChallenge(id) {
+  const ch = (state.challenges || []).find(c => c.id === id);
+  if (!ch) return;
+  // Create a real habit from the challenge
+  const hab = {
+    id: 'hab_' + Date.now(),
+    name: ch.goalLabel,
+    icon: ch.goalIcon || 'target',
+    color: ch.goalColor || '#e6b94e',
+    category: '',
+    source: 'camera',
+    app: 'camera',
+    verify: 'proof',
+    freq: 'Every Day',
+    stake: ch.stake,
+    challengeFrom: ch.fromName,
+    challengeId: ch.id,
+    createdAt: new Date().toISOString(),
+    completedDays: [],
+    missedDays: [],
+    currentStreak: 0,
+    bestStreak: 0
+  };
+  state.habits.push(hab);
+  ch.status = 'accepted';
+  ch.habitId = hab.id;
+  saveState();
+  renderHabits();
+  showToast('⚡ Challenge accepted! $' + ch.stake + '/day is locked in.', 'green');
+}
+
+function declineChallenge(id) {
+  const ch = (state.challenges || []).find(c => c.id === id);
+  if (!ch) return;
+  ch.status = 'declined';
+  saveState();
+  renderChallengeInbox();
+  showToast('Challenge declined.', '');
 }
 
 function inviteFriends() {
