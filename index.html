@@ -886,6 +886,89 @@
     .wallet-card{ transform:none !important; }
     .wallet-shine{ display:none; }
   }
+
+  /* ============================================================
+     DIGITAL APP-PICKER (scoped to #screen-ob2) — pick apps → cap → stake
+  ============================================================ */
+  #screen-ob2 .app-pick-note{
+    background: var(--surface); border: 1px solid var(--border);
+    border-radius: var(--radius-sm); padding: 12px 14px;
+    font-size: 12.5px; color: var(--text-muted); line-height: 1.5;
+    margin-bottom: 16px;
+  }
+  #screen-ob2 .app-grid{
+    display: grid; grid-template-columns: repeat(4, 1fr);
+    gap: 10px; margin-bottom: 24px;
+  }
+  #screen-ob2 .app-tile{
+    position: relative; display: flex; flex-direction: column;
+    align-items: center; justify-content: center; gap: 8px;
+    background: var(--surface); border: 1.5px solid var(--border);
+    border-radius: var(--radius-sm); padding: 14px 6px 11px;
+    cursor: pointer; transition: transform .12s, border-color .15s, background .15s;
+    user-select: none;
+  }
+  #screen-ob2 .app-tile:active{ transform: scale(.95); }
+  #screen-ob2 .app-tile.selected{
+    border-color: var(--gold); background: var(--gold-dim);
+    box-shadow: 0 0 0 1px var(--gold) inset;
+  }
+  #screen-ob2 .app-logo{
+    width: 40px; height: 40px; border-radius: 11px;
+    display: flex; align-items: center; justify-content: center;
+    background: var(--surface2); overflow: hidden;
+  }
+  #screen-ob2 .app-tile.selected .app-logo{ background: rgba(0,0,0,.25); }
+  #screen-ob2 .app-logo svg{ display: block; border-radius: 7px; }
+  #screen-ob2 .app-name{
+    font-size: 11px; font-weight: 600; color: var(--text-dim);
+    letter-spacing: -.1px; text-align: center; line-height: 1;
+  }
+  #screen-ob2 .app-tile.selected .app-name{ color: var(--text); }
+  #screen-ob2 .app-check{
+    position: absolute; top: 6px; right: 6px;
+    width: 17px; height: 17px; border-radius: 50%;
+    background: var(--gold); color: #0a0a0b;
+    font-size: 11px; font-weight: 900; line-height: 17px; text-align: center;
+    transform: scale(0); transition: transform .15s cubic-bezier(.34,1.56,.64,1);
+  }
+  #screen-ob2 .app-tile.selected .app-check{ transform: scale(1); }
+  #screen-ob2 .cap-label{ margin-bottom: 12px; font-size: 14px; color: var(--text-dim); font-weight: 600; }
+  #screen-ob2 .cap-sub{ color: var(--text-muted); font-weight: 400; }
+  #screen-ob2 .cap-chips{ display: flex; gap: 8px; margin-bottom: 14px; }
+  #screen-ob2 .cap-chip{
+    flex: 1; background: var(--surface); border: 1.5px solid var(--border);
+    border-radius: var(--radius-sm); padding: 12px 4px; text-align: center;
+    cursor: pointer; transition: all .15s; font-weight: 800; font-size: 17px; color: var(--text);
+  }
+  #screen-ob2 .cap-chip small{ display: block; font-size: 10px; font-weight: 600; color: var(--text-muted); margin-top: 2px; }
+  #screen-ob2 .cap-chip.selected{ border-color: var(--gold); background: var(--gold-dim); color: var(--gold); }
+  #screen-ob2 .cap-chip.selected small{ color: var(--gold); }
+  #screen-ob2 .cap-stepper{
+    display: flex; align-items: center; justify-content: space-between;
+    background: var(--surface); border: 1px solid var(--border);
+    border-radius: var(--radius-sm); padding: 8px 10px; margin-bottom: 22px;
+  }
+  #screen-ob2 .cap-step-btn{
+    width: 38px; height: 38px; border-radius: 10px;
+    background: var(--surface2); border: 1px solid var(--border);
+    color: var(--text); font-size: 20px; font-weight: 700; cursor: pointer;
+    display: flex; align-items: center; justify-content: center; transition: border-color .15s;
+  }
+  #screen-ob2 .cap-step-btn:active{ border-color: var(--gold); }
+  #screen-ob2 .cap-step-readout{ text-align: center; line-height: 1.1; }
+  #screen-ob2 .cap-step-readout span{ font-size: 22px; font-weight: 800; color: var(--gold); }
+  #screen-ob2 .cap-step-readout small{ display: block; font-size: 11px; color: var(--text-muted); font-weight: 600; }
+  #screen-ob2 .cap-preview{
+    display: flex; align-items: flex-start; gap: 9px;
+    background: var(--gold-dim); border: 1px solid rgba(230,185,78,.35);
+    border-radius: var(--radius-sm); padding: 13px 15px; margin-bottom: 4px;
+    font-size: 13.5px; line-height: 1.45; color: var(--text);
+  }
+  #screen-ob2 .cap-preview-lock{ font-size: 14px; flex-shrink: 0; }
+  @media (max-width: 360px){
+    #screen-ob2 .app-grid{ grid-template-columns: repeat(3, 1fr); }
+  }
 </style>
 </head>
 <body>
@@ -1455,7 +1538,7 @@ let state = {
 function loadState() {
   const raw = localStorage.getItem(STORAGE_KEY);
   if (raw) state = { ...state, ...JSON.parse(raw) };
-  state.connections = Object.assign({ health:false, screentime:false, canvas:false, gps:false, camera:false }, state.connections || {});
+  state.connections = Object.assign({ health:false, screentime:false, canvas:false, gps:false, kindle:false, duolingo:false, camera:false }, state.connections || {});
   state.canvas = Object.assign({ host:'', token:'', connected:false }, state.canvas || {});
   state.connections.canvas = !!state.canvas.connected;
 }
@@ -1512,8 +1595,24 @@ const SOURCES = {
   screentime: { label: 'Screen Time',  icon: '⏱️', sub: 'App & category time limits, enforced by iOS.' },
   canvas:     { label: 'Canvas',        icon: '🎓', sub: 'Verify assignments are submitted on time — read straight from your own Canvas account.' },
   gps:        { label: 'Location',      icon: '📍', sub: 'GPS check-ins — prove you showed up (or stayed away).' },
+  kindle:     { label: 'Kindle',        icon: '📖', sub: 'Reading time & pages from your Kindle library — verify you actually read.' },
+  duolingo:   { label: 'Duolingo',      icon: '🦉', sub: 'Lessons completed and streak kept — verify your daily language practice.' },
   camera:     { label: 'Photo + AI',    icon: '📸', sub: 'AI checks your photo against your description; a human reviews if unsure.' },
 };
+
+// Real brand logos for sources that map to an actual app (id-free + gradient-free
+// so they can render many times inline without duplicate-ID collisions). Others keep emoji.
+const SOURCE_LOGOS = {
+  health: '<rect width="48" height="48" rx="11" fill="#fdfdfd"/><path d="M24 35.2c-.55 0-1.06-.2-1.45-.55C16.9 29.6 13.2 26.25 13.2 21.6c0-3.05 2.35-5.4 5.35-5.4 1.95 0 3.6 1.05 4.55 2.65l.9 1.5.9-1.5c.95-1.6 2.6-2.65 4.55-2.65 3 0 5.35 2.35 5.35 5.4 0 4.65-3.7 8-9.35 13.05-.39.35-.9.55-1.45.55z" fill="#fb1c40"/>',
+  canvas: '<rect width="48" height="48" rx="11" fill="#E72429"/><g fill="#ffffff"><circle cx="24" cy="11.5" r="3.1"/><circle cx="24" cy="36.5" r="3.1"/><circle cx="11.5" cy="24" r="3.1"/><circle cx="36.5" cy="24" r="3.1"/><circle cx="15.16" cy="15.16" r="2.7"/><circle cx="32.84" cy="32.84" r="2.7"/><circle cx="15.16" cy="32.84" r="2.7"/><circle cx="32.84" cy="15.16" r="2.7"/></g><circle cx="24" cy="24" r="4.6" fill="none" stroke="#ffffff" stroke-width="2.3"/>'
+};
+// Inline source badge: real logo where we have one, else the emoji fallback (for innerHTML contexts only).
+function srcBadge(src, px){
+  px = px || 15;
+  const inner = SOURCE_LOGOS[src];
+  if (inner) return `<span style="display:inline-flex;vertical-align:-2px;margin-right:1px"><svg viewBox="0 0 48 48" width="${px}" height="${px}" style="border-radius:4px" aria-hidden="true">${inner}</svg></span>`;
+  return (SOURCES[src] ? SOURCES[src].icon : '');
+}
 
 // ── SVG icons (Lucide-style line icons) — replace emojis for tasks/categories ──
 const ICONS = {
@@ -1537,6 +1636,9 @@ const ICONS = {
   pencil: '<path d="M21.174 6.812a1 1 0 0 0-3.986-3.987L3.842 16.174a2 2 0 0 0-.5.83l-1.321 4.352a.5.5 0 0 0 .623.622l4.353-1.32a2 2 0 0 0 .83-.497z"/><path d="m15 5 4 4"/>',
   utensils: '<path d="M3 2v7c0 1.1.9 2 2 2a2 2 0 0 0 2-2V2"/><path d="M7 2v20"/><path d="M21 15V2a5 5 0 0 0-5 5v6c0 1.1.9 2 2 2h3Z"/>',
   flame: '<path d="M8.5 14.5A2.5 2.5 0 0 0 11 12c0-1.38-.5-2-1-3-1.072-2.143-.224-4.054 2-6 .5 2.5 2 4.9 4 6.5 2 1.6 3 3.5 3 5.5a7 7 0 1 1-14 0c0-1.153.433-2.294 1-3a2.5 2.5 0 0 0 2.5 2.5z"/>',
+  book: '<path d="M4 19.5v-15A2.5 2.5 0 0 1 6.5 2H19a1 1 0 0 1 1 1v18a1 1 0 0 1-1 1H6.5a1 1 0 0 1 0-5H20"/>',
+  globe: '<circle cx="12" cy="12" r="10"/><path d="M12 2a14.5 14.5 0 0 0 0 20 14.5 14.5 0 0 0 0-20"/><path d="M2 12h20"/>',
+  'help-circle': '<circle cx="12" cy="12" r="10"/><path d="M9.09 9a3 3 0 0 1 5.83 1c0 2-3 3-3 3"/><path d="M12 17h.01"/>',
 };
 function iconSVG(name, size, color) {
   const inner = ICONS[name] || ICONS.target;
@@ -1556,9 +1658,11 @@ const PICKER_ICONS = ['dumbbell','footprints','activity','leaf','heart','droplet
 const CATEGORIES = [
   { id:'fitness',  label:'Fitness',    icon:'activity',        emoji:'🏃', color:'#4ade80', source:'health',     desc:'Steps, running, and workouts' },
   { id:'wellness', label:'Wellness',   icon:'heart',           emoji:'🧘', color:'#a78bfa', source:'health',     desc:'Sleep, meditation, mindfulness' },
-  { id:'digital',  label:'Digital',    icon:'smartphone',      emoji:'📱', color:'#f87171', source:'screentime', desc:'Screen time limits enforced by iOS' },
+  { id:'digital',  label:'Digital',    icon:'smartphone',      emoji:'📱', color:'#f87171', source:'screentime', desc:'Cap the apps that eat your time' },
   { id:'school',   label:'School',     icon:'graduation-cap',  emoji:'📚', color:'#60a5fa', source:'canvas',     desc:'Assignment deadlines, no missing work' },
   { id:'location', label:'Location',   icon:'map-pin',         emoji:'📍', color:'#38bdf8', source:'gps',        desc:'Gym check-ins, avoid certain places' },
+  { id:'reading',  label:'Reading',    icon:'book',            emoji:'📖', color:'#f59e0b', source:'kindle',     desc:'Reading time & pages, via Kindle' },
+  { id:'learning', label:'Learning',   icon:'globe',           emoji:'🦉', color:'#22c55e', source:'duolingo',   desc:'Language lessons, via Duolingo' },
   { id:'custom',   label:'Custom',     icon:'camera',          emoji:'📸', color:'#e6b94e', source:'camera',     desc:'AI-verified photo proof for anything' },
 ];
 
@@ -1568,11 +1672,14 @@ const GOALS = [
   { id:'run',      category:'fitness',  label:'Run 3 miles',                icon:'activity',     emoji:'🏃', color:'#fb923c', source:'health',     metric:'Run distance',    dir:'≥', target:3,     unit:'mi',    verify:'auto' },
   { id:'meditate', category:'wellness', label:'Meditate 10 min',            icon:'leaf',         emoji:'🧘', color:'#a78bfa', source:'health',     metric:'Mindful minutes', dir:'≥', target:10,    unit:'min',   verify:'auto' },
   { id:'sleep',    category:'wellness', label:'Sleep 7+ hours',             icon:'moon',         emoji:'🛌', color:'#60a5fa', source:'health',     metric:'Sleep',           dir:'≥', target:7,     unit:'hr',    verify:'auto' },
-  { id:'screen',   category:'digital',  label:'Limit social apps',          icon:'smartphone',   emoji:'📱', color:'#f87171', source:'screentime', metric:'Screen time',     dir:'≤', target:30,    unit:'min',   verify:'auto' },
+  { id:'screen',   category:'digital',  label:'Cap your time-sink apps',     icon:'smartphone',   emoji:'📱', color:'#f87171', source:'screentime', metric:'Screen time',     dir:'≤', target:30,    unit:'min',   verify:'auto' },
   { id:'cv_ontime',category:'school',   label:'Submit assignments on time', icon:'circle-check', emoji:'🎓', color:'#dc2626', source:'canvas',     metric:'Canvas',          dir:'',  target:0,     unit:'',      verify:'canvas' },
   { id:'cv_nomiss',category:'school',   label:'No missing assignments',     icon:'book-open',    emoji:'📚', color:'#2563eb', source:'canvas',     metric:'Canvas',          dir:'',  target:0,     unit:'',      verify:'canvas' },
   { id:'gym',      category:'location', label:'Get to the gym',             icon:'dumbbell',     emoji:'📍', color:'#38bdf8', source:'gps',        metric:'Gym check-in',    dir:'',  target:0,     unit:'',      verify:'auto' },
   { id:'avoid',    category:'location', label:'Avoid a place',              icon:'ban',          emoji:'🚫', color:'#94a3b8', source:'gps',        metric:'Stay away',       dir:'',  target:0,     unit:'',      verify:'auto' },
+  { id:'read_min', category:'reading',  label:'Read 20 minutes',            icon:'book',         emoji:'📖', color:'#f59e0b', source:'kindle',     metric:'Reading time',    dir:'≥', target:20,    unit:'min',   verify:'auto' },
+  { id:'read_pg',  category:'reading',  label:'Read 25 pages',              icon:'book',         emoji:'📖', color:'#fb923c', source:'kindle',     metric:'Pages read',      dir:'≥', target:25,    unit:'pages', verify:'auto' },
+  { id:'duo',      category:'learning', label:'Complete a Duolingo lesson', icon:'globe',        emoji:'🦉', color:'#22c55e', source:'duolingo',   metric:'Lessons',         dir:'≥', target:1,     unit:'lesson',verify:'auto' },
   { id:'proof',    category:'custom',   label:'Custom (photo proof)',       icon:'camera',       emoji:'📸', color:'#e6b94e', source:'camera',     metric:'Photo + AI',      dir:'',  target:0,     unit:'',      verify:'proof' },
 ];
 
@@ -1788,7 +1895,7 @@ function renderGoalList(){
         <div class="cat-emoji" style="background:${hexToRgba(col,0.15)};border:1px solid ${hexToRgba(col,0.4)};color:${col}">${iconSVG(cat.icon, 24, col)}</div>
         <div class="cat-body">
           <div class="cat-name">${cat.label}</div>
-          <div class="cat-src">${SOURCES[cat.source].icon} ${SOURCES[cat.source].label} · ${cat.desc}</div>
+          <div class="cat-src">${srcBadge(cat.source)} ${SOURCES[cat.source].label} · ${cat.desc}</div>
         </div>
         ${connected
           ? `<div class="cat-chevron">›</div>`
@@ -1798,6 +1905,9 @@ function renderGoalList(){
     document.getElementById('goal-config').innerHTML = '';
     return;
   }
+
+  // Digital category → multi-app picker (pick apps → cap → stake) instead of generic goal list
+  if (catId === 'digital') { renderAppPicker(); return; }
 
   // Phase 2: habit picker within category
   const cat = CATEGORIES.find(c => c.id === catId);
@@ -1814,7 +1924,7 @@ function renderGoalList(){
         <div class="goal-emoji" style="background:${hexToRgba(g.color,0.16)};border:1px solid ${hexToRgba(g.color,0.4)};color:${g.color}">${iconSVG(g.icon, 22, g.color)}</div>
         <div class="goal-body">
           <div class="goal-name">${g.label}</div>
-          <div class="goal-src">${SOURCES[g.source].icon} ${SOURCES[g.source].label}</div>
+          <div class="goal-src">${srcBadge(g.source)} ${SOURCES[g.source].label}</div>
         </div>
       </div>`;
     }).join('');
@@ -1867,7 +1977,7 @@ function renderGoalConfig(){
               : g.id==='avoid' ? "stay outside the location's radius at the deadline."
               : g.source==='canvas' ? "we read your Canvas submissions and check nothing's missing or late."
               : 'auto-checked.';
-    inner = `<div style="margin-top:18px;background:var(--surface);border:1px solid var(--border);border-radius:var(--radius-sm);padding:14px;font-size:13px;color:var(--text-dim);line-height:1.5">${SOURCES[g.source].icon} Verified via ${SOURCES[g.source].label} — ${how}</div>`;
+    inner = `<div style="margin-top:18px;background:var(--surface);border:1px solid var(--border);border-radius:var(--radius-sm);padding:14px;font-size:13px;color:var(--text-dim);line-height:1.5">${srcBadge(g.source)} Verified via ${SOURCES[g.source].label} — ${how}</div>`;
   }
   inner += `<div class="onboard-hint" style="margin-top:18px">How often?</div>
     <div class="tag-row" id="ob-freq">
@@ -1880,14 +1990,135 @@ function selectObFreq(elx, f){
   document.querySelectorAll('#ob-freq .tag').forEach(t=>t.classList.remove('selected'));
   elx.classList.add('selected');
 }
+// ─────────────────────────────────────────────
+// DIGITAL APP-PICKER (pick apps → cap → stake). Uses goalId 'screen'.
+// ─────────────────────────────────────────────
+const APP_LABELS = {
+  youtube:'YouTube', tiktok:'TikTok', instagram:'Instagram', snapchat:'Snapchat',
+  x:'X', reddit:'Reddit', facebook:'Facebook', netflix:'Netflix'
+};
+
+const APP_PICKER_HTML = `
+<div class="cat-back" onclick="backToCategories()">← All categories</div>
+<div class="app-pick-intro">
+  <div class="app-pick-note">
+    On iOS, Ante can't see your installed apps directly — the real version opens
+    Apple's own Screen&nbsp;Time picker. For now, choose from the usual time-sinks below.
+  </div>
+</div>
+<div class="app-grid" id="app-grid">
+  <div class="app-tile" data-app="youtube" onclick="toggleApp(this,'youtube')"><span class="app-check">✓</span><span class="app-logo"><svg viewBox="0 0 24 24" width="26" height="26" aria-hidden="true"><rect x="1" y="4.5" width="22" height="15" rx="4.2" fill="#FF0000"/><path d="M10 8.6v6.8l6-3.4z" fill="#fff"/></svg></span><span class="app-name">YouTube</span></div>
+  <div class="app-tile" data-app="tiktok" onclick="toggleApp(this,'tiktok')"><span class="app-check">✓</span><span class="app-logo"><svg viewBox="0 0 24 24" width="26" height="26" aria-hidden="true"><rect width="24" height="24" rx="6" fill="#010101"/><path d="M16.6 6.2a3.5 3.5 0 0 1-2.2-1.2h-1.9v8.9a2 2 0 1 1-1.5-1.95V9.9a3.9 3.9 0 1 0 3.4 3.86V9.3a5.4 5.4 0 0 0 2.7.74z" fill="#fff"/><path d="M15.9 5.7a3.5 3.5 0 0 1-1.5-1.7h-.3a3.5 3.5 0 0 0 2.5 2.9z" fill="#25F4EE"/><path d="M10.1 14.9a2 2 0 0 1 1.1-3.7v-1.3a3.9 3.9 0 0 0-2.9 6.6 3.9 3.9 0 0 1-.2-1.6z" fill="#FE2C55" opacity=".9"/></svg></span><span class="app-name">TikTok</span></div>
+  <div class="app-tile" data-app="instagram" onclick="toggleApp(this,'instagram')"><span class="app-check">✓</span><span class="app-logo"><svg viewBox="0 0 24 24" width="26" height="26" aria-hidden="true"><defs><radialGradient id="ig-g" cx="30%" cy="105%" r="130%"><stop offset="0%" stop-color="#FFD776"/><stop offset="25%" stop-color="#F3A14F"/><stop offset="50%" stop-color="#E1306C"/><stop offset="75%" stop-color="#C13584"/><stop offset="100%" stop-color="#5851DB"/></radialGradient></defs><rect width="24" height="24" rx="6" fill="url(#ig-g)"/><rect x="6" y="6" width="12" height="12" rx="4" fill="none" stroke="#fff" stroke-width="1.7"/><circle cx="12" cy="12" r="2.8" fill="none" stroke="#fff" stroke-width="1.7"/><circle cx="16.2" cy="7.8" r="1.05" fill="#fff"/></svg></span><span class="app-name">Instagram</span></div>
+  <div class="app-tile" data-app="snapchat" onclick="toggleApp(this,'snapchat')"><span class="app-check">✓</span><span class="app-logo"><svg viewBox="0 0 24 24" width="26" height="26" aria-hidden="true"><rect width="24" height="24" rx="6" fill="#FFFC00"/><path d="M12 5.2c1.9 0 3.1 1.4 3.1 3.3 0 .6-.05 1.2-.05 1.6.25.13.6.18.9.07.5-.17.9.55.36.86-.45.27-1.2.36-1.3.78-.07.3.5.95 1.45 1.3.5.18.36.78-.2.86-.45.06-.5.27-.55.55-.07.4-.55.3-1 .2-.7-.15-1.1.5-2 1.1-.5.34-1.05.4-1.16.4s-.66-.06-1.16-.4c-.9-.6-1.3-1.25-2-1.1-.45.1-.93.2-1-.2-.05-.28-.1-.49-.55-.55-.56-.08-.7-.68-.2-.86.95-.35 1.52-1 1.45-1.3-.1-.42-.85-.51-1.3-.78-.46-.31-.06-1.03.36-.86.3.11.65.06.9-.07 0-.4-.05-1-.05-1.6 0-1.9 1.2-3.3 3.1-3.3z" fill="#fff"/></svg></span><span class="app-name">Snapchat</span></div>
+  <div class="app-tile" data-app="x" onclick="toggleApp(this,'x')"><span class="app-check">✓</span><span class="app-logo"><svg viewBox="0 0 24 24" width="26" height="26" aria-hidden="true"><rect width="24" height="24" rx="6" fill="#000"/><path d="M6 6l4.6 6.1L6.2 18h1.5l3.5-4.1L14.3 18H18l-4.8-6.4L17.6 6h-1.5l-3.3 3.9L9.7 6z" fill="#fff"/></svg></span><span class="app-name">X</span></div>
+  <div class="app-tile" data-app="reddit" onclick="toggleApp(this,'reddit')"><span class="app-check">✓</span><span class="app-logo"><svg viewBox="0 0 24 24" width="26" height="26" aria-hidden="true"><rect width="24" height="24" rx="6" fill="#FF4500"/><circle cx="12" cy="13.5" r="6" fill="#fff"/><circle cx="9.6" cy="13.2" r="1" fill="#FF4500"/><circle cx="14.4" cy="13.2" r="1" fill="#FF4500"/><path d="M9.8 15.4c1.2.9 3.2.9 4.4 0" stroke="#FF4500" stroke-width="1" fill="none" stroke-linecap="round"/><circle cx="17.4" cy="9" r="1.4" fill="#fff"/><circle cx="12" cy="7" r="1" fill="#fff"/><path d="M12 7.6l.4-2 1.9.4" stroke="#fff" stroke-width="1" fill="none" stroke-linecap="round"/></svg></span><span class="app-name">Reddit</span></div>
+  <div class="app-tile" data-app="facebook" onclick="toggleApp(this,'facebook')"><span class="app-check">✓</span><span class="app-logo"><svg viewBox="0 0 24 24" width="26" height="26" aria-hidden="true"><rect width="24" height="24" rx="6" fill="#1877F2"/><path d="M13.4 19v-6h2l.4-2.4h-2.4V9.1c0-.7.2-1.2 1.2-1.2h1.3V5.7c-.6-.08-1.3-.13-2-.13-2 0-3.3 1.2-3.3 3.4v1.6H8.3V13h2.3v6z" fill="#fff"/></svg></span><span class="app-name">Facebook</span></div>
+  <div class="app-tile" data-app="netflix" onclick="toggleApp(this,'netflix')"><span class="app-check">✓</span><span class="app-logo"><svg viewBox="0 0 24 24" width="26" height="26" aria-hidden="true"><rect width="24" height="24" rx="6" fill="#000"/><path d="M9 5h2.1l3.8 10.8V5H17v14h-2.1L11 8v11H9z" fill="#E50914"/></svg></span><span class="app-name">Netflix</span></div>
+</div>
+<div class="cap-block" id="cap-block">
+  <div class="onboard-hint cap-label">Daily cap <span class="cap-sub">— total across the apps you picked</span></div>
+  <div class="cap-chips" id="cap-chips">
+    <div class="cap-chip" data-cap="15" onclick="selectCap(this,15)">15<small>min</small></div>
+    <div class="cap-chip selected" data-cap="30" onclick="selectCap(this,30)">30<small>min</small></div>
+    <div class="cap-chip" data-cap="45" onclick="selectCap(this,45)">45<small>min</small></div>
+    <div class="cap-chip" data-cap="60" onclick="selectCap(this,60)">60<small>min</small></div>
+  </div>
+  <div class="cap-stepper">
+    <button class="cap-step-btn" onclick="stepCap(-5)" aria-label="Decrease">−</button>
+    <div class="cap-step-readout"><span id="cap-step-val">30</span><small>min/day</small></div>
+    <button class="cap-step-btn" onclick="stepCap(5)" aria-label="Increase">+</button>
+  </div>
+</div>
+<div class="cap-preview" id="cap-preview">
+  <span class="cap-preview-lock">🔒</span>
+  <span id="cap-preview-text">Pick at least one app to cap.</span>
+</div>`;
+
+function renderAppPicker(){
+  const el = document.getElementById('goal-list');
+  if (!el) return;
+  const qEl = document.getElementById('ob2-q');
+  const hEl = document.getElementById('ob2-hint');
+  if (qEl) qEl.innerHTML = '<span style="display:inline-flex;vertical-align:middle;margin-right:7px">'
+    + iconSVG('smartphone', 18, '#f87171') + '</span>Pick the apps to cap';
+  if (hEl) hEl.textContent = 'Put money on cutting down the apps that eat your time. Tap all the ones you lose hours to.';
+  el.innerHTML = APP_PICKER_HTML;
+  document.getElementById('goal-config').innerHTML = '';
+  state.onboardData.goalId = 'screen';
+  if (!Array.isArray(state.onboardData.apps)) state.onboardData.apps = [];
+  if (!state.onboardData.capMinutes) state.onboardData.capMinutes = 30;
+  state.onboardData.apps.forEach(k=>{
+    const t = el.querySelector(`.app-tile[data-app="${k}"]`);
+    if (t) t.classList.add('selected');
+  });
+  syncCapUI(state.onboardData.capMinutes);
+  updateBetPreview();
+}
+function toggleApp(tileEl, key){
+  tileEl.classList.toggle('selected');
+  const apps = state.onboardData.apps || (state.onboardData.apps = []);
+  const i = apps.indexOf(key);
+  if (i === -1) apps.push(key); else apps.splice(i,1);
+  updateBetPreview();
+}
+function selectCap(chipEl, mins){
+  document.querySelectorAll('#cap-chips .cap-chip').forEach(c=>c.classList.remove('selected'));
+  chipEl.classList.add('selected');
+  state.onboardData.capMinutes = mins;
+  document.getElementById('cap-step-val').textContent = mins;
+  updateBetPreview();
+}
+function stepCap(delta){
+  let m = (state.onboardData.capMinutes || 30) + delta;
+  m = Math.max(5, Math.min(180, m));
+  state.onboardData.capMinutes = m;
+  syncCapUI(m);
+  updateBetPreview();
+}
+function syncCapUI(mins){
+  document.getElementById('cap-step-val').textContent = mins;
+  document.querySelectorAll('#cap-chips .cap-chip').forEach(c=>{
+    c.classList.toggle('selected', parseInt(c.dataset.cap,10) === mins);
+  });
+}
+function buildAppBetName(){
+  const apps = state.onboardData.apps || [];
+  const cap  = state.onboardData.capMinutes || 30;
+  if (!apps.length) return '';
+  const names = apps.map(k=>APP_LABELS[k] || k);
+  let list;
+  if (names.length === 1) list = names[0];
+  else if (names.length === 2) list = names[0] + ' & ' + names[1];
+  else if (names.length === 3) list = names[0] + ', ' + names[1] + ' & ' + names[2];
+  else list = names[0] + ', ' + names[1] + ' +' + (names.length-2) + ' more';
+  return `Keep ${list} under ${cap} min/day`;
+}
+function updateBetPreview(){
+  const txt = document.getElementById('cap-preview-text');
+  if (!txt) return;
+  txt.textContent = buildAppBetName() || 'Pick at least one app to cap.';
+}
+function commitAppPicker(){
+  const apps = state.onboardData.apps || [];
+  if (!apps.length){ showToast('Pick at least one app to cap','red'); return false; }
+  const cap = state.onboardData.capMinutes || 30;
+  state.onboardData.goalId     = 'screen';
+  state.onboardData.capMinutes = cap;
+  state.onboardData.target     = cap;
+  state.onboardData.name       = buildAppBetName();
+  state.onboardData.freq       = selectedFreq;
+  return true;
+}
+
 function startNewBet(){
-  state.onboardData = { goalId: null, categoryId: null, name: '', target: null, freq: 'Every Day', stake: 5 };
+  state.onboardData = { goalId: null, categoryId: null, name: '', target: null, freq: 'Every Day', stake: 5, apps: [], capMinutes: 30 };
   selectedFreq = 'Every Day'; selectedStake = 5;
   if (anyConnected()) { renderGoalList(); renderGoalConfig(); goTo('screen-ob2'); }
   else { renderConnectList(); goTo('screen-ob1'); }
 }
 function startOnboarding(){
-  state.onboardData = { goalId: null, categoryId: null, name: '', target: null, freq: 'Every Day', stake: 5 };
+  state.onboardData = { goalId: null, categoryId: null, name: '', target: null, freq: 'Every Day', stake: 5, apps: [], capMinutes: 30 };
   selectedFreq = 'Every Day';
   renderConnectList();
   goTo('screen-ob1');
@@ -1926,6 +2157,11 @@ function ob1Next() {
   goTo('screen-ob2');
 }
 function ob2Next() {
+  if (state.onboardData.categoryId === 'digital') {
+    if (!commitAppPicker()) return;
+    goTo('screen-ob3');
+    return;
+  }
   const g = goalById(state.onboardData.goalId);
   if (!g) { showToast('Pick a goal first','red'); return; }
   if (g.verify === 'proof') {
@@ -1943,8 +2179,11 @@ function ob2Next() {
 function ob3Next() {
   state.onboardData.stake = selectedStake;
   const g = goalById(state.onboardData.goalId) || {};
-  const tgt = g.unit ? ` · ${g.dir==='≤'?'≤':'≥'} ${state.onboardData.target} ${g.unit}` : '';
-  document.getElementById('sum-habit').innerHTML = `<span style="display:inline-flex;vertical-align:middle;margin-right:7px">${iconSVG(g.icon || 'target', 18, g.color || '#e6b94e')}</span>${state.onboardData.name}${tgt}`;
+  const isDigital = state.onboardData.categoryId === 'digital';
+  // For digital, the bet name already states the cap ("under 30 min/day") — skip the redundant ≤ suffix.
+  const tgt = (!isDigital && g.unit) ? ` · ${g.dir==='≤'?'≤':'≥'} ${state.onboardData.target} ${g.unit}` : '';
+  const sumIcon = isDigital ? iconSVG('smartphone', 18, '#f87171') : iconSVG(g.icon || 'target', 18, g.color || '#e6b94e');
+  document.getElementById('sum-habit').innerHTML = `<span style="display:inline-flex;vertical-align:middle;margin-right:7px">${sumIcon}</span>${state.onboardData.name}${tgt}`;
   document.getElementById('sum-verify').textContent = g.source ? `${SOURCES[g.source].icon} ${SOURCES[g.source].label}` : '—';
   document.getElementById('sum-freq').textContent = state.onboardData.freq;
   document.getElementById('sum-stake').textContent = `$${state.onboardData.stake}/miss`;
@@ -1976,9 +2215,11 @@ function createHabit(od) {
     source: g.source || 'camera',
     metric: g.metric || '',
     dir: g.dir || '',
-    target: od.target != null ? od.target : (g.target || 0),
+    target: od.capMinutes != null ? od.capMinutes : (od.target != null ? od.target : (g.target || 0)),
     unit: g.unit || '',
     verify: g.verify || 'proof',
+    apps: od.apps || [],
+    capMinutes: od.capMinutes || null,
     freq: od.freq || 'Every Day',
     stake: od.stake || 5,
     createdAt: new Date().toISOString(),
@@ -2261,7 +2502,7 @@ function renderHabits() {
       <div class="habit-name">${h.name}</div>
       <div class="habit-meta">${h.freq}${targetStr ? ` · ${targetStr}` : ''}</div>
       <div style="margin-top:8px;display:flex;gap:8px;align-items:center;flex-wrap:wrap">
-        <span class="verify-badge">${src.icon} ${src.label}</span>
+        <span class="verify-badge">${srcBadge(h.source)} ${src.label}</span>
         ${streak > 0 ? `<span class="streak-display" style="margin-top:0">${flameSVG(streak, 18)} ${streak} day streak</span>` : ''}
       </div>
       <div class="habit-progress">
@@ -2465,7 +2706,7 @@ function openHabitDetail(id) {
     <div style="display:flex;justify-content:center;margin-bottom:12px;color:${h.color || '#e6b94e'}">${iconSVG(habitIcon(h), 46, h.color || '#e6b94e')}</div>
     <div class="modal-title" style="text-align:center">${h.name}</div>
     <div class="info-row">
-      <span class="info-label">Verified by</span><span class="info-val">${(SOURCES[h.source]||SOURCES.camera).icon} ${(SOURCES[h.source]||SOURCES.camera).label}</span>
+      <span class="info-label">Verified by</span><span class="info-val">${srcBadge(h.source)} ${(SOURCES[h.source]||SOURCES.camera).label}</span>
     </div>
     ${h.unit ? `<div class="info-row"><span class="info-label">Target</span><span class="info-val">${h.dir==='≤'?'≤':'≥'} ${h.target} ${h.unit}</span></div>` : ''}
     <div class="info-row">
