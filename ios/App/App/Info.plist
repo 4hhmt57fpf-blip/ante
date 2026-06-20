@@ -47,5 +47,9 @@
 	</array>
 	<key>UIViewControllerBasedStatusBarAppearance</key>
 	<true/>
+	<key>NSHealthShareUsageDescription</key>
+	<string>Ante reads your steps and workouts from Apple Health to automatically verify your fitness habits, so you keep your staked money when you follow through.</string>
+	<key>NSHealthUpdateUsageDescription</key>
+	<string>Ante only reads from Apple Health to verify your habits and does not write any data back.</string>
 </dict>
 </plist>

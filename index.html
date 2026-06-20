@@ -1851,7 +1851,80 @@ function verifyComplete(id){
     return;
   }
 
-  // ── Health / Screen Time — simulated (real: requires native HealthKit bridge) ──
+  // ── Health — real HealthKit in the iOS app; simulated on the web demo ──
+  if (h.source === 'health' && isNativeApp() && capPlugin('HealthPlugin')) {
+    showToast('🍎 Checking Apple Health…', null);
+    nativeHealthVerify(h)
+      .then(res => {
+        if (res.ok) {
+          completeHabit(id);
+          showToast(`✅ Apple Health: ${res.value.toLocaleString()} ${res.unit} — bet won!`, 'green');
+        } else {
+          showToast(`❌ Only ${res.value.toLocaleString()} ${res.unit} today — need ${h.dir} ${h.target} ${h.unit}`, 'red');
+        }
+      })
+      .catch(err => {
+        if (err && err.message === 'UNSUPPORTED') return simulatedVerify(h, id, src);
+        showToast('⚠️ ' + (err.message || 'Apple Health check failed'), 'red');
+      });
+    return;
+  }
+
+  // ── Screen Time + web demo — simulated until each native bridge exists ──
+  simulatedVerify(h, id, src);
+}
+
+// ─────────────────────────────────────────────
+// HEALTHKIT (native iOS) — real auto-verification via capacitor-health.
+// On the web (GitHub Pages demo) Capacitor isn't present, so health habits
+// fall back to simulatedVerify(). Inside the iOS app, the global bridge
+// window.Capacitor.Plugins.HealthPlugin reads real Apple Health data.
+// ─────────────────────────────────────────────
+function isNativeApp() {
+  return !!(window.Capacitor && window.Capacitor.isNativePlatform && window.Capacitor.isNativePlatform());
+}
+function capPlugin(name) {
+  return (window.Capacitor && window.Capacitor.Plugins && window.Capacitor.Plugins[name]) || null;
+}
+function todayRangeISO() {
+  const now = new Date();
+  const start = new Date(now.getFullYear(), now.getMonth(), now.getDate(), 0, 0, 0, 0);
+  return { startDate: start.toISOString(), endDate: now.toISOString() };
+}
+async function nativeHealthVerify(h) {
+  const HK = capPlugin('HealthPlugin');
+  if (!HK) throw new Error('Apple Health is only available in the iOS app');
+  const { startDate, endDate } = todayRangeISO();
+  const metric = h.metric || '';
+
+  if (metric === 'Steps') {
+    await HK.requestHealthPermissions({ permissions: ['READ_STEPS'] });
+    const r = await HK.queryAggregated({ startDate, endDate, dataType: 'steps', bucket: 'day' });
+    const steps = (r.aggregatedData || []).reduce((s, d) => s + (d.value || 0), 0);
+    return { ok: steps >= h.target, value: Math.round(steps), unit: 'steps' };
+  }
+  if (metric === 'Mindful minutes') {
+    await HK.requestHealthPermissions({ permissions: ['READ_MINDFULNESS'] });
+    const r = await HK.queryAggregated({ startDate, endDate, dataType: 'mindfulness', bucket: 'day' });
+    const mins = (r.aggregatedData || []).reduce((s, d) => s + (d.value || 0), 0) / 60; // seconds → min
+    return { ok: mins >= h.target, value: Math.round(mins), unit: 'min' };
+  }
+  if (metric === 'Exercise') {
+    await HK.requestHealthPermissions({ permissions: ['READ_WORKOUTS'] });
+    const r = await HK.queryWorkouts({ startDate, endDate, includeHeartRate: false, includeRoute: false, includeSteps: false });
+    const mins = (r.workouts || []).reduce((s, w) => s + (w.duration || 0), 0) / 60; // seconds → min
+    return { ok: mins >= h.target, value: Math.round(mins), unit: 'min' };
+  }
+  if (metric === 'Run distance') {
+    await HK.requestHealthPermissions({ permissions: ['READ_WORKOUTS'] });
+    const r = await HK.queryWorkouts({ startDate, endDate, includeHeartRate: false, includeRoute: false, includeSteps: false });
+    const miles = (r.workouts || []).reduce((s, w) => s + (w.distance || 0), 0) / 1609.34; // meters → mi
+    return { ok: miles >= h.target, value: Math.round(miles * 10) / 10, unit: 'mi' };
+  }
+  // e.g. Sleep — not exposed by the plugin yet; fall back to the demo path
+  throw new Error('UNSUPPORTED');
+}
+function simulatedVerify(h, id, src) {
   showToast(`↻ Syncing ${src.label}…`, null);
   setTimeout(() => {
     let detail = '';
