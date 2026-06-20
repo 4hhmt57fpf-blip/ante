@@ -1798,7 +1798,7 @@
     <div class="modal-title">Help</div>
     <div class="help-faq">
       <div class="faq-item"><div class="faq-q">How does Ante work?</div><div class="faq-a">Stake money on a daily habit. Complete it (auto-verified by a connected app) and keep your money. Miss it and the stake locks into your Savings Vault.</div></div>
-      <div class="faq-item"><div class="faq-q">How is a habit verified?</div><div class="faq-a">Each category links an app — Apple Health, Screen Time, Canvas, Location, Kindle, or Duolingo — and reads the data automatically. No honor system.</div></div>
+      <div class="faq-item"><div class="faq-q">How is a habit verified?</div><div class="faq-a">Each category links an app — Apple Health, Screen Time, Canvas, GPS, Kindle, or Duolingo — and reads the data automatically. No honor system.</div></div>
       <div class="faq-item"><div class="faq-q">What's the Savings Vault?</div><div class="faq-a">Missed stakes go into a locked vault — still your money, just inaccessible until you build the habit back.</div></div>
     </div>
     <div class="chat-head">💬 Ask Ante AI</div>
@@ -2028,7 +2028,7 @@ const SOURCES = {
   health:     { label: 'Apple Health', icon: '🍎', sub: 'Steps, workouts, mindfulness, sleep — plus anything that syncs to Health (Strava, Whoop…).' },
   screentime: { label: 'Screen Time',  icon: '⏱️', sub: 'App & category time limits, enforced by iOS.' },
   canvas:     { label: 'Canvas',        icon: '🎓', sub: 'Verify assignments are submitted on time — read straight from your own Canvas account.' },
-  gps:        { label: 'Location',      icon: '📍', sub: 'GPS check-ins — prove you showed up (or stayed away).' },
+  gps:        { label: 'GPS',           icon: '📍', sub: 'GPS check-ins — prove you showed up (or stayed away).' },
   kindle:     { label: 'Kindle',        icon: '📖', sub: 'Reading time & pages from your Kindle library — verify you actually read.' },
   duolingo:   { label: 'Duolingo',      icon: '🦉', sub: 'Lessons completed and streak kept — verify your daily language practice.' },
   camera:     { label: 'Photo + AI',    icon: '📸', sub: 'AI checks your photo against your description; a human reviews if unsure.' },
@@ -2094,7 +2094,7 @@ const CATEGORIES = [
   { id:'wellness', label:'Wellness',   icon:'heart',           emoji:'🧘', color:'#a78bfa', source:'health',     desc:'Sleep, meditation, mindfulness' },
   { id:'digital',  label:'Digital',    icon:'smartphone',      emoji:'📱', color:'#f87171', source:'screentime', desc:'Cap the apps that eat your time' },
   { id:'school',   label:'School',     icon:'graduation-cap',  emoji:'📚', color:'#60a5fa', source:'canvas',     desc:'Assignment deadlines, no missing work' },
-  { id:'location', label:'Location',   icon:'map-pin',         emoji:'📍', color:'#38bdf8', source:'gps',        desc:'Gym check-ins, avoid certain places' },
+  { id:'location', label:'Places',     icon:'map-pin',         emoji:'📍', color:'#38bdf8', source:'gps',        desc:'Gym check-ins, avoid certain places' },
   { id:'reading',  label:'Reading',    icon:'book',            emoji:'📖', color:'#f59e0b', source:'kindle',     desc:'Reading time & pages, via Kindle' },
   { id:'learning', label:'Learning',   icon:'globe',           emoji:'🦉', color:'#22c55e', source:'duolingo',   desc:'Language lessons, via Duolingo' },
   { id:'custom',   label:'Custom',     icon:'camera',          emoji:'📸', color:'#e6b94e', source:'camera',     desc:'AI-verified photo proof for anything' },
@@ -2949,7 +2949,7 @@ async function sendHelpMessage(){
 function localHelpAnswer(q){
   q = (q || '').toLowerCase();
   if (/vault|savings|miss/.test(q)) return "Miss a habit and your stake locks into the Savings Vault — still your money, just inaccessible until you build the habit back. Deploy the AI backend (see HELP config) for the full assistant.";
-  if (/verif|connect|app|health|kindle|duolingo|canvas|strava/.test(q)) return "Each habit links an app — Apple Health, Screen Time, Canvas, Location, Kindle, or Duolingo — and Ante reads the data to verify you automatically. Connect an app in the new-bet flow.";
+  if (/verif|connect|app|health|kindle|duolingo|canvas|strava/.test(q)) return "Each habit links an app — Apple Health, Screen Time, Canvas, GPS, Kindle, or Duolingo — and Ante reads the data to verify you automatically. Connect an app in the new-bet flow.";
   if (/stake|money|pay|bet|charge/.test(q)) return "You pick a daily stake ($1–$100). Complete the habit and you keep it; miss it and it goes to your Savings Vault. Real card charging uses Stripe (see PAYMENTS.md).";
   return "I can help with habits, staking, app verification, and the Savings Vault. For the full AI assistant, deploy the backend and set HELP.BACKEND_URL.";
 }
@@ -3126,7 +3126,7 @@ function verifyComplete(id){
 
   // ── GPS — real geolocation ──
   if (h.source === 'gps') {
-    if (!navigator.geolocation) { showToast('⚠️ Location not available in this browser', 'red'); return; }
+    if (!navigator.geolocation) { showToast('⚠️ GPS not available in this browser', 'red'); return; }
     showToast('📍 Getting your location…', null);
     navigator.geolocation.getCurrentPosition(
       pos => {
