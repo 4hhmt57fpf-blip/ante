@@ -317,6 +317,44 @@
   .challenge-banner .cb-title { font-size: 17px; font-weight: 700; margin: 6px 0 4px; }
   .challenge-banner .cb-sub { font-size: 13px; color: var(--text-muted); margin-bottom: 14px; }
 
+  /* ── FRIENDS (fr-* namespace) ── */
+  .fr-search-wrap { padding: 12px 20px 4px; position: relative; }
+  .fr-search-icon { position: absolute; left: 34px; top: 50%; transform: translateY(-50%); color: var(--text-muted); pointer-events: none; display: flex; }
+  .fr-search-input { width: 100%; background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius-sm); padding: 11px 14px 11px 42px; color: var(--text); font-size: 15px; outline: none; box-sizing: border-box; transition: border-color .15s; }
+  .fr-search-input::placeholder { color: var(--text-muted); }
+  .fr-search-input:focus { border-color: var(--border-strong); }
+  .fr-results { margin: 6px 20px 0; background: var(--surface); border: 1px solid var(--border-strong); border-radius: var(--radius); overflow: hidden; display: none; }
+  .fr-results.open { display: block; }
+  .fr-result-row { display: flex; align-items: center; gap: 12px; padding: 12px 14px; border-bottom: 1px solid var(--border); }
+  .fr-result-row:last-child { border-bottom: none; }
+  .fr-r-av { width: 38px; height: 38px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-weight: 700; font-size: 14px; flex-shrink: 0; color: #fff; }
+  .fr-r-info { flex: 1; min-width: 0; }
+  .fr-r-name { font-size: 14px; font-weight: 700; color: var(--text); }
+  .fr-r-handle { font-size: 12px; color: var(--text-muted); }
+  .fr-add-btn { padding: 6px 14px; border-radius: 20px; font-size: 13px; font-weight: 700; background: rgba(127,220,164,.12); color: var(--gold); border: 1px solid rgba(127,220,164,.25); cursor: pointer; white-space: nowrap; flex-shrink: 0; }
+  .fr-add-btn.added { background: rgba(255,255,255,.04); color: var(--text-muted); border-color: var(--border); pointer-events: none; }
+  .fr-section { padding: 0 20px; margin-top: 20px; }
+  .fr-section-head { display: flex; align-items: center; justify-content: space-between; margin-bottom: 12px; }
+  .fr-section-title { font-size: 12px; font-weight: 700; text-transform: uppercase; letter-spacing: 1.2px; color: var(--text-muted); }
+  .fr-invite-btn { font-size: 13px; font-weight: 700; color: var(--gold); background: rgba(127,220,164,.08); border: 1px solid rgba(127,220,164,.2); border-radius: 20px; padding: 5px 14px; cursor: pointer; }
+  .fr-empty { background: var(--surface); border: 1px dashed var(--border-strong); border-radius: var(--radius); padding: 28px 20px; text-align: center; }
+  .fr-empty-icon { font-size: 32px; margin-bottom: 10px; }
+  .fr-empty-title { font-size: 15px; font-weight: 700; color: var(--text); margin-bottom: 6px; }
+  .fr-empty-sub { font-size: 13px; color: var(--text-muted); line-height: 1.5; margin-bottom: 16px; }
+  .fr-friend-card { background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius); padding: 14px; display: flex; align-items: center; gap: 12px; margin-bottom: 10px; }
+  .fr-friend-card:last-child { margin-bottom: 0; }
+  .fr-f-av { width: 42px; height: 42px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-weight: 700; font-size: 15px; flex-shrink: 0; color: #fff; }
+  .fr-f-info { flex: 1; min-width: 0; }
+  .fr-f-name { font-size: 15px; font-weight: 700; color: var(--text); }
+  .fr-f-habit { font-size: 12px; color: var(--text-muted); margin-top: 2px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+  .fr-f-badge { font-size: 11px; font-weight: 700; padding: 3px 9px; border-radius: 20px; white-space: nowrap; flex-shrink: 0; }
+  .fr-f-badge.win { background: var(--green-dim); color: var(--green); }
+  .fr-f-badge.loss { background: var(--red-dim); color: var(--red); }
+  .fr-challenge-btn { padding: 7px 13px; border-radius: var(--radius-sm); font-size: 12px; font-weight: 700; background: var(--surface2); border: 1px solid var(--border); color: var(--text); cursor: pointer; flex-shrink: 0; }
+  .fr-divider { display: flex; align-items: center; gap: 12px; padding: 20px 20px 0; }
+  .fr-divider-line { flex: 1; height: 1px; background: var(--border); }
+  .fr-divider-label { font-size: 11px; font-weight: 700; text-transform: uppercase; letter-spacing: 1.4px; color: var(--text-muted); }
+
   /* ── STATS ── */
   #screen-stats { padding-bottom: 100px; }
   .stats-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; padding: 0 20px; margin-bottom: 20px; }
@@ -677,20 +715,31 @@
   .connect-card.connected .connect-btn { border-color: var(--green); color: var(--green); background: var(--green-dim); }
 
   .goal-card {
-    position: relative; display: flex; align-items: center; gap: 13px;
+    position: relative; display: flex; align-items: center; gap: 16px;
     background: var(--surface); border: 1px solid var(--border);
-    border-radius: var(--radius-sm); padding: 13px 15px; margin-bottom: 10px;
+    border-radius: var(--radius-sm); padding: 17px 18px; margin-bottom: 11px;
     cursor: pointer; transition: all .15s;
   }
   .goal-card.selected { border-color: var(--gold); background: var(--gold-dim); }
   .goal-card.locked { opacity: .45; cursor: not-allowed; }
   .goal-emoji {
-    width: 40px; height: 40px; border-radius: 11px; display: flex;
-    align-items: center; justify-content: center; font-size: 20px; flex-shrink: 0;
+    width: 52px; height: 52px; border-radius: 14px; display: flex;
+    align-items: center; justify-content: center; font-size: 24px; flex-shrink: 0;
   }
   .goal-body { flex: 1; min-width: 0; }
-  .goal-name { font-size: 15px; font-weight: 700; }
-  .goal-src { font-size: 12px; color: var(--text-muted); margin-top: 2px; }
+  .goal-name { font-size: 17px; font-weight: 700; letter-spacing: -.2px; }
+  .goal-desc { font-size: 13px; color: var(--text-dim); margin-top: 3px; line-height: 1.4; }
+  .goal-src { font-size: 12px; color: var(--text-muted); margin-top: 5px; }
+
+  /* ── Login screen ── */
+  .login-wrap { display:flex; flex-direction:column; align-items:center; justify-content:center; min-height:100%; padding:48px 24px 36px; gap:0; }
+  .login-logo-mark { font-size:54px; font-weight:900; color:var(--gold); letter-spacing:-3px; margin-bottom:6px; line-height:1; }
+  .login-title { font-size:28px; font-weight:800; letter-spacing:-.5px; text-align:center; margin-bottom:5px; }
+  .login-sub { font-size:15px; color:var(--text-muted); text-align:center; margin-bottom:36px; }
+  .login-form { width:100%; display:flex; flex-direction:column; gap:13px; }
+  .login-divider { display:flex; align-items:center; gap:12px; color:var(--text-muted); font-size:12px; margin:6px 0; }
+  .login-divider::before,.login-divider::after { content:''; flex:1; height:1px; background:var(--border); }
+  .login-toggle { font-size:14px; color:var(--text-muted); text-align:center; margin-top:18px; }
   .goal-lock { font-size: 11px; font-weight: 700; color: var(--text-muted); display: flex; align-items: center; gap: 4px; white-space: nowrap; }
 
   /* Verification badge on habit cards & detail */
@@ -1016,7 +1065,7 @@
     position:fixed; inset:0; z-index:9999;
     display:flex; flex-direction:column; align-items:center; justify-content:center;
     background:radial-gradient(120% 90% at 50% 32%, #14181a 0%, #0b0e0f 55%, #060808 100%);
-    overflow:hidden; -webkit-tap-highlight-color:transparent; user-select:none; touch-action:none;
+    -webkit-tap-highlight-color:transparent; user-select:none; touch-action:none;
     opacity:1; transition:opacity .45s ease; --mint:#7fdca4;
   }
   .ante-vault.av-done{ opacity:0; pointer-events:none; }
@@ -1027,7 +1076,7 @@
     background:radial-gradient(circle, rgba(127,220,164,.14) 0%, rgba(127,220,164,.04) 40%, transparent 66%);
     opacity:.5; transform:scale(.9); transition:opacity .9s ease, transform 1.1s cubic-bezier(.2,.8,.2,1); will-change:opacity,transform; pointer-events:none; }
   .av-stage{ position:relative; width:min(78vw,320px); aspect-ratio:1/1; margin-bottom:4%;
-    perspective:1300px; perspective-origin:50% 50%;
+    -webkit-perspective:1300px; perspective:1300px; -webkit-perspective-origin:50% 50%; perspective-origin:50% 50%;
     transition:opacity .5s ease, transform .9s cubic-bezier(.6,0,.2,1); will-change:transform,opacity; }
   /* green glowing interior behind the door */
   .av-core{ position:absolute; inset:9%; border-radius:50%; z-index:1; opacity:0; transform:scale(.72);
@@ -1040,14 +1089,14 @@
     background:radial-gradient(circle at 45% 40%, #ffffff, #cdebd9 40%, transparent 72%); opacity:.9; }
   /* domed metal door */
   /* 3D door body: a real extruded disc (preserve-3d) that swings on a left hinge */
-  .av-door3d{ position:absolute; inset:0; z-index:2; transform-style:preserve-3d; transform-origin:12% 50%;
-    transition:transform 2.2s cubic-bezier(.6,0,.18,1) .65s, opacity .7s ease .65s; will-change:transform; }
+  .av-door3d{ position:absolute; inset:0; z-index:2; -webkit-transform-style:preserve-3d; transform-style:preserve-3d; -webkit-transform-origin:12% 50%; transform-origin:12% 50%;
+    transition:transform 2.2s cubic-bezier(.6,0,.18,1) .65s, opacity .7s ease .65s; }
   /* the metal thickness — a stack of disc slices forming the cylindrical side wall (filled by JS) */
-  .av-slices{ position:absolute; inset:0; transform-style:preserve-3d; }
+  .av-slices{ position:absolute; inset:0; -webkit-transform-style:preserve-3d; transform-style:preserve-3d; }
   .av-slice{ position:absolute; inset:0; border-radius:50%;
     background:linear-gradient(to top, #30353800 0%, #2c3134 0%, #1a1e20 52%, #0c0f11 100%); }
   /* front face holds the rings + wheel; shaded so light reads as coming from BELOW */
-  .av-face{ position:absolute; inset:0; border-radius:50%; transform-style:preserve-3d;
+  .av-face{ position:absolute; inset:0; border-radius:50%; -webkit-transform-style:preserve-3d; transform-style:preserve-3d;
     background:radial-gradient(circle at 50% 66%, #2b3033 0%, #1d2123 42%, #121517 76%, #0b0d0e 100%);
     box-shadow:0 44px 74px rgba(0,0,0,.62), inset 0 -12px 24px rgba(255,255,255,.05), inset 0 14px 28px rgba(0,0,0,.62); }
   .av-ringd{ position:absolute; inset:0; margin:auto; border-radius:50%; will-change:transform;
@@ -1360,9 +1409,43 @@
 <div class="toast" id="toast"></div>
 
 <!-- ══════════════════════════════════════════════
+     SCREEN -1: LOGIN / SIGNUP
+══════════════════════════════════════════════ -->
+<div class="screen active" id="screen-login">
+  <div class="login-wrap">
+    <div class="login-logo-mark">A</div>
+    <div class="login-title" id="login-title">Welcome back</div>
+    <div class="login-sub">Your vault awaits.</div>
+
+    <div class="login-form">
+      <input class="input-field" id="login-email" type="email" placeholder="Email address"
+             autocomplete="email" autocapitalize="off" autocorrect="off" spellcheck="false"
+             onkeydown="if(event.key==='Enter')document.getElementById('login-pw').focus()">
+      <input class="input-field" id="login-pw" type="password" placeholder="Password"
+             autocomplete="current-password"
+             onkeydown="if(event.key==='Enter')doLogin()">
+
+      <button class="btn btn-primary" id="login-btn" onclick="doLogin()" style="margin-top:4px">Sign In</button>
+
+      <div class="login-divider">or</div>
+
+      <button class="btn" onclick="loginWithApple()"
+        style="background:var(--surface);border:1px solid var(--border);color:var(--text);display:flex;align-items:center;justify-content:center;gap:10px;font-weight:600">
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor"><path d="M17.05 20.28c-.98.95-2.05.8-3.08.35-1.09-.46-2.09-.48-3.24 0-1.44.62-2.2.44-3.06-.35C2.79 15.25 3.51 7.7 9.05 7.42c1.29.07 2.18.74 2.93.77.97-.2 1.9-.89 3.07-.83 1.31.09 2.3.64 2.96 1.61-2.72 1.63-2.28 5.24.22 6.26-.52 1.38-1.22 2.74-2.18 5.05zM12.03 7.25c-.15-2.23 1.66-4.07 3.74-4.25.29 2.58-2.34 4.5-3.74 4.25z"/></svg>
+        Continue with Apple
+      </button>
+    </div>
+
+    <div class="login-toggle" id="login-toggle">
+      New to Ante? <span onclick="setLoginMode('signup')" style="color:var(--gold);cursor:pointer;font-weight:600">Create account</span>
+    </div>
+  </div>
+</div>
+
+<!-- ══════════════════════════════════════════════
      SCREEN 0: WELCOME
 ══════════════════════════════════════════════ -->
-<div class="screen active" id="screen-welcome">
+<div class="screen" id="screen-welcome">
   <div class="logo-mark" id="heroLogo" data-depth="34" style="color:#16120a;font-weight:800">A<div class="sweep"></div></div>
   <div class="welcome-title" data-depth="20">Bet on<br><span>Yourself.</span></div>
   <div class="welcome-sub" data-depth="16">Stake real money on your habits.<br>Complete them — or pay up.</div>
@@ -2025,6 +2108,20 @@ function saveState() {
 }
 loadState();
 
+// Skip login if user is already authenticated
+(function checkAuth() {
+  try {
+    var auth = JSON.parse(localStorage.getItem('ante_auth') || 'null');
+    if (auth && auth.email) {
+      // Already logged in — go directly to home or welcome
+      document.addEventListener('DOMContentLoaded', function() {
+        if (state.habits && state.habits.length) showTab('home');
+        else goTo('screen-welcome');
+      });
+    }
+  } catch(e) {}
+})();
+
 // ─────────────────────────────────────────────
 // NAVIGATION
 // ─────────────────────────────────────────────
@@ -2056,6 +2153,46 @@ function skipOnboard() {
   // Demo mode: pre-load habits
   if (state.habits.length === 0) seedDemoData();
   showTab('home');
+}
+
+/* ── Login / Auth ── */
+function setLoginMode(mode) {
+  var isSignup = mode === 'signup';
+  document.getElementById('login-title').textContent   = isSignup ? 'Create account' : 'Welcome back';
+  document.getElementById('login-btn').textContent     = isSignup ? 'Create Account' : 'Sign In';
+  document.getElementById('login-btn').onclick         = isSignup ? doSignup : doLogin;
+  document.getElementById('login-toggle').innerHTML    = isSignup
+    ? 'Already have an account? <span onclick="setLoginMode(\'signin\')" style="color:var(--gold);cursor:pointer;font-weight:600">Sign In</span>'
+    : 'New to Ante? <span onclick="setLoginMode(\'signup\')" style="color:var(--gold);cursor:pointer;font-weight:600">Create account</span>';
+}
+function _authFields() {
+  var email = (document.getElementById('login-email').value || '').trim();
+  var pw    = document.getElementById('login-pw').value || '';
+  return { email: email, pw: pw };
+}
+function _saveAuth(email) {
+  localStorage.setItem('ante_auth', JSON.stringify({ email: email, at: Date.now() }));
+  if (!state.userName) { state.userName = email.split('@')[0]; saveState(); }
+}
+function doLogin() {
+  var f = _authFields();
+  if (!f.email || !f.pw) { showToast('Enter your email and password', 'red'); return; }
+  _saveAuth(f.email);
+  showToast('Welcome back!', 'green');
+  if (state.habits && state.habits.length) showTab('home'); else goTo('screen-welcome');
+}
+function doSignup() {
+  var f = _authFields();
+  if (!f.email || !f.pw) { showToast('Fill in both fields', 'red'); return; }
+  if (f.pw.length < 6) { showToast('Password must be at least 6 characters', 'red'); return; }
+  _saveAuth(f.email);
+  showToast('Account created!', 'green');
+  goTo('screen-welcome');
+}
+function loginWithApple() {
+  _saveAuth('apple_user@ante.app');
+  showToast('Signed in with Apple', 'green');
+  if (state.habits && state.habits.length) showTab('home'); else goTo('screen-welcome');
 }
 
 // ─────────────────────────────────────────────
@@ -2266,22 +2403,53 @@ const CATEGORIES = [
 ];
 
 const GOALS = [
-  { id:'steps',    category:'fitness',  label:'Walk 10,000 steps',         icon:'footprints',   emoji:'🚶', color:'#34d399', source:'health',     metric:'Steps',           dir:'≥', target:10000, unit:'steps', apps:['health','fitbit','garmin','samsunghealth','googlefit'], verify:'auto' },
-  { id:'exercise', category:'fitness',  label:'30 min of exercise',         icon:'dumbbell',     emoji:'🏋️', color:'#4ade80', source:'health',     metric:'Exercise',        dir:'≥', target:30,    unit:'min',   apps:['health','whoop','strava','peloton','nikerun'], verify:'auto' },
-  { id:'run',      category:'fitness',  label:'Run 3 miles',                icon:'activity',     emoji:'🏃', color:'#fb923c', source:'health',     metric:'Run distance',    dir:'≥', target:3,     unit:'mi',    apps:['strava','garmin','health','nikerun','mapmyrun'], verify:'auto' },
-  { id:'meditate', category:'wellness', label:'Meditate 10 min',            icon:'leaf',         emoji:'🧘', color:'#a78bfa', source:'health',     metric:'Mindful minutes', dir:'≥', target:10,    unit:'min',   apps:['health','headspace','calm','insighttimer','balance'], verify:'auto' },
-  { id:'sleep',    category:'wellness', label:'Sleep 7+ hours',             icon:'moon',         emoji:'🛌', color:'#60a5fa', source:'health',     metric:'Sleep',           dir:'≥', target:7,     unit:'hr',    apps:['health','oura','whoop','sleepcycle','autosleep'], verify:'auto' },
-  { id:'food_log', category:'nutrition',label:'Log all your meals',         icon:'utensils',     emoji:'🥗', color:'#34d399', source:'nutrition',  metric:'Meals logged',    dir:'',  target:0,     unit:'',      apps:['nutrition','calai','loseit','cronometer','health'], verify:'auto' },
-  { id:'food_cal', category:'nutrition',label:'Stay under your calories',   icon:'utensils',     emoji:'🔥', color:'#fb923c', source:'nutrition',  metric:'Calories',        dir:'≤', target:2000,  unit:'kcal',  apps:['nutrition','calai','loseit','cronometer','health'], verify:'auto' },
-  { id:'screen',   category:'digital',  label:'Cap your time-sink apps',     icon:'smartphone',   emoji:'📱', color:'#f87171', source:'screentime', metric:'Screen time',     dir:'≤', target:30,    unit:'min',   verify:'auto' },
-  { id:'cv_ontime',category:'school',   label:'Submit assignments on time', icon:'circle-check', emoji:'🎓', color:'#dc2626', source:'canvas',     metric:'Canvas',          dir:'',  target:0,     unit:'',      apps:['canvas','classroom','blackboard','schoology','moodle'], verify:'canvas' },
-  { id:'cv_nomiss',category:'school',   label:'No missing assignments',     icon:'book-open',    emoji:'📚', color:'#2563eb', source:'canvas',     metric:'Canvas',          dir:'',  target:0,     unit:'',      apps:['canvas','classroom','blackboard','schoology','moodle'], verify:'canvas' },
-  { id:'gym',      category:'location', label:'Get to the gym',             icon:'dumbbell',     emoji:'📍', color:'#38bdf8', source:'gps',        metric:'Gym check-in',    dir:'',  target:0,     unit:'',      verify:'auto' },
-  { id:'avoid',    category:'location', label:'Avoid a place',              icon:'ban',          emoji:'🚫', color:'#94a3b8', source:'gps',        metric:'Stay away',       dir:'',  target:0,     unit:'',      verify:'auto' },
-  { id:'read_min', category:'reading',  label:'Read 20 minutes',            icon:'book',         emoji:'📖', color:'#f59e0b', source:'kindle',     metric:'Reading time',    dir:'≥', target:20,    unit:'min',   apps:['kindle','audible','goodreads','storygraph','applebooks'], verify:'auto' },
-  { id:'read_pg',  category:'reading',  label:'Read 25 pages',              icon:'book',         emoji:'📖', color:'#fb923c', source:'kindle',     metric:'Pages read',      dir:'≥', target:25,    unit:'pages', apps:['kindle','goodreads','storygraph','applebooks','libby'], verify:'auto' },
-  { id:'duo',      category:'learning', label:'Complete a Duolingo lesson', icon:'globe',        emoji:'🦉', color:'#22c55e', source:'duolingo',   metric:'Lessons',         dir:'≥', target:1,     unit:'lesson',apps:['duolingo','babbel','busuu','memrise','pimsleur'], verify:'auto' },
-  { id:'proof',    category:'custom',   label:'Create your own goal',       icon:'camera',       emoji:'📸', color:'#e6b94e', source:'camera',     metric:'Photo + AI',      dir:'',  target:0,     unit:'',      verify:'proof' },
+  // FITNESS
+  { id:'steps',    category:'fitness',  label:'Get your steps in',          desc:'Walk however far feels right — you set the target',       icon:'footprints',   emoji:'🚶', color:'#34d399', source:'health',     metric:'Steps',           dir:'≥', target:8000,  unit:'steps', apps:['health','fitbit','garmin','samsunghealth','googlefit'], verify:'auto' },
+  { id:'exercise', category:'fitness',  label:'Work out for the day',       desc:'Any workout that gets your heart going counts',           icon:'dumbbell',     emoji:'🏋️', color:'#4ade80', source:'health',     metric:'Exercise',        dir:'≥', target:30,    unit:'min',   apps:['health','whoop','strava','peloton','nikerun'], verify:'auto' },
+  { id:'run',      category:'fitness',  label:'Go for a run',               desc:'Hit whatever distance you are aiming for today',         icon:'activity',     emoji:'🏃', color:'#fb923c', source:'health',     metric:'Run distance',    dir:'≥', target:2,     unit:'mi',    apps:['strava','garmin','health','nikerun','mapmyrun'], verify:'auto' },
+  { id:'swim',     category:'fitness',  label:'Hit the pool',               desc:'Lap swim or open water — any time in the water',         icon:'droplet',      emoji:'🏊', color:'#38bdf8', source:'health',     metric:'Swim workout',    dir:'≥', target:20,    unit:'min',   apps:['health','garmin','whoop','strava'], verify:'auto' },
+  { id:'bike',     category:'fitness',  label:'Ride your bike',             desc:'Outdoor ride or spin class, it all counts',              icon:'activity',     emoji:'🚴', color:'#a78bfa', source:'health',     metric:'Cycling',         dir:'≥', target:20,    unit:'min',   apps:['health','strava','garmin','peloton','nikerun'], verify:'auto' },
+  { id:'yoga',     category:'fitness',  label:'Do yoga or stretch',         desc:'Move intentionally — your body needs this',              icon:'leaf',         emoji:'🧘', color:'#f59e0b', source:'health',     metric:'Yoga / stretch',  dir:'≥', target:20,    unit:'min',   apps:['health','whoop','strava','peloton'], verify:'auto' },
+
+  // WELLNESS
+  { id:'meditate', category:'wellness', label:'Meditate daily',             desc:'Any mindfulness practice — guided or solo',              icon:'leaf',         emoji:'🧘', color:'#a78bfa', source:'health',     metric:'Mindful minutes', dir:'≥', target:10,    unit:'min',   apps:['health','headspace','calm','insighttimer','balance'], verify:'auto' },
+  { id:'sleep',    category:'wellness', label:'Get a full night\'s sleep',  desc:'Hit your target hours and wake rested',                  icon:'moon',         emoji:'🛌', color:'#60a5fa', source:'health',     metric:'Sleep',           dir:'≥', target:7,     unit:'hr',    apps:['health','oura','whoop','sleepcycle','autosleep'], verify:'auto' },
+  { id:'noalc',    category:'wellness', label:'No alcohol today',           desc:'Keep it clean for one more day — every day counts',      icon:'ban',          emoji:'🚫', color:'#f87171', source:'camera',     metric:'Photo proof',     dir:'',  target:0,     unit:'',      verify:'proof' },
+  { id:'gratitude',category:'wellness', label:'Practice gratitude',         desc:'Write down three things you are grateful for',           icon:'heart',        emoji:'💛', color:'#fbbf24', source:'camera',     metric:'Journal entry',   dir:'',  target:0,     unit:'',      verify:'proof' },
+  { id:'vitamins', category:'wellness', label:'Take your vitamins',         desc:'Don\'t skip your daily supplements — prove it',          icon:'droplet',      emoji:'💊', color:'#34d399', source:'camera',     metric:'Photo proof',     dir:'',  target:0,     unit:'',      verify:'proof' },
+
+  // NUTRITION
+  { id:'food_log', category:'nutrition',label:'Log everything you eat',     desc:'Track every meal — awareness is half the battle',        icon:'utensils',     emoji:'🥗', color:'#34d399', source:'nutrition',  metric:'Meals logged',    dir:'',  target:0,     unit:'',      apps:['nutrition','calai','loseit','cronometer','health'], verify:'auto' },
+  { id:'food_cal', category:'nutrition',label:'Stay within your calorie goal', desc:'You set the number — we help you hold the line',     icon:'target',       emoji:'🔥', color:'#fb923c', source:'nutrition',  metric:'Calories',        dir:'≤', target:2000,  unit:'kcal',  apps:['nutrition','calai','loseit','cronometer','health'], verify:'auto' },
+  { id:'water',    category:'nutrition',label:'Drink enough water',         desc:'Hit your daily hydration target — you know your body',   icon:'droplet',      emoji:'💧', color:'#38bdf8', source:'health',     metric:'Water intake',    dir:'≥', target:64,    unit:'oz',    apps:['health','nutrition','calai'], verify:'auto' },
+  { id:'nojunk',   category:'nutrition',label:'No junk food today',         desc:'Skip the processed stuff for a full day — prove it',     icon:'ban',          emoji:'🥦', color:'#22c55e', source:'camera',     metric:'Photo proof',     dir:'',  target:0,     unit:'',      verify:'proof' },
+  { id:'veggies',  category:'nutrition',label:'Eat your vegetables',        desc:'Get your greens in — you know what counts',             icon:'leaf',         emoji:'🥬', color:'#4ade80', source:'camera',     metric:'Meal photo',      dir:'',  target:0,     unit:'',      verify:'proof' },
+
+  // DIGITAL
+  { id:'screen',   category:'digital',  label:'Cap your time-sink apps',    desc:'Pick the apps and set the daily limit that works for you',icon:'smartphone',   emoji:'📱', color:'#f87171', source:'screentime', metric:'Screen time',     dir:'≤', target:60,    unit:'min',   verify:'auto' },
+
+  // SCHOOL
+  { id:'cv_ontime',category:'school',   label:'Turn in your work on time',  desc:'Submit before the deadline every time — no exceptions',  icon:'circle-check', emoji:'🎓', color:'#60a5fa', source:'canvas',     metric:'Canvas',          dir:'',  target:0,     unit:'',      apps:['canvas','classroom','blackboard','schoology','moodle'], verify:'canvas' },
+  { id:'cv_nomiss',category:'school',   label:'No missing assignments',     desc:'Get to zero and keep it there',                          icon:'book-open',    emoji:'📚', color:'#a78bfa', source:'canvas',     metric:'Canvas',          dir:'',  target:0,     unit:'',      apps:['canvas','classroom','blackboard','schoology','moodle'], verify:'canvas' },
+  { id:'study',    category:'school',   label:'Put in a study session',     desc:'Block time to focus — library, desk, wherever it sticks', icon:'pencil',       emoji:'📝', color:'#34d399', source:'gps',        metric:'Location check-in',dir:'', target:0,     unit:'',      verify:'auto' },
+
+  // LOCATION
+  { id:'gym',      category:'location', label:'Check in at the gym',        desc:'Show up and get it done — GPS verifies you were there',  icon:'dumbbell',     emoji:'📍', color:'#38bdf8', source:'gps',        metric:'Gym check-in',    dir:'',  target:0,     unit:'',      verify:'auto' },
+  { id:'avoid',    category:'location', label:'Avoid your distraction spot',desc:'Stay away from a place that derails you — GPS enforced', icon:'ban',          emoji:'🚫', color:'#94a3b8', source:'gps',        metric:'Stay away',       dir:'',  target:0,     unit:'',      verify:'auto' },
+  { id:'library',  category:'location', label:'Go to the library',          desc:'Clock your study time in a focused, verified space',     icon:'book',         emoji:'📖', color:'#60a5fa', source:'gps',        metric:'Location check-in',dir:'', target:0,     unit:'',      verify:'auto' },
+
+  // READING
+  { id:'read_min', category:'reading',  label:'Read every day',             desc:'Pick up the book and put in real, uninterrupted time',   icon:'book',         emoji:'📖', color:'#f59e0b', source:'kindle',     metric:'Reading time',    dir:'≥', target:20,    unit:'min',   apps:['kindle','audible','goodreads','storygraph','applebooks'], verify:'auto' },
+  { id:'read_pg',  category:'reading',  label:'Make progress in your book', desc:'Move the needle however far feels right today',          icon:'book',         emoji:'📚', color:'#fb923c', source:'kindle',     metric:'Pages read',      dir:'≥', target:15,    unit:'pages', apps:['kindle','goodreads','storygraph','applebooks','libby'], verify:'auto' },
+  { id:'chapter',  category:'reading',  label:'Finish a chapter',           desc:'One chapter at a time — that\'s how you finish books',   icon:'book-open',    emoji:'📑', color:'#a78bfa', source:'camera',     metric:'Photo proof',     dir:'',  target:0,     unit:'',      verify:'proof' },
+
+  // LEARNING
+  { id:'duo',      category:'learning', label:'Do your language lesson',    desc:'Keep the streak alive — one lesson moves the needle',    icon:'globe',        emoji:'🦉', color:'#22c55e', source:'duolingo',   metric:'Lessons',         dir:'≥', target:1,     unit:'lesson',apps:['duolingo','babbel','busuu','memrise','pimsleur'], verify:'auto' },
+  { id:'instrument',category:'learning',label:'Practice an instrument',     desc:'Daily practice is how you go from okay to great',        icon:'music',        emoji:'🎸', color:'#f59e0b', source:'camera',     metric:'Photo proof',     dir:'',  target:0,     unit:'',      verify:'proof' },
+  { id:'lecture',  category:'learning', label:'Watch a lecture',            desc:'One video, one step ahead — show the screenshot',        icon:'code',         emoji:'🎓', color:'#60a5fa', source:'camera',     metric:'Screenshot proof',dir:'',  target:0,     unit:'',      verify:'proof' },
+
+  // CUSTOM
+  { id:'proof',    category:'custom',   label:'Create your own goal',       desc:'Describe it, stake it, and prove it with a photo — AI checks it', icon:'camera', emoji:'📸', color:'#e6b94e', source:'camera', metric:'Photo + AI', dir:'', target:0, unit:'', verify:'proof' },
 ];
 
 function goalById(id){ return GOALS.find(g => g.id === id); }
@@ -2570,10 +2738,11 @@ function renderGoalList(){
     catGoals.map(g => {
       const sel = state.onboardData.goalId === g.id;
       return `<div class="goal-card ${sel ? 'selected' : ''}" onclick="selectGoal('${g.id}')">
-        <div class="goal-emoji" style="background:${hexToRgba(g.color,0.16)};border:1px solid ${hexToRgba(g.color,0.4)};color:${g.color}">${iconSVG(g.icon, 22, g.color)}</div>
+        <div class="goal-emoji" style="background:${hexToRgba(g.color,0.16)};border:1px solid ${hexToRgba(g.color,0.4)};color:${g.color}">${iconSVG(g.icon, 26, g.color)}</div>
         <div class="goal-body">
           <div class="goal-name">${g.label}</div>
-          <div class="goal-src">${srcBadge(g.source)} ${SOURCES[g.source].label}</div>
+          ${g.desc ? `<div class="goal-desc">${g.desc}</div>` : ''}
+          <div class="goal-src" style="margin-top:6px">${srcBadge(g.source)} ${SOURCES[g.source].label}</div>
         </div>
       </div>`;
     }).join('');
