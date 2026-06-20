@@ -988,6 +988,118 @@
   @media (max-width: 360px){
     #screen-ob2 .app-grid{ grid-template-columns: repeat(3, 1fr); }
   }
+
+  /* ===================== VAULT SPLASH ===================== */
+  .ante-vault{
+    position:fixed; inset:0; z-index:9999;
+    display:flex; flex-direction:column; align-items:center; justify-content:center;
+    background:radial-gradient(120% 90% at 50% 38%, #101417 0%, #0a0c0d 55%, #060707 100%);
+    overflow:hidden; -webkit-tap-highlight-color:transparent; user-select:none; touch-action:none;
+    opacity:1; transition:opacity .4s ease;
+    --mint:#7fdca4;
+  }
+  .ante-vault.av-done{ opacity:0; pointer-events:none; }
+  .av-bloom{
+    position:absolute; width:560px; height:560px; max-width:140vw; max-height:140vw; border-radius:50%;
+    background:radial-gradient(circle, rgba(127,220,164,.16) 0%, rgba(127,220,164,.05) 38%, transparent 66%);
+    opacity:.55; transform:scale(.9);
+    transition:opacity .9s ease, transform 1.1s cubic-bezier(.2,.8,.2,1);
+    will-change:opacity,transform; pointer-events:none;
+  }
+  .av-stage{
+    position:relative; width:min(82vw,340px); aspect-ratio:1/1;
+    display:flex; align-items:center; justify-content:center;
+    transition:opacity .55s ease .65s, transform .9s cubic-bezier(.7,0,.84,0) .55s;
+    will-change:transform,opacity;
+  }
+  .av-door,.av-half-svg{ position:absolute; inset:0; width:100%; height:100%; overflow:visible; }
+  .av-half{ position:absolute; inset:0; will-change:transform; transition:transform 1s cubic-bezier(.66,0,.2,1) .15s; }
+  .av-plate{ fill:#15181b; }
+  .av-plate-ring{ fill:none; stroke:rgba(127,220,164,.10); stroke-width:2; }
+  .av-ring{ fill:none; stroke:var(--mint); will-change:transform,opacity; transform-box:fill-box; transform-origin:center; }
+  .av-ring-outer{ stroke:rgba(127,220,164,.30); stroke-width:1.5; }
+  .av-ring-thin{ stroke:rgba(245,245,246,.14); stroke-width:1; animation:avSpinB 26s linear infinite; }
+  .av-dash-track{ stroke:rgba(127,220,164,.55); stroke-width:2; stroke-dasharray:3 11; stroke-linecap:round; animation:avSpinA 40s linear infinite; }
+  .av-dash-inner{ stroke:rgba(127,220,164,.40); stroke-width:1.5; stroke-dasharray:2 8; stroke-linecap:round; animation:avSpinB 30s linear infinite; }
+  .av-bolts{ transform-box:fill-box; transform-origin:center; }
+  .av-bolt{ stroke:rgba(127,220,164,.7); stroke-width:3; stroke-linecap:round; }
+  .av-ticks{ transform-box:fill-box; transform-origin:center; animation:avSpinA 60s linear infinite; }
+  .av-tick{ stroke:rgba(245,245,246,.20); stroke-width:1; }
+  .av-tick-major{ stroke:rgba(127,220,164,.6); stroke-width:1.5; }
+  .av-wheel{ transform-box:fill-box; transform-origin:center; animation:avTick 6s steps(1) infinite; }
+  .av-hub{ fill:#10130f; }
+  .av-hub-ring{ fill:none; stroke:rgba(127,220,164,.5); stroke-width:2; }
+  .av-spoke{ stroke:rgba(127,220,164,.65); stroke-width:3; stroke-linecap:round; }
+  .av-core{ fill:var(--mint); }
+  .av-seam-light{
+    position:absolute; width:4px; height:62%; border-radius:4px;
+    background:linear-gradient(to bottom, transparent, var(--mint), #dffbe9, var(--mint), transparent);
+    opacity:0; transform:scaleY(.2); box-shadow:0 0 24px 6px rgba(127,220,164,.6);
+    transition:opacity .5s ease, transform .7s ease; will-change:opacity,transform;
+  }
+  .av-prompt{ position:absolute; bottom:11%; display:flex; flex-direction:column; align-items:center; gap:14px;
+    transition:opacity .35s ease, transform .35s ease; will-change:opacity,transform; }
+  .av-prompt-text{ font-size:14px; letter-spacing:.04em; color:var(--text-dim,#9b9ba4); }
+  .av-chev{ position:relative; width:26px; height:18px; }
+  .av-chev span{ position:absolute; left:50%; width:13px; height:13px;
+    border-left:2px solid var(--mint); border-top:2px solid var(--mint);
+    transform:translateX(-50%) rotate(45deg); animation:avChev 1.8s ease-in-out infinite; }
+  .av-chev span:nth-child(2){ top:7px; animation-delay:.28s; opacity:.5; }
+  .av-brand{ position:absolute; top:9%; font-size:13px; letter-spacing:.42em; font-weight:500;
+    color:rgba(127,220,164,.7); padding-left:.42em; }
+  .av-opening .av-prompt{ opacity:0; transform:translateY(14px); }
+  .av-opening .av-bloom{ opacity:1; transform:scale(1.55); }
+  .av-opening .av-seam-light{ opacity:1; transform:scaleY(1); }
+  .av-opening .av-dash-track,
+  .av-opening .av-dash-inner,
+  .av-opening .av-ring-thin,
+  .av-opening .av-ticks,
+  .av-opening .av-wheel{ animation:none; }
+  .av-opening .av-ring,
+  .av-opening .av-bolts,
+  .av-opening .av-ticks,
+  .av-opening .av-wheel{ transition:transform .7s cubic-bezier(.5,0,.2,1), opacity .6s ease; }
+  .av-opening .av-dash-track{ transform:rotate(120deg) scale(1.4); opacity:0; }
+  .av-opening .av-dash-inner{ transform:rotate(-90deg) scale(1.5); opacity:0; }
+  .av-opening .av-ring-thin{ transform:scale(1.6); opacity:0; }
+  .av-opening .av-ring-outer{ transition:opacity .6s ease .1s; opacity:0; }
+  .av-opening .av-ticks{ transform:scale(1.3); opacity:0; }
+  .av-opening .av-wheel{ transform:rotate(150deg) scale(.2); opacity:0; }
+  .av-opening .av-bolts{ transform:scale(.86); opacity:0; }
+  .av-opening .av-half-l{ transform:translateX(-72%) rotate(-4deg); }
+  .av-opening .av-half-r{ transform:translateX(72%) rotate(4deg); }
+  .av-opening .av-stage{ transform:scale(2.6); opacity:0; }
+  @keyframes avSpinA{ to{ transform:rotate(360deg); } }
+  @keyframes avSpinB{ to{ transform:rotate(-360deg); } }
+  @keyframes avTick{ 0%,92%{ transform:rotate(0deg);} 96%,100%{ transform:rotate(7deg);} }
+  @keyframes avChev{ 0%,100%{ transform:translateX(-50%) rotate(45deg) translate(0,0); opacity:.9; }
+    50%{ transform:translateX(-50%) rotate(45deg) translate(-3px,-3px); opacity:.4; } }
+
+  /* ===================== SCREEN TRANSITIONS ===================== */
+  .screen{ backface-visibility:hidden; }
+  .screen.vt-anim{
+    will-change:transform,opacity;
+    transition:transform .30s cubic-bezier(.22,1.12,.36,1), opacity .24s ease;
+  }
+  /* keep the outgoing screen painted during the crossover (app uses display:flex) */
+  .screen.vt-active-ghost{ display:flex; opacity:1; }
+  .screen.vt-leaving{ pointer-events:none !important; z-index:2; }
+  .screen.vt-entering{ z-index:3; }
+  .screen.vt-enter-fwd{ opacity:0; transform:translate3d(36%,0,0); }
+  .screen.vt-exit-fwd { opacity:0; transform:translate3d(-14%,0,0) scale(.94); }
+  .screen.vt-enter-back{ opacity:0; transform:translate3d(-18%,0,0) scale(.94); }
+  .screen.vt-exit-back { opacity:0; transform:translate3d(36%,0,0); }
+  .screen.vt-enter-tab{ opacity:0; transform:translate3d(0,12px,0) scale(.99); }
+  .screen.vt-exit-tab { opacity:0; transform:translate3d(0,-10px,0) scale(.99); }
+
+  @media (prefers-reduced-motion: reduce){
+    .av-ring,.av-ticks,.av-wheel,.av-chev span{ animation:none !important; }
+    .ante-vault,.av-stage{ transition:none; }
+    .screen.vt-anim{ transition:none !important; }
+    .screen.vt-enter-fwd,.screen.vt-exit-fwd,
+    .screen.vt-enter-back,.screen.vt-exit-back,
+    .screen.vt-enter-tab,.screen.vt-exit-tab{ opacity:1 !important; transform:none !important; }
+  }
 </style>
 </head>
 <body>
@@ -3874,6 +3986,201 @@ if ('serviceWorker' in navigator) {
     if (mq.addEventListener) mq.addEventListener("change", onMQ);
     else if (mq.addListener) mq.addListener(onMQ);
   }
+})();
+</script>
+
+<!-- ===================== VAULT SPLASH MARKUP ===================== -->
+<div id="anteVault" class="ante-vault" role="dialog" aria-modal="true" aria-label="Tap or swipe up to open your vault">
+  <div class="av-bloom" aria-hidden="true"></div>
+  <div class="av-stage" id="avStage">
+    <div class="av-half av-half-l" aria-hidden="true">
+      <svg class="av-half-svg" viewBox="0 0 320 320" preserveAspectRatio="xMidYMid meet">
+        <defs><clipPath id="avClipL"><rect x="0" y="0" width="160" height="320"/></clipPath></defs>
+        <g clip-path="url(#avClipL)">
+          <circle cx="160" cy="160" r="150" class="av-plate"/>
+          <circle cx="160" cy="160" r="150" class="av-plate-ring"/>
+        </g>
+      </svg>
+    </div>
+    <div class="av-half av-half-r" aria-hidden="true">
+      <svg class="av-half-svg" viewBox="0 0 320 320" preserveAspectRatio="xMidYMid meet">
+        <defs><clipPath id="avClipR"><rect x="160" y="0" width="160" height="320"/></clipPath></defs>
+        <g clip-path="url(#avClipR)">
+          <circle cx="160" cy="160" r="150" class="av-plate"/>
+          <circle cx="160" cy="160" r="150" class="av-plate-ring"/>
+        </g>
+      </svg>
+    </div>
+    <svg class="av-door" id="avDoor" viewBox="0 0 320 320" preserveAspectRatio="xMidYMid meet" role="img" aria-label="Vault door">
+      <circle class="av-ring av-ring-outer" cx="160" cy="160" r="148"/>
+      <g class="av-bolts" id="avBolts"></g>
+      <circle class="av-ring av-dash-track" id="avDashOuter" cx="160" cy="160" r="118"/>
+      <circle class="av-ring av-ring-thin" id="avRingThin" cx="160" cy="160" r="98"/>
+      <g class="av-ticks" id="avTicks"></g>
+      <circle class="av-ring av-dash-inner" id="avDashInner" cx="160" cy="160" r="70"/>
+      <g class="av-wheel" id="avWheel">
+        <circle class="av-hub" cx="160" cy="160" r="40"/>
+        <circle class="av-hub-ring" cx="160" cy="160" r="40"/>
+        <g class="av-spokes" id="avSpokes"></g>
+        <circle class="av-core" cx="160" cy="160" r="12"/>
+      </g>
+    </svg>
+    <div class="av-seam-light" aria-hidden="true"></div>
+  </div>
+  <div class="av-prompt" id="avPrompt">
+    <div class="av-chev" aria-hidden="true"><span></span><span></span></div>
+    <div class="av-prompt-text">Swipe up to open your vault</div>
+  </div>
+  <div class="av-brand" aria-hidden="true">ANTE</div>
+</div>
+
+<script>
+/* ===================== VAULT SPLASH SCRIPT ===================== */
+(function(){
+  var vault  = document.getElementById('anteVault');
+  if(!vault) return;
+  var stage  = document.getElementById('avStage');
+  var bolts  = document.getElementById('avBolts');
+  var ticks  = document.getElementById('avTicks');
+  var spokes = document.getElementById('avSpokes');
+  var prompt = document.getElementById('avPrompt');
+  var reduce = window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+  var opened = false;
+  var NS = 'http://www.w3.org/2000/svg';
+
+  function el(name, attrs){ var e=document.createElementNS(NS,name); for(var k in attrs) e.setAttribute(k,attrs[k]); return e; }
+  function ring(parent, count, build){
+    for(var i=0;i<count;i++){ var a=(i/count)*Math.PI*2 - Math.PI/2; var node=build(a,i); if(node) parent.appendChild(node); }
+  }
+  ring(bolts,8,function(a){ var r1=148,r2=132,cx=160,cy=160;
+    return el('line',{x1:cx+Math.cos(a)*r1,y1:cy+Math.sin(a)*r1,x2:cx+Math.cos(a)*r2,y2:cy+Math.sin(a)*r2,class:'av-bolt'}); });
+  ring(ticks,48,function(a,i){ var major=(i%4===0),r1=88,r2=major?78:82,cx=160,cy=160;
+    return el('line',{x1:cx+Math.cos(a)*r1,y1:cy+Math.sin(a)*r1,x2:cx+Math.cos(a)*r2,y2:cy+Math.sin(a)*r2,class:major?'av-tick av-tick-major':'av-tick'}); });
+  ring(spokes,6,function(a){ var r1=14,r2=38,cx=160,cy=160;
+    return el('line',{x1:cx+Math.cos(a)*r1,y1:cy+Math.sin(a)*r1,x2:cx+Math.cos(a)*r2,y2:cy+Math.sin(a)*r2,class:'av-spoke'}); });
+
+  var px=0,py=0,tx=0,ty=0,rafId=null;
+  var layers=[
+    {sel:'#avDashOuter,#avBolts', d:14},
+    {sel:'#avRingThin,#avTicks',  d:9},
+    {sel:'#avDashInner',          d:6},
+    {sel:'#avWheel',              d:3}
+  ].map(function(L){ return {nodes:vault.querySelectorAll(L.sel), d:L.d}; });
+
+  function loop(){
+    tx += (px-tx)*0.08; ty += (py-ty)*0.08;
+    for(var i=0;i<layers.length;i++){
+      var L=layers[i], t='translate('+(tx*L.d).toFixed(2)+'px,'+(ty*L.d).toFixed(2)+'px)';
+      for(var j=0;j<L.nodes.length;j++) L.nodes[j].style.transform=t;
+    }
+    if(!opened) rafId=requestAnimationFrame(loop);
+  }
+  function startParallax(){ if(!reduce && !rafId) rafId=requestAnimationFrame(loop); }
+  function onPointer(e){ var w=innerWidth,h=innerHeight; px=((e.clientX||w/2)/w-0.5)*2; py=((e.clientY||h/2)/h-0.5)*2; }
+  function onTilt(e){ var g=e.gamma||0,b=e.beta||0; px=Math.max(-1,Math.min(1,g/30)); py=Math.max(-1,Math.min(1,(b-45)/30)); }
+  if(!reduce){ window.addEventListener('mousemove',onPointer,{passive:true}); startParallax(); }
+
+  function tryGyro(){
+    if(typeof DeviceOrientationEvent!=='undefined' && typeof DeviceOrientationEvent.requestPermission==='function'){
+      DeviceOrientationEvent.requestPermission().then(function(s){ if(s==='granted') window.addEventListener('deviceorientation',onTilt,{passive:true}); }).catch(function(){});
+    } else if(window.DeviceOrientationEvent){ window.addEventListener('deviceorientation',onTilt,{passive:true}); }
+  }
+
+  function openVault(){
+    if(opened) return; opened=true;
+    cancelAnimationFrame(rafId); rafId=null;
+    for(var i=0;i<layers.length;i++) for(var j=0;j<layers[i].nodes.length;j++) layers[i].nodes[j].style.transform='';
+    if(reduce){ finish(); return; }
+    vault.classList.add('av-opening');
+    var done=false;
+    function end(){ if(done) return; done=true; finish(); }
+    stage.addEventListener('transitionend',function te(ev){
+      if(ev.target===stage && ev.propertyName==='opacity'){ stage.removeEventListener('transitionend',te); end(); }
+    });
+    setTimeout(end,2200);
+  }
+  function finish(){
+    vault.classList.add('av-done');
+    vault.setAttribute('aria-hidden','true');
+    setTimeout(function(){ vault.style.display='none'; },420);
+    if(typeof window.anteOpenVault==='function'){ try{ window.anteOpenVault(); }catch(e){} }
+    document.dispatchEvent(new CustomEvent('ante:vault-open'));
+  }
+
+  var sy=null,sx=null,moved=false;
+  function down(e){ var t=(e.touches&&e.touches[0])||e; sy=t.clientY; sx=t.clientX; moved=false; tryGyro(); }
+  function move(e){ if(sy==null) return; var t=(e.touches&&e.touches[0])||e, dy=sy-t.clientY, dx=Math.abs(sx-t.clientX);
+    if(dy>10) moved=true; if(dy>70 && dy>dx){ openVault(); sy=null; } }
+  function up(){ if(sy!=null && !moved) openVault(); sy=null; }
+  vault.addEventListener('touchstart',down,{passive:true});
+  vault.addEventListener('touchmove',move,{passive:true});
+  vault.addEventListener('touchend',up,{passive:true});
+  vault.addEventListener('mousedown',down);
+  vault.addEventListener('mousemove',move);
+  vault.addEventListener('mouseup',up);
+  vault.addEventListener('keydown',function(e){ if(e.key==='Enter'||e.key===' '){ e.preventDefault(); openVault(); } });
+  vault.tabIndex=0;
+
+  if(reduce) prompt.querySelector('.av-prompt-text').textContent='Tap to enter';
+  window.anteVaultOpen = openVault;
+})();
+
+/* ===================== SCREEN TRANSITION ENGINE ===================== */
+(function () {
+  'use strict';
+  var DURATION = 320;
+  var navStack = [];
+  var reduce = window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+  if (window.matchMedia) {
+    window.matchMedia('(prefers-reduced-motion: reduce)')
+      .addEventListener('change', function (e) { reduce = e.matches; });
+  }
+  function activeScreen() { return document.querySelector('.screen.active'); }
+  function animate(from, to, dir) {
+    if (!to || from === to) return;
+    if (reduce) { cleanup(from); cleanup(to); return; }
+    var enterCls = 'vt-enter-' + dir;
+    to.classList.add('vt-anim', 'vt-entering', enterCls);
+    if (from) from.classList.add('vt-anim', 'vt-leaving', 'vt-active-ghost');
+    void to.offsetWidth;
+    requestAnimationFrame(function () {
+      to.classList.remove(enterCls, 'vt-entering');
+      if (from) from.classList.add('vt-exit-' + dir);
+      var settled = false;
+      function done() { if (settled) return; settled = true; cleanup(to); cleanup(from); }
+      to.addEventListener('transitionend', done, { once: true });
+      setTimeout(done, DURATION + 40);
+    });
+  }
+  function cleanup(el) {
+    if (!el) return;
+    el.classList.remove('vt-anim','vt-entering','vt-leaving','vt-active-ghost',
+      'vt-enter-fwd','vt-exit-fwd','vt-enter-back','vt-exit-back','vt-enter-tab','vt-exit-tab');
+    el.style.willChange = '';
+  }
+  var _goTo = window.goTo;
+  if (typeof _goTo === 'function') window.goTo = function (screenId) {
+    var from = activeScreen();
+    var r = _goTo.apply(this, arguments);
+    var to = document.getElementById(screenId) || activeScreen();
+    var idx = navStack.lastIndexOf(screenId);
+    var dir = 'fwd';
+    if (idx !== -1 && idx < navStack.length - 1) { dir = 'back'; navStack.length = idx + 1; }
+    else navStack.push(screenId);
+    animate(from, to, dir);
+    return r;
+  };
+  var _showTab = window.showTab;
+  if (typeof _showTab === 'function') window.showTab = function (tab) {
+    var from = activeScreen();
+    var r = _showTab.apply(this, arguments);
+    var to = document.getElementById('screen-' + tab) || activeScreen();
+    animate(from, to, 'tab');
+    navStack = ['screen-' + tab];
+    return r;
+  };
+  var boot = activeScreen();
+  if (boot) navStack.push(boot.id);
 })();
 </script>
 </body>
