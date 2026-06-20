@@ -484,6 +484,25 @@
   .tag.icon-tag { padding:9px; display:inline-flex; align-items:center; justify-content:center; color:var(--text-dim); }
   .tag.icon-tag.selected { color:var(--gold); }
 
+  /* ── Help + AI chatbot ── */
+  .help-btn { background:none; border:1px solid var(--border-strong); color:var(--text-dim); width:34px; height:34px; border-radius:50%; display:flex; align-items:center; justify-content:center; cursor:pointer; transition:color .15s, border-color .15s; }
+  .help-btn:active { transform:scale(.92); }
+  .help-faq { display:flex; flex-direction:column; gap:10px; margin-bottom:18px; }
+  .faq-item { background:var(--surface); border:1px solid var(--border); border-radius:var(--radius-sm); padding:12px 14px; }
+  .faq-q { font-size:14px; font-weight:700; color:var(--text); }
+  .faq-a { font-size:13px; color:var(--text-dim); line-height:1.5; margin-top:4px; }
+  .chat-head { font-size:12px; font-weight:700; text-transform:uppercase; letter-spacing:.5px; color:var(--text-muted); margin-bottom:8px; }
+  .chat-log { background:var(--bg-2); border:1px solid var(--border); border-radius:var(--radius-sm); padding:12px; min-height:120px; max-height:260px; overflow-y:auto; display:flex; flex-direction:column; gap:8px; margin-bottom:10px; }
+  .chat-msg { max-width:85%; padding:9px 12px; border-radius:14px; font-size:14px; line-height:1.45; white-space:pre-wrap; }
+  .chat-msg.user { align-self:flex-end; background:var(--gold-dim); border:1px solid rgba(230,185,78,.3); color:var(--text); }
+  .chat-msg.bot { align-self:flex-start; background:var(--surface2); border:1px solid var(--border); color:var(--text-dim); }
+  .chat-msg.bot.typing { color:var(--text-muted); font-style:italic; }
+  .chat-empty { color:var(--text-muted); font-size:13px; text-align:center; padding:18px 8px; }
+  .chat-input-row { display:flex; gap:8px; }
+  .chat-input { flex:1; background:var(--surface); border:1px solid var(--border-strong); border-radius:12px; padding:11px 14px; color:var(--text); font-size:14px; outline:none; }
+  .chat-send { background:linear-gradient(135deg,var(--gold-soft),var(--gold)); color:#000; border:none; border-radius:12px; padding:0 18px; font-weight:700; font-size:14px; cursor:pointer; }
+  .chat-send:disabled { opacity:.5; }
+
   @media (prefers-reduced-motion:reduce) {
     .flame .fl-layer, .flame .fl-core, .flame .fl-tip, .flame .ember { animation:none !important; }
     .flame .ember { opacity:0 !important; }
@@ -1052,6 +1071,7 @@
   </div>
   <div class="onboard-q" id="ob2-q">What do you want to improve?</div>
   <div class="onboard-hint" id="ob2-hint">Pick a category — each one uses a different app to verify you.</div>
+  <input class="input-field" id="goal-search" placeholder="Search what you want to do…" oninput="onGoalSearch(this.value)" autocomplete="off" style="margin-bottom:14px">
   <div id="goal-list"></div>
   <div id="goal-config"></div>
   <div style="margin-top:auto">
@@ -1149,7 +1169,10 @@
       </svg>
       <span class="brand-word">ante</span>
     </div>
-    <div class="brand-date" id="home-date" onclick="showTab('stats')"></div>
+    <div style="display:flex;align-items:center;gap:14px">
+      <button class="help-btn" onclick="openHelp()" aria-label="Help"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><path d="M9.09 9a3 3 0 0 1 5.83 1c0 2-3 3-3 3"/><path d="M12 17h.01"/></svg></button>
+      <div class="brand-date" id="home-date" onclick="showTab('stats')"></div>
+    </div>
   </div>
 
   <div class="hero" data-depth="8">
@@ -1374,6 +1397,25 @@
 <!-- Habit Detail Modal -->
 <div class="modal-overlay" id="habit-detail-modal" onclick="closeModalIfBg(event,'habit-detail-modal')">
   <div class="modal" id="habit-detail-content"></div>
+</div>
+
+<!-- Help + AI chatbot -->
+<div class="modal-overlay" id="help-modal" onclick="closeModalIfBg(event,'help-modal')">
+  <div class="modal" onclick="event.stopPropagation()">
+    <div class="modal-handle"></div>
+    <div class="modal-title">Help</div>
+    <div class="help-faq">
+      <div class="faq-item"><div class="faq-q">How does Ante work?</div><div class="faq-a">Stake money on a daily habit. Complete it (auto-verified by a connected app) and keep your money. Miss it and the stake locks into your Savings Vault.</div></div>
+      <div class="faq-item"><div class="faq-q">How is a habit verified?</div><div class="faq-a">Each category links an app — Apple Health, Screen Time, Canvas, Location, Kindle, or Duolingo — and reads the data automatically. No honor system.</div></div>
+      <div class="faq-item"><div class="faq-q">What's the Savings Vault?</div><div class="faq-a">Missed stakes go into a locked vault — still your money, just inaccessible until you build the habit back.</div></div>
+    </div>
+    <div class="chat-head">💬 Ask Ante AI</div>
+    <div class="chat-log" id="chat-log"></div>
+    <div class="chat-input-row">
+      <input class="chat-input" id="chat-input" placeholder="Ask anything about Ante…" autocomplete="off" onkeydown="if(event.key==='Enter')sendHelpMessage()">
+      <button class="chat-send" id="chat-send" onclick="sendHelpMessage()">Send</button>
+    </div>
+  </div>
 </div>
 
 <!-- Share / Challenge Modal -->
@@ -1880,6 +1922,31 @@ function renderGoalList(){
   if (!el) return;
   const catId = state.onboardData.categoryId;
 
+  // Search mode — surface matching goals across every category.
+  const q = (state._goalSearch || '').trim().toLowerCase();
+  if (q) {
+    const matches = GOALS.filter(g => {
+      const cat = CATEGORIES.find(c => c.id === g.category);
+      const hay = `${g.label} ${cat ? cat.label : ''} ${g.metric || ''} ${SOURCES[g.source] ? SOURCES[g.source].label : ''}`.toLowerCase();
+      return hay.includes(q);
+    });
+    const qEl = document.getElementById('ob2-q'); const hEl = document.getElementById('ob2-hint');
+    if (qEl) qEl.textContent = 'Search results';
+    if (hEl) hEl.textContent = matches.length ? `${matches.length} match${matches.length !== 1 ? 'es' : ''} — tap one to start` : 'No matches — try "read", "run", or "study"';
+    el.innerHTML = matches.map(g => {
+      const connected = g.source === 'canvas' ? !!(state.canvas && state.canvas.connected) : !!state.connections[g.source];
+      return `<div class="goal-card" onclick="selectGoalFromSearch('${g.id}')">
+        <div class="goal-emoji" style="background:${hexToRgba(g.color,0.16)};border:1px solid ${hexToRgba(g.color,0.4)};color:${g.color}">${iconSVG(g.icon, 22, g.color)}</div>
+        <div class="goal-body">
+          <div class="goal-name">${g.label}</div>
+          <div class="goal-src">${SOURCES[g.source].icon} ${SOURCES[g.source].label}${connected ? '' : ' · 🔒 connect'}</div>
+        </div>
+      </div>`;
+    }).join('') || '<div class="onboard-hint" style="margin-top:16px">Nothing found. Try "read", "run", "study"…</div>';
+    document.getElementById('goal-config').innerHTML = '';
+    return;
+  }
+
   if (!catId) {
     // Phase 1: category picker
     const qEl = document.getElementById('ob2-q');
@@ -1940,8 +2007,21 @@ function selectCategory(id) {
 function backToCategories() {
   state.onboardData.categoryId = null;
   state.onboardData.goalId = null;
+  state._goalSearch = '';
+  const si = document.getElementById('goal-search'); if (si) si.value = '';
   renderGoalList();
   renderGoalConfig();
+}
+function onGoalSearch(v){ state._goalSearch = v; renderGoalList(); }
+function selectGoalFromSearch(id){
+  const g = goalById(id);
+  const connected = g.source === 'canvas' ? !!(state.canvas && state.canvas.connected) : !!state.connections[g.source];
+  if (!connected) { promptConnect(g.source); return; }
+  state.onboardData.categoryId = g.category;
+  state._goalSearch = '';
+  const si = document.getElementById('goal-search'); if (si) si.value = '';
+  if (g.category === 'digital') { renderGoalList(); renderGoalConfig(); return; }
+  selectGoal(id);
 }
 function promptConnect(src){
   showToast(`Connect ${SOURCES[src].label} first`, 'red');
@@ -2114,6 +2194,8 @@ function commitAppPicker(){
 function startNewBet(){
   state.onboardData = { goalId: null, categoryId: null, name: '', target: null, freq: 'Every Day', stake: 5, apps: [], capMinutes: 30 };
   selectedFreq = 'Every Day'; selectedStake = 5;
+  state._goalSearch = '';
+  const sb = document.getElementById('goal-search'); if (sb) sb.value = '';
   if (anyConnected()) { renderGoalList(); renderGoalConfig(); goTo('screen-ob2'); }
   else { renderConnectList(); goTo('screen-ob1'); }
 }
@@ -2390,6 +2472,73 @@ function openStripeWebSheet(stripe, elements) {
     else { showToast('✅ Card saved — your stakes are now backed.', 'green'); sheet.remove(); }
   };
   document.getElementById('stripe-save').onclick = finish;
+}
+
+// ─────────────────────────────────────────────
+// HELP — in-app AI chatbot (Claude via the backend)
+// Set HELP.BACKEND_URL to your deployed backend (the payments-backend with the
+// /ai-chat endpoint). Until then the chat answers from a built-in FAQ so Help
+// still works offline. The Anthropic API key lives ONLY on the backend.
+// ─────────────────────────────────────────────
+const HELP = {
+  BACKEND_URL: '',   // e.g. 'https://ante-pay.vercel.app' (same server as payments)
+};
+let helpChat = [];   // [{role:'user'|'assistant', content}]
+function chatEscape(s){ return String(s).replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c])); }
+function openHelp(){
+  showModal('help-modal');
+  renderChat();
+  setTimeout(() => { const i = document.getElementById('chat-input'); if (i) i.focus(); }, 150);
+}
+function renderChat(){
+  const log = document.getElementById('chat-log');
+  if (!log) return;
+  if (!helpChat.length) {
+    log.innerHTML = '<div class="chat-empty">Ask me anything about Ante — habits, staking, verification, the Savings Vault…</div>';
+    return;
+  }
+  log.innerHTML = helpChat.map(m => `<div class="chat-msg ${m.role === 'user' ? 'user' : 'bot'}">${chatEscape(m.content)}</div>`).join('');
+  log.scrollTop = log.scrollHeight;
+}
+async function sendHelpMessage(){
+  const input = document.getElementById('chat-input');
+  const text = (input && input.value || '').trim();
+  if (!text) return;
+  input.value = '';
+  helpChat.push({ role: 'user', content: text });
+  renderChat();
+  const log = document.getElementById('chat-log');
+  const typing = document.createElement('div');
+  typing.className = 'chat-msg bot typing'; typing.textContent = 'Ante AI is typing…';
+  log.appendChild(typing); log.scrollTop = log.scrollHeight;
+  const sendBtn = document.getElementById('chat-send'); if (sendBtn) sendBtn.disabled = true;
+  try {
+    let reply;
+    if (HELP.BACKEND_URL) {
+      const r = await fetch(HELP.BACKEND_URL.replace(/\/$/, '') + '/ai-chat', {
+        method: 'POST', headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ messages: helpChat }),
+      }).then(x => x.json());
+      if (r.error) throw new Error(r.error);
+      reply = r.reply;
+    } else {
+      reply = localHelpAnswer(text);
+    }
+    helpChat.push({ role: 'assistant', content: reply || "Sorry, I didn't catch that." });
+  } catch (e) {
+    helpChat.push({ role: 'assistant', content: '⚠️ ' + (e.message || 'Could not reach Ante AI') + '\n\n' + localHelpAnswer(text) });
+  } finally {
+    if (sendBtn) sendBtn.disabled = false;
+    renderChat();
+  }
+}
+// Offline fallback so Help works before the AI backend is deployed.
+function localHelpAnswer(q){
+  q = (q || '').toLowerCase();
+  if (/vault|savings|miss/.test(q)) return "Miss a habit and your stake locks into the Savings Vault — still your money, just inaccessible until you build the habit back. Deploy the AI backend (see HELP config) for the full assistant.";
+  if (/verif|connect|app|health|kindle|duolingo|canvas|strava/.test(q)) return "Each habit links an app — Apple Health, Screen Time, Canvas, Location, Kindle, or Duolingo — and Ante reads the data to verify you automatically. Connect an app in the new-bet flow.";
+  if (/stake|money|pay|bet|charge/.test(q)) return "You pick a daily stake ($1–$100). Complete the habit and you keep it; miss it and it goes to your Savings Vault. Real card charging uses Stripe (see PAYMENTS.md).";
+  return "I can help with habits, staking, app verification, and the Savings Vault. For the full AI assistant, deploy the backend and set HELP.BACKEND_URL.";
 }
 
 // ─────────────────────────────────────────────
