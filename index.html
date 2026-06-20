@@ -1012,6 +1012,7 @@
     background:radial-gradient(circle, rgba(127,220,164,.14) 0%, rgba(127,220,164,.04) 40%, transparent 66%);
     opacity:.5; transform:scale(.9); transition:opacity .9s ease, transform 1.1s cubic-bezier(.2,.8,.2,1); will-change:opacity,transform; pointer-events:none; }
   .av-stage{ position:relative; width:min(78vw,320px); aspect-ratio:1/1; margin-bottom:4%;
+    perspective:1300px; perspective-origin:50% 50%;
     transition:opacity .5s ease, transform .9s cubic-bezier(.6,0,.2,1); will-change:transform,opacity; }
   /* green glowing interior behind the door */
   .av-core{ position:absolute; inset:9%; border-radius:50%; z-index:1; opacity:0; transform:scale(.72);
@@ -1023,10 +1024,17 @@
   .av-core::after{ content:''; position:absolute; inset:34%; border-radius:50%;
     background:radial-gradient(circle at 45% 40%, #ffffff, #cdebd9 40%, transparent 72%); opacity:.9; }
   /* domed metal door */
-  .av-door{ position:absolute; inset:0; border-radius:50%; z-index:2; transform-origin:18% 50%;
-    background:radial-gradient(circle at 38% 30%, #2b3033 0%, #1d2123 45%, #121517 78%, #0b0d0e 100%);
-    box-shadow:0 3px 0 #15191b, 0 6px 0 #12161a, 0 9px 0 #0f1315, 0 12px 0 #0c1011, 0 15px 0 #090c0d, 0 18px 0 #070909, 0 21px 0 #050707,0 26px 30px rgba(0,0,0,.5), 0 48px 74px rgba(0,0,0,.62),inset 0 3px 4px rgba(255,255,255,.08), inset 0 -18px 30px rgba(0,0,0,.62);
+  /* 3D door body: a real extruded disc (preserve-3d) that swings on a left hinge */
+  .av-door3d{ position:absolute; inset:0; z-index:2; transform-style:preserve-3d; transform-origin:12% 50%;
     transition:transform 2.2s cubic-bezier(.6,0,.18,1) .65s, opacity .7s ease .65s; will-change:transform; }
+  /* the metal thickness — a stack of disc slices forming the cylindrical side wall (filled by JS) */
+  .av-slices{ position:absolute; inset:0; transform-style:preserve-3d; }
+  .av-slice{ position:absolute; inset:0; border-radius:50%;
+    background:linear-gradient(to top, #30353800 0%, #2c3134 0%, #1a1e20 52%, #0c0f11 100%); }
+  /* front face holds the rings + wheel; shaded so light reads as coming from BELOW */
+  .av-face{ position:absolute; inset:0; border-radius:50%; transform-style:preserve-3d;
+    background:radial-gradient(circle at 50% 66%, #2b3033 0%, #1d2123 42%, #121517 76%, #0b0d0e 100%);
+    box-shadow:0 44px 74px rgba(0,0,0,.62), inset 0 -12px 24px rgba(255,255,255,.05), inset 0 14px 28px rgba(0,0,0,.62); }
   .av-ringd{ position:absolute; inset:0; margin:auto; border-radius:50%; will-change:transform;
     background:radial-gradient(circle at 40% 32%, #262b2e, #16191b);
     box-shadow:inset 0 2px 4px rgba(255,255,255,.05), inset 0 -7px 13px rgba(0,0,0,.5), 0 5px 11px rgba(0,0,0,.4); }
@@ -1059,12 +1067,12 @@
   .av-opening .av-prompt,.av-opening .av-wordmark,.av-opening .av-tagline{ opacity:0; transform:translateY(12px); }
   .av-opening .av-bloom{ opacity:1; transform:scale(1.5); }
   .av-opening .av-wheel-rot{ transform:rotate(300deg); animation:none; }
-  .av-opening .av-door{ transform:perspective(1100px) rotateY(-82deg); opacity:1; }
+  .av-opening .av-door3d{ transform:rotateY(-78deg); opacity:1; }
   .av-opening .av-core{ opacity:1; transform:scale(1); animation:avCorePulse 1.8s ease-in-out 1.5s infinite; }
   .av-opening .av-stage{ transition:transform 1.4s cubic-bezier(.7,0,.84,0) 2.6s, opacity .9s ease 2.9s; transform:scale(2.7); opacity:0; }
   @media (prefers-reduced-motion: reduce){
     .av-wheel-rot,.av-chev span,.av-core{ animation:none !important; }
-    .ante-vault,.av-stage,.av-door{ transition:none; }
+    .ante-vault,.av-stage,.av-door3d{ transition:none; }
   }
 
   /* ===================== SCREEN TRANSITIONS ===================== */
@@ -1267,9 +1275,9 @@
   .j-mini-chev svg { width: 20px; height: 20px; fill: none; stroke: currentColor; stroke-width: 2; stroke-linecap: round; stroke-linejoin: round; }
   @media (prefers-reduced-motion: reduce) { .j-cell { animation: none; opacity: 1; } }
   /* vault door: thick-puck rim highlight (chamfer on the exposed outer edge) */
-  .av-door::before{ content:''; position:absolute; inset:0; border-radius:50%; pointer-events:none; z-index:0;
-    background:radial-gradient(circle at 50% 15%, rgba(255,255,255,.12), rgba(255,255,255,0) 42%);
-    box-shadow:inset 0 0 0 2px rgba(255,255,255,.05), inset 0 -3px 6px rgba(0,0,0,.4); }
+  .av-face::before{ content:''; position:absolute; inset:0; border-radius:50%; pointer-events:none; z-index:0;
+    background:radial-gradient(circle at 50% 92%, rgba(255,255,255,.11), rgba(255,255,255,0) 40%);
+    box-shadow:inset 0 -3px 8px rgba(255,255,255,.045), inset 0 5px 9px rgba(0,0,0,.45); }
 
   /* bottom nav: move Stats to the middle (Home · Stats · Friends) via flex order,
      DOM order unchanged so the index-based active highlighting still works */
@@ -2365,24 +2373,22 @@ function renderGoalList(){
   // Search mode — surface matching goals across every category.
   const q = (state._goalSearch || '').trim().toLowerCase();
   if (q) {
-    const matches = GOALS.filter(g => {
-      const cat = CATEGORIES.find(c => c.id === g.category);
-      const hay = `${g.label} ${cat ? cat.label : ''} ${g.metric || ''} ${SOURCES[g.source] ? SOURCES[g.source].label : ''}`.toLowerCase();
-      return hay.includes(q);
-    });
+    stopSearchPlaceholder();
+    const matches = searchGoals(q);                 // natural-language intent matching
     const qEl = document.getElementById('ob2-q'); const hEl = document.getElementById('ob2-hint');
-    if (qEl) qEl.textContent = 'Search results';
-    if (hEl) hEl.textContent = matches.length ? `${matches.length} match${matches.length !== 1 ? 'es' : ''} — tap one to start` : 'No matches — try "read", "run", or "study"';
+    if (qEl) qEl.textContent = matches.length ? 'Here’s what fits' : 'Hmm, no match';
+    if (hEl) hEl.textContent = matches.length ? `${matches.length} goal${matches.length !== 1 ? 's' : ''} for "${state._goalSearch.trim()}" — tap one to start` : 'Try "lose weight", "stop scrolling", "read more", or "study"';
     el.innerHTML = matches.map(g => {
+      const cat = CATEGORIES.find(c => c.id === g.category);
       const connected = g.source === 'canvas' ? !!(state.canvas && state.canvas.connected) : !!state.connections[g.source];
       return `<div class="goal-card" onclick="selectGoalFromSearch('${g.id}')">
         <div class="goal-emoji" style="background:${hexToRgba(g.color,0.16)};border:1px solid ${hexToRgba(g.color,0.4)};color:${g.color}">${iconSVG(g.icon, 22, g.color)}</div>
         <div class="goal-body">
           <div class="goal-name">${g.label}</div>
-          <div class="goal-src">${SOURCES[g.source].icon} ${SOURCES[g.source].label}${connected ? '' : ' · 🔒 connect'}</div>
+          <div class="goal-src"><span style="color:${g.color};font-weight:700">${cat ? cat.label : ''}</span> · ${srcBadge(g.source)} ${SOURCES[g.source].label}${connected ? '' : ' · 🔒 connect'}</div>
         </div>
       </div>`;
-    }).join('') || '<div class="onboard-hint" style="margin-top:16px">Nothing found. Try "read", "run", "study"…</div>';
+    }).join('') || '<div class="onboard-hint" style="margin-top:16px">Nothing found. Try "lose weight", "read more", "stop scrolling"…</div>';
     document.getElementById('goal-config').innerHTML = '';
     return;
   }
@@ -2405,6 +2411,7 @@ function renderGoalList(){
       </div>`;
     }).join('');
     document.getElementById('goal-config').innerHTML = '';
+    startSearchPlaceholder();
     return;
   }
 
@@ -2453,8 +2460,90 @@ function selectGoalFromSearch(id){
   state.onboardData.categoryId = g.category;
   state._goalSearch = '';
   const si = document.getElementById('goal-search'); if (si) si.value = '';
+  stopSearchPlaceholder();
   if (g.category === 'digital') { renderGoalList(); renderGoalConfig(); return; }
   selectGoal(id);
+}
+
+// ─────────────────────────────────────────────
+// NATURAL-LANGUAGE GOAL SEARCH — maps plain-English intents to goals.
+// Type "I want to lose weight" → surfaces the relevant goals, each tagged
+// with the category it lands in. Pure keyword/synonym matching (offline).
+// ─────────────────────────────────────────────
+const INTENT_KW = {
+  steps:    ['walk','walking','steps','step count','more active','move more','sedentary','weight','lose weight'],
+  exercise: ['exercise','workout','work out','fit','fitness','get in shape','in shape','strength','lift','lifting','weights','muscle','gains','cardio','active','tone','toned','weight','lose weight','get healthy'],
+  run:      ['run','running','runner','jog','jogging','marathon','half marathon','5k','10k','race','sprint','couch to 5k','cardio','weight','lose weight'],
+  meditate: ['meditate','meditation','mindful','mindfulness','calm','calmer','stress','stressed','anxiety','anxious','breathe','breathing','relax','zen','headspace','present','mental health'],
+  sleep:    ['sleep','sleeping','rest','tired','exhausted','burnout','insomnia','bedtime','go to bed','wake up','wake early','early','8 hours','7 hours','wind down','sleep schedule'],
+  screen:   ['screen','screen time','phone','off my phone','on my phone','scroll','scrolling','doomscroll','doom scroll','social media','instagram','tiktok','youtube','reddit','distract','distraction','distracted','focus','focused','attention','addicted','addiction','less phone','put my phone down','stop scrolling'],
+  cv_ontime:['homework','assignment','assignments','submit','turn in','hand in','deadline','deadlines','school','grades','gpa','study','studying','class','classes','college','university','exam','exams','procrastinate','procrastinating','procrastination','canvas','academic','coursework'],
+  cv_nomiss:['missing','no missing','catch up','behind','stay on top','grades','gpa','assignments','school'],
+  read_min: ['read','reading','book','books','novel','novels','kindle','read more','read every night','bookworm','literacy','chapter'],
+  read_pg:  ['read','reading','pages','book','books','finish a book','finish books','chapter','chapters'],
+  duo:      ['language','languages','spanish','french','german','italian','japanese','chinese','korean','learn a language','duolingo','lesson','lessons','fluent','fluency','vocab','vocabulary'],
+  gym:      ['gym','go to the gym','get to the gym','hit the gym','show up at the gym','check in at gym','workout'],
+  avoid:    ['avoid','stay away','stay out','quit going','stop going','off limits','a bar','bars','fast food','my ex','a place','casino'],
+  proof:    ['custom','anything','my own','something else','other','guitar','piano','instrument','practice','draw','drawing','journal','journaling','write','writing','water','hydrate','drink water','floss','flossing','skincare','clean','tidy','make my bed','cold shower','no smoking','stop smoking','quit smoking','vape','vaping','no drinking','sober','sobriety','side project','build','create','code','coding','art','paint','stretch','yoga'],
+  food_log: ['food','eat','eating','meal','meals','log my food','log food','track food','track my food','track calories','log calories','nutrition','diet','dieting','macros','protein','calorie','calories','myfitnesspal','what i eat','eat healthy','healthy eating','count calories','meal prep','clean eating','junk food','stop eating junk'],
+  food_cal: ['lose weight','losing weight','weight loss','lose fat','cut','cutting','deficit','calorie deficit','under my calories','stay under','calorie goal','slim down','drop weight','get lean','lean','watch my weight','count calories','calories','diet','dieting'],
+};
+function searchGoals(raw){
+  const q = (raw || '').toLowerCase().trim();
+  if (!q) return [];
+  const toks = q.split(/[^a-z0-9]+/).filter(t => t.length > 2);
+  const scored = GOALS.map(g => {
+    const cat = CATEGORIES.find(c => c.id === g.category);
+    const hay = `${g.label} ${cat ? cat.label : ''} ${g.metric || ''} ${SOURCES[g.source] ? SOURCES[g.source].label : ''}`.toLowerCase();
+    const kws = INTENT_KW[g.id] || [];
+    let s = 0;
+    if (hay.includes(q)) s += 6;
+    kws.forEach(k => { if (q.includes(k)) s += (k.includes(' ') ? 5 : 3); });
+    toks.forEach(t => {
+      if (hay.includes(t)) s += 1;
+      kws.forEach(k => { if (k === t) s += 1.5; else if (k.includes(t)) s += 0.4; });
+    });
+    return { g, s };
+  }).filter(x => x.s > 0).sort((a, b) => b.s - a.s);
+  return scored.map(x => x.g);
+}
+
+// ─────────────────────────────────────────────
+// ANIMATED SEARCH PLACEHOLDER — typewriter cycle of example intents.
+// ─────────────────────────────────────────────
+const SEARCH_EXAMPLES = [
+  'I want to lose weight', 'Train for a marathon', 'Stop doomscrolling',
+  'Track my food', 'Read every night', 'Get to the gym', 'Sleep 7+ hours',
+  'Cut my screen time', 'Learn a language', 'Submit assignments on time',
+  'Meditate every morning', 'Stay under my calories',
+];
+let _phTimer = null, _phI = 0, _phC = 0, _phDel = false;
+function stopSearchPlaceholder(){ if (_phTimer) { clearTimeout(_phTimer); _phTimer = null; } }
+function startSearchPlaceholder(){
+  stopSearchPlaceholder();
+  const reduce = window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+  function tick(){
+    const el = document.getElementById('goal-search');
+    const onOb2 = document.getElementById('screen-ob2') && document.getElementById('screen-ob2').classList.contains('active');
+    if (!el || !onOb2) { stopSearchPlaceholder(); return; }
+    if (el.value || document.activeElement === el) { _phTimer = setTimeout(tick, 700); return; }
+    const phrase = SEARCH_EXAMPLES[_phI];
+    if (reduce) {                                   // reduced motion: just cycle whole phrases
+      el.placeholder = 'Try: ' + phrase;
+      _phI = (_phI + 1) % SEARCH_EXAMPLES.length;
+      _phTimer = setTimeout(tick, 2200); return;
+    }
+    if (!_phDel) {
+      _phC++;
+      if (_phC >= phrase.length) { _phDel = true; el.placeholder = 'Try: ' + phrase; _phTimer = setTimeout(tick, 1500); return; }
+    } else {
+      _phC--;
+      if (_phC <= 0) { _phC = 0; _phDel = false; _phI = (_phI + 1) % SEARCH_EXAMPLES.length; }
+    }
+    el.placeholder = 'Try: ' + phrase.slice(0, _phC) + '▎';
+    _phTimer = setTimeout(tick, _phDel ? 28 : 55);
+  }
+  tick();
 }
 function promptConnect(src){
   showToast(`Connect ${SOURCES[src].label} first`, 'red');
@@ -4572,17 +4661,20 @@ if ('serviceWorker' in navigator) {
   <div class="av-bloom" aria-hidden="true"></div>
   <div class="av-stage" id="avStage">
     <div class="av-core" aria-hidden="true"></div>
-    <div class="av-door" id="avDoor" role="img" aria-label="Vault door">
-      <div class="av-ringd r1"></div>
-      <div class="av-ringd r2"></div>
-      <div class="av-groove"></div>
-      <div class="av-ringd r3"></div>
-      <div class="av-wheel" id="avWheel">
-        <div class="av-wheel-rot">
-          <div class="av-spoke s1"></div>
-          <div class="av-spoke s2"></div>
-          <div class="av-spoke s3"></div>
-          <div class="av-hub"></div>
+    <div class="av-door3d" id="avDoor" role="img" aria-label="Vault door">
+      <div class="av-slices" aria-hidden="true"></div>
+      <div class="av-face">
+        <div class="av-ringd r1"></div>
+        <div class="av-ringd r2"></div>
+        <div class="av-groove"></div>
+        <div class="av-ringd r3"></div>
+        <div class="av-wheel" id="avWheel">
+          <div class="av-wheel-rot">
+            <div class="av-spoke s1"></div>
+            <div class="av-spoke s2"></div>
+            <div class="av-spoke s3"></div>
+            <div class="av-hub"></div>
+          </div>
         </div>
       </div>
     </div>
@@ -4603,6 +4695,19 @@ if ('serviceWorker' in navigator) {
   var reduce=window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches;
   var opened=false, scrubbing=false, px=0,py=0,tx=0,ty=0,rafId=null;
   var wheelRot=vault.querySelector('.av-wheel-rot'); var OPENT=92;
+  (function build3D(){
+    var host=vault.querySelector('.av-slices'); var face=vault.querySelector('.av-face');
+    if(!host||!face) return;
+    var DEPTH=48, N=26;
+    for(var k=0;k<N;k++){
+      var sl=document.createElement('div'); sl.className='av-slice';
+      var z=(k/(N-1))*DEPTH;                              /* 0 = back, DEPTH = front */
+      sl.style.transform='translateZ('+z.toFixed(1)+'px)';
+      sl.style.filter='brightness('+(0.45+0.55*(k/(N-1))).toFixed(2)+')';  /* darker toward the back */
+      host.appendChild(sl);
+    }
+    face.style.transform='translateZ('+(DEPTH+1)+'px)';   /* face sits just in front of the stack */
+  })();
   var layers=[
     {sel:'.av-ringd.r1', d:5},
     {sel:'.av-ringd.r2,.av-groove', d:9},
