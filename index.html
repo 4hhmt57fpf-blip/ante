@@ -481,6 +481,8 @@
   .hero { padding:2px 20px 14px; }
   .hero-title { font-size:30px; font-weight:800; letter-spacing:-1px; color:var(--text); margin:0; }
   .hero-sub { font-size:14px; color:var(--text-dim); margin:5px 0 0; }
+  .tag.icon-tag { padding:9px; display:inline-flex; align-items:center; justify-content:center; color:var(--text-dim); }
+  .tag.icon-tag.selected { color:var(--gold); }
 
   @media (prefers-reduced-motion:reduce) {
     .flame .fl-layer, .flame .fl-core, .flame .fl-tip, .flame .ember { animation:none !important; }
@@ -1246,7 +1248,7 @@
     <input class="input-field" id="modal-habit-name" placeholder="e.g. Meditate 10 min" style="margin-bottom:16px">
 
     <div class="onboard-hint">Emoji</div>
-    <div class="tag-row" id="modal-emoji-picker">🏃 🏋️ 📚 🧘 💊 💧 🛌 🥗 ✍️ 🎯 🎸 🌿 💻 🧠 🚴</div>
+    <div class="tag-row" id="modal-emoji-picker"></div>
 
     <div class="onboard-hint">Daily stake</div>
     <div class="stake-options">
@@ -1513,27 +1515,65 @@ const SOURCES = {
   camera:     { label: 'Photo + AI',    icon: '📸', sub: 'AI checks your photo against your description; a human reviews if unsure.' },
 };
 
+// ── SVG icons (Lucide-style line icons) — replace emojis for tasks/categories ──
+const ICONS = {
+  activity: '<path d="M22 12h-4l-3 9L9 3l-3 9H2"/>',
+  heart: '<path d="M19 14c1.49-1.46 3-3.21 3-5.5A5.5 5.5 0 0 0 16.5 3c-1.76 0-3 .5-4.5 2-1.5-1.5-2.74-2-4.5-2A5.5 5.5 0 0 0 2 8.5c0 2.29 1.51 4.04 3 5.5l7 7Z"/>',
+  smartphone: '<rect width="14" height="20" x="5" y="2" rx="2"/><path d="M12 18h.01"/>',
+  'graduation-cap': '<path d="M21.42 10.922a1 1 0 0 0-.019-1.838L12.83 5.18a2 2 0 0 0-1.66 0L2.6 9.08a1 1 0 0 0 0 1.832l8.57 3.908a2 2 0 0 0 1.66 0z"/><path d="M22 10v6"/><path d="M6 12.5V16a6 3 0 0 0 12 0v-3.5"/>',
+  'map-pin': '<path d="M20 10c0 6-8 12-8 12s-8-6-8-12a8 8 0 0 1 16 0Z"/><circle cx="12" cy="10" r="3"/>',
+  camera: '<path d="M14.5 4h-5L7 7H4a2 2 0 0 0-2 2v9a2 2 0 0 0 2 2h16a2 2 0 0 0 2-2V9a2 2 0 0 0-2-2h-3l-2.5-3z"/><circle cx="12" cy="13" r="3"/>',
+  footprints: '<path d="M4 16v-2.38C4 11.5 2.97 10.5 3 8c.03-2.72 1.49-6 4.5-6C9.37 2 10 3.8 10 5.5c0 3.11-2 5.66-2 8.68V16a2 2 0 1 1-4 0Z"/><path d="M20 20v-2.38c0-2.12 1.03-3.12 1-5.62-.03-2.72-1.49-6-4.5-6C14.63 6 14 7.8 14 9.5c0 3.11 2 5.66 2 8.68V20a2 2 0 1 0 4 0Z"/><path d="M16 17h4"/><path d="M4 13h4"/>',
+  dumbbell: '<path d="M6 7v10"/><path d="M18 7v10"/><path d="M3 9v6"/><path d="M21 9v6"/><path d="M6 12h12"/>',
+  leaf: '<path d="M11 20A7 7 0 0 1 9.8 6.1C15.5 5 17 4.48 19 2c1 2 2 4.18 2 8 0 5.5-4.78 10-10 10Z"/><path d="M2 21c0-3 1.85-5.36 5.08-6"/>',
+  moon: '<path d="M12 3a6 6 0 0 0 9 9 9 9 0 1 1-9-9Z"/>',
+  'circle-check': '<circle cx="12" cy="12" r="10"/><path d="m9 12 2 2 4-4"/>',
+  'book-open': '<path d="M12 7v14"/><path d="M3 18a1 1 0 0 1-1-1V4a1 1 0 0 1 1-1h5a4 4 0 0 1 4 4 4 4 0 0 1 4-4h5a1 1 0 0 1 1 1v13a1 1 0 0 1-1 1h-6a3 3 0 0 0-3 3 3 3 0 0 0-3-3z"/>',
+  ban: '<circle cx="12" cy="12" r="10"/><path d="m4.9 4.9 14.2 14.2"/>',
+  droplet: '<path d="M12 22a7 7 0 0 0 7-7c0-2-1-3.9-3-5.5s-3.5-4-4-6.5c-.5 2.5-2 4.9-4 6.5C6 11.1 5 13 5 15a7 7 0 0 0 7 7z"/>',
+  target: '<circle cx="12" cy="12" r="10"/><circle cx="12" cy="12" r="6"/><circle cx="12" cy="12" r="2"/>',
+  music: '<path d="M9 18V5l12-2v13"/><circle cx="6" cy="18" r="3"/><circle cx="18" cy="16" r="3"/>',
+  code: '<path d="m16 18 6-6-6-6"/><path d="m8 6-6 6 6 6"/>',
+  pencil: '<path d="M21.174 6.812a1 1 0 0 0-3.986-3.987L3.842 16.174a2 2 0 0 0-.5.83l-1.321 4.352a.5.5 0 0 0 .623.622l4.353-1.32a2 2 0 0 0 .83-.497z"/><path d="m15 5 4 4"/>',
+  utensils: '<path d="M3 2v7c0 1.1.9 2 2 2a2 2 0 0 0 2-2V2"/><path d="M7 2v20"/><path d="M21 15V2a5 5 0 0 0-5 5v6c0 1.1.9 2 2 2h3Z"/>',
+  flame: '<path d="M8.5 14.5A2.5 2.5 0 0 0 11 12c0-1.38-.5-2-1-3-1.072-2.143-.224-4.054 2-6 .5 2.5 2 4.9 4 6.5 2 1.6 3 3.5 3 5.5a7 7 0 1 1-14 0c0-1.153.433-2.294 1-3a2.5 2.5 0 0 0 2.5 2.5z"/>',
+};
+function iconSVG(name, size, color) {
+  const inner = ICONS[name] || ICONS.target;
+  return `<svg width="${size}" height="${size}" viewBox="0 0 24 24" fill="none" stroke="${color || 'currentColor'}" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="display:block">${inner}</svg>`;
+}
+// Resolve an icon for a habit (new habits store .icon; older ones map by metric/source).
+function habitIcon(h) {
+  if (h && h.icon) return h.icon;
+  const byMetric = { 'Steps':'footprints', 'Exercise':'dumbbell', 'Run distance':'activity', 'Mindful minutes':'leaf', 'Sleep':'moon', 'Screen time':'smartphone', 'Canvas':'book-open', 'Gym check-in':'dumbbell', 'Stay away':'ban', 'Photo + AI':'camera' };
+  if (h && h.metric && byMetric[h.metric]) return byMetric[h.metric];
+  const bySource = { health:'activity', screentime:'smartphone', canvas:'book-open', gps:'map-pin', camera:'camera' };
+  return (h && bySource[h.source]) || 'target';
+}
+// Icon options offered when building a custom habit.
+const PICKER_ICONS = ['dumbbell','footprints','activity','leaf','heart','droplet','moon','book-open','code','music','pencil','utensils','target','map-pin','camera','flame'];
+
 const CATEGORIES = [
-  { id:'fitness',  label:'Fitness',    emoji:'🏃', color:'#4ade80', source:'health',     desc:'Steps, running, and workouts' },
-  { id:'wellness', label:'Wellness',   emoji:'🧘', color:'#a78bfa', source:'health',     desc:'Sleep, meditation, mindfulness' },
-  { id:'digital',  label:'Digital',    emoji:'📱', color:'#f87171', source:'screentime', desc:'Screen time limits enforced by iOS' },
-  { id:'school',   label:'School',     emoji:'📚', color:'#60a5fa', source:'canvas',     desc:'Assignment deadlines, no missing work' },
-  { id:'location', label:'Location',   emoji:'📍', color:'#38bdf8', source:'gps',        desc:'Gym check-ins, avoid certain places' },
-  { id:'custom',   label:'Custom',     emoji:'📸', color:'#e6b94e', source:'camera',     desc:'AI-verified photo proof for anything' },
+  { id:'fitness',  label:'Fitness',    icon:'activity',        emoji:'🏃', color:'#4ade80', source:'health',     desc:'Steps, running, and workouts' },
+  { id:'wellness', label:'Wellness',   icon:'heart',           emoji:'🧘', color:'#a78bfa', source:'health',     desc:'Sleep, meditation, mindfulness' },
+  { id:'digital',  label:'Digital',    icon:'smartphone',      emoji:'📱', color:'#f87171', source:'screentime', desc:'Screen time limits enforced by iOS' },
+  { id:'school',   label:'School',     icon:'graduation-cap',  emoji:'📚', color:'#60a5fa', source:'canvas',     desc:'Assignment deadlines, no missing work' },
+  { id:'location', label:'Location',   icon:'map-pin',         emoji:'📍', color:'#38bdf8', source:'gps',        desc:'Gym check-ins, avoid certain places' },
+  { id:'custom',   label:'Custom',     icon:'camera',          emoji:'📸', color:'#e6b94e', source:'camera',     desc:'AI-verified photo proof for anything' },
 ];
 
 const GOALS = [
-  { id:'steps',    category:'fitness',  label:'Walk 10,000 steps',         emoji:'🚶', color:'#34d399', source:'health',     metric:'Steps',           dir:'≥', target:10000, unit:'steps', verify:'auto' },
-  { id:'exercise', category:'fitness',  label:'30 min of exercise',         emoji:'🏋️', color:'#4ade80', source:'health',     metric:'Exercise',        dir:'≥', target:30,    unit:'min',   verify:'auto' },
-  { id:'run',      category:'fitness',  label:'Run 3 miles',                emoji:'🏃', color:'#fb923c', source:'health',     metric:'Run distance',    dir:'≥', target:3,     unit:'mi',    verify:'auto' },
-  { id:'meditate', category:'wellness', label:'Meditate 10 min',            emoji:'🧘', color:'#a78bfa', source:'health',     metric:'Mindful minutes', dir:'≥', target:10,    unit:'min',   verify:'auto' },
-  { id:'sleep',    category:'wellness', label:'Sleep 7+ hours',             emoji:'🛌', color:'#60a5fa', source:'health',     metric:'Sleep',           dir:'≥', target:7,     unit:'hr',    verify:'auto' },
-  { id:'screen',   category:'digital',  label:'Limit social apps',          emoji:'📱', color:'#f87171', source:'screentime', metric:'Screen time',     dir:'≤', target:30,    unit:'min',   verify:'auto' },
-  { id:'cv_ontime',category:'school',   label:'Submit assignments on time', emoji:'🎓', color:'#dc2626', source:'canvas',     metric:'Canvas',          dir:'',  target:0,     unit:'',      verify:'canvas' },
-  { id:'cv_nomiss',category:'school',   label:'No missing assignments',     emoji:'📚', color:'#2563eb', source:'canvas',     metric:'Canvas',          dir:'',  target:0,     unit:'',      verify:'canvas' },
-  { id:'gym',      category:'location', label:'Get to the gym',             emoji:'📍', color:'#38bdf8', source:'gps',        metric:'Gym check-in',    dir:'',  target:0,     unit:'',      verify:'auto' },
-  { id:'avoid',    category:'location', label:'Avoid a place',              emoji:'🚫', color:'#94a3b8', source:'gps',        metric:'Stay away',       dir:'',  target:0,     unit:'',      verify:'auto' },
-  { id:'proof',    category:'custom',   label:'Custom (photo proof)',       emoji:'📸', color:'#e6b94e', source:'camera',     metric:'Photo + AI',      dir:'',  target:0,     unit:'',      verify:'proof' },
+  { id:'steps',    category:'fitness',  label:'Walk 10,000 steps',         icon:'footprints',   emoji:'🚶', color:'#34d399', source:'health',     metric:'Steps',           dir:'≥', target:10000, unit:'steps', verify:'auto' },
+  { id:'exercise', category:'fitness',  label:'30 min of exercise',         icon:'dumbbell',     emoji:'🏋️', color:'#4ade80', source:'health',     metric:'Exercise',        dir:'≥', target:30,    unit:'min',   verify:'auto' },
+  { id:'run',      category:'fitness',  label:'Run 3 miles',                icon:'activity',     emoji:'🏃', color:'#fb923c', source:'health',     metric:'Run distance',    dir:'≥', target:3,     unit:'mi',    verify:'auto' },
+  { id:'meditate', category:'wellness', label:'Meditate 10 min',            icon:'leaf',         emoji:'🧘', color:'#a78bfa', source:'health',     metric:'Mindful minutes', dir:'≥', target:10,    unit:'min',   verify:'auto' },
+  { id:'sleep',    category:'wellness', label:'Sleep 7+ hours',             icon:'moon',         emoji:'🛌', color:'#60a5fa', source:'health',     metric:'Sleep',           dir:'≥', target:7,     unit:'hr',    verify:'auto' },
+  { id:'screen',   category:'digital',  label:'Limit social apps',          icon:'smartphone',   emoji:'📱', color:'#f87171', source:'screentime', metric:'Screen time',     dir:'≤', target:30,    unit:'min',   verify:'auto' },
+  { id:'cv_ontime',category:'school',   label:'Submit assignments on time', icon:'circle-check', emoji:'🎓', color:'#dc2626', source:'canvas',     metric:'Canvas',          dir:'',  target:0,     unit:'',      verify:'canvas' },
+  { id:'cv_nomiss',category:'school',   label:'No missing assignments',     icon:'book-open',    emoji:'📚', color:'#2563eb', source:'canvas',     metric:'Canvas',          dir:'',  target:0,     unit:'',      verify:'canvas' },
+  { id:'gym',      category:'location', label:'Get to the gym',             icon:'dumbbell',     emoji:'📍', color:'#38bdf8', source:'gps',        metric:'Gym check-in',    dir:'',  target:0,     unit:'',      verify:'auto' },
+  { id:'avoid',    category:'location', label:'Avoid a place',              icon:'ban',          emoji:'🚫', color:'#94a3b8', source:'gps',        metric:'Stay away',       dir:'',  target:0,     unit:'',      verify:'auto' },
+  { id:'proof',    category:'custom',   label:'Custom (photo proof)',       icon:'camera',       emoji:'📸', color:'#e6b94e', source:'camera',     metric:'Photo + AI',      dir:'',  target:0,     unit:'',      verify:'proof' },
 ];
 
 function goalById(id){ return GOALS.find(g => g.id === id); }
@@ -1546,7 +1586,7 @@ function renderConnectList(){
   el.innerHTML = Object.entries(SOURCES).map(([k,s]) => {
     const isCanvas = k === 'canvas';
     const on = isCanvas ? !!(state.canvas && state.canvas.connected) : state.connections[k];
-    const action = isCanvas ? 'openCanvasSetup()' : `toggleConnect('${k}')`;
+    const action = isCanvas ? 'openCanvasSetup()' : (k === 'health' ? 'connectHealth()' : `toggleConnect('${k}')`);
     const label = isCanvas ? (on ? 'Connected ✓' : 'Set up') : (on ? 'Connected ✓' : 'Connect');
     return `<div class="connect-card ${on?'connected':''}">
       <div class="ci">${s.icon}</div>
@@ -1560,6 +1600,32 @@ function toggleConnect(k){
   saveState();
   renderConnectList();
   showToast(state.connections[k] ? `✅ ${SOURCES[k].label} connected` : `${SOURCES[k].label} disconnected`, state.connections[k]?'green':null);
+}
+
+// Real Apple Health connect — requests HealthKit permission in the iOS app.
+async function connectHealth(){
+  if (state.connections.health) {            // already on -> disconnect
+    state.connections.health = false; saveState(); renderConnectList();
+    showToast('Apple Health disconnected', null);
+    return;
+  }
+  const HK = capPlugin('HealthPlugin');
+  if (isNativeApp() && HK) {
+    try {
+      const avail = await HK.isHealthAvailable();
+      if (!avail || !avail.available) { showToast('⚠️ Apple Health isn\'t available on this device', 'red'); return; }
+      showToast('🍎 Requesting Apple Health access…', null);
+      await HK.requestHealthPermissions({ permissions: ['READ_STEPS', 'READ_WORKOUTS', 'READ_MINDFULNESS'] });
+      state.connections.health = true; saveState(); renderConnectList();
+      showToast('✅ Apple Health connected', 'green');
+    } catch (e) {
+      showToast('⚠️ ' + (e.message || 'Could not connect Apple Health'), 'red');
+    }
+  } else {
+    // Web demo: live Health reads happen in the iOS app; mark connected so the flow works.
+    state.connections.health = true; saveState(); renderConnectList();
+    showToast('✅ Apple Health connected — live data reads in the iOS app', 'green');
+  }
 }
 
 // ── Canvas (real integration via local proxy) ──
@@ -1719,7 +1785,7 @@ function renderGoalList(){
         : !!state.connections[cat.source];
       const col = cat.color;
       return `<div class="category-card ${connected ? '' : 'locked'}" onclick="${connected ? `selectCategory('${cat.id}')` : `promptConnect('${cat.source}')`}">
-        <div class="cat-emoji" style="background:${hexToRgba(col,0.15)};border:1px solid ${hexToRgba(col,0.4)}">${cat.emoji}</div>
+        <div class="cat-emoji" style="background:${hexToRgba(col,0.15)};border:1px solid ${hexToRgba(col,0.4)};color:${col}">${iconSVG(cat.icon, 24, col)}</div>
         <div class="cat-body">
           <div class="cat-name">${cat.label}</div>
           <div class="cat-src">${SOURCES[cat.source].icon} ${SOURCES[cat.source].label} · ${cat.desc}</div>
@@ -1738,14 +1804,14 @@ function renderGoalList(){
   const catGoals = GOALS.filter(g => g.category === catId);
   const qEl = document.getElementById('ob2-q');
   const hEl = document.getElementById('ob2-hint');
-  if (qEl) qEl.textContent = cat ? `${cat.emoji} ${cat.label}` : 'Choose your goal';
+  if (qEl) qEl.innerHTML = cat ? `<span style="display:inline-flex;vertical-align:middle;margin-right:7px">${iconSVG(cat.icon, 18, cat.color)}</span>${cat.label}` : 'Choose your goal';
   if (hEl) hEl.textContent = 'Select a goal — auto-verified through the connected app. No honor system.';
 
   el.innerHTML = `<div class="cat-back" onclick="backToCategories()">← All categories</div>` +
     catGoals.map(g => {
       const sel = state.onboardData.goalId === g.id;
       return `<div class="goal-card ${sel ? 'selected' : ''}" onclick="selectGoal('${g.id}')">
-        <div class="goal-emoji" style="background:${hexToRgba(g.color,0.16)};border:1px solid ${hexToRgba(g.color,0.4)}">${g.emoji}</div>
+        <div class="goal-emoji" style="background:${hexToRgba(g.color,0.16)};border:1px solid ${hexToRgba(g.color,0.4)};color:${g.color}">${iconSVG(g.icon, 22, g.color)}</div>
         <div class="goal-body">
           <div class="goal-name">${g.label}</div>
           <div class="goal-src">${SOURCES[g.source].icon} ${SOURCES[g.source].label}</div>
@@ -1878,7 +1944,7 @@ function ob3Next() {
   state.onboardData.stake = selectedStake;
   const g = goalById(state.onboardData.goalId) || {};
   const tgt = g.unit ? ` · ${g.dir==='≤'?'≤':'≥'} ${state.onboardData.target} ${g.unit}` : '';
-  document.getElementById('sum-habit').textContent = `${g.emoji || '🎯'} ${state.onboardData.name}${tgt}`;
+  document.getElementById('sum-habit').innerHTML = `<span style="display:inline-flex;vertical-align:middle;margin-right:7px">${iconSVG(g.icon || 'target', 18, g.color || '#e6b94e')}</span>${state.onboardData.name}${tgt}`;
   document.getElementById('sum-verify').textContent = g.source ? `${SOURCES[g.source].icon} ${SOURCES[g.source].label}` : '—';
   document.getElementById('sum-freq').textContent = state.onboardData.freq;
   document.getElementById('sum-stake').textContent = `$${state.onboardData.stake}/miss`;
@@ -1904,6 +1970,7 @@ function createHabit(od) {
     id: Date.now().toString(),
     name: od.name || g.label || 'Goal',
     emoji: g.emoji || '🎯',
+    icon: g.icon || 'target',
     color: g.color || '#e6b94e',
     category: g.category || '',
     source: g.source || 'camera',
@@ -1942,7 +2009,7 @@ function completeHabit(id) {
   // Add to tx history
   state.txHistory.unshift({
     date: todayStr(),
-    desc: `✅ Completed: ${h.emoji} ${h.name}`,
+    desc: `✅ Completed: ${h.name}`,
     amount: 0,
     type: 'win'
   });
@@ -1961,7 +2028,7 @@ function missHabit(id) {
   state.savingsVault = (state.savingsVault || 0) + h.stake;
   state.txHistory.unshift({
     date: todayStr(),
-    desc: `❌ Missed: ${h.emoji} ${h.name} → 🔒 Savings Vault`,
+    desc: `❌ Missed: ${h.name} → 🔒 Savings Vault`,
     amount: -h.stake,
     type: 'loss'
   });
@@ -2188,7 +2255,7 @@ function renderHabits() {
     return `
     <div class="habit-card" style="--hc:${hc};--stagger:${i*60}ms" onclick="openHabitDetail('${h.id}')">
       <div class="habit-top">
-        <div class="habit-emoji" style="background:${hexToRgba(color,0.16)};border-color:${hexToRgba(color,0.42)}">${h.emoji}</div>
+        <div class="habit-emoji" style="background:${hexToRgba(color,0.16)};border-color:${hexToRgba(color,0.42)};color:${color}">${iconSVG(habitIcon(h), 22, color)}</div>
         <div class="habit-stake-badge">$${h.stake}/miss</div>
       </div>
       <div class="habit-name">${h.name}</div>
@@ -2395,7 +2462,7 @@ function openHabitDetail(id) {
 
   document.getElementById('habit-detail-content').innerHTML = `
     <div class="modal-handle"></div>
-    <div style="font-size:48px;text-align:center;margin-bottom:12px">${h.emoji}</div>
+    <div style="display:flex;justify-content:center;margin-bottom:12px;color:${h.color || '#e6b94e'}">${iconSVG(habitIcon(h), 46, h.color || '#e6b94e')}</div>
     <div class="modal-title" style="text-align:center">${h.name}</div>
     <div class="info-row">
       <span class="info-label">Verified by</span><span class="info-val">${(SOURCES[h.source]||SOURCES.camera).icon} ${(SOURCES[h.source]||SOURCES.camera).label}</span>
@@ -2444,6 +2511,7 @@ function openHabitDetail(id) {
 // ADD HABIT FROM MODAL
 // ─────────────────────────────────────────────
 let modalSelectedEmoji = '🏃';
+let modalSelectedIcon = 'dumbbell';
 let modalSelectedStake = 5;
 
 function addHabitFromModal() {
@@ -2451,14 +2519,14 @@ function addHabitFromModal() {
   if (!name) { showToast('Enter a habit name','red'); return; }
   const freqEl = document.querySelector('#modal-freq-picker .tag.selected');
   const freq = freqEl ? freqEl.textContent : 'Daily';
-  const emojiEl = document.querySelector('#modal-emoji-picker .tag.selected');
-  const emoji = (emojiEl ? emojiEl.textContent : '🎯').trim();
+  const iconEl = document.querySelector('#modal-emoji-picker .tag.selected');
+  const icon = iconEl ? iconEl.dataset.icon : modalSelectedIcon;
   const stakeEl = document.querySelector('#add-habit-modal .stake-chip.selected');
   const stake = stakeEl ? parseInt(stakeEl.textContent.replace('$','')) : 5;
 
   const od = { goalId: null, name, target: null, freq, stake, charity: 'Boys & Girls Club' };
   const h = createHabit(od);
-  h.emoji = emoji;
+  h.icon = icon;
   state.habits.push(h);
   document.getElementById('modal-habit-name').value = '';
   saveState();
@@ -3035,24 +3103,29 @@ function updateIdentity() {
 // ─────────────────────────────────────────────
 // EDIT HABIT
 // ─────────────────────────────────────────────
-let editSelectedEmoji = '🏃', editSelectedStake = 5;
+let editSelectedIcon = 'target', editSelectedStake = 5;
 
-function buildEditEmojiPicker(current) {
-  const emojis = ['🏃','🏋️','📚','🧘','💊','💧','🛌','🥗','✍️','🎯','🎸','🌿','💻','🧠','🚴','🚫'];
-  const c = document.getElementById('edit-emoji-picker');
+// Shared icon picker — renders selectable SVG-icon chips into a container.
+function buildIconPicker(containerId, current, onPick) {
+  const c = document.getElementById(containerId);
+  if (!c) return;
   c.innerHTML = '';
-  emojis.forEach(e => {
+  PICKER_ICONS.forEach(name => {
     const t = document.createElement('div');
-    t.className = 'tag' + (e === current ? ' selected' : '');
-    t.textContent = e;
+    t.className = 'tag icon-tag' + (name === current ? ' selected' : '');
+    t.dataset.icon = name;
+    t.innerHTML = iconSVG(name, 20);
     t.onclick = () => {
       c.querySelectorAll('.tag').forEach(x => x.classList.remove('selected'));
       t.classList.add('selected');
-      editSelectedEmoji = e;
+      onPick(name);
     };
     c.appendChild(t);
   });
-  editSelectedEmoji = current;
+  onPick(current);
+}
+function buildEditEmojiPicker(current) {
+  buildIconPicker('edit-emoji-picker', current || 'target', n => editSelectedIcon = n);
 }
 function selectEditStake(el) {
   document.querySelectorAll('#edit-stake-picker .stake-chip').forEach(c => c.classList.remove('selected'));
@@ -3069,7 +3142,7 @@ function openEditHabit(id) {
   closeModal('habit-detail-modal');
   document.getElementById('edit-habit-id').value = id;
   document.getElementById('edit-habit-name').value = h.name;
-  buildEditEmojiPicker(h.emoji);
+  buildEditEmojiPicker(habitIcon(h));
   editSelectedStake = h.stake;
   document.querySelectorAll('#edit-stake-picker .stake-chip').forEach(c =>
     c.classList.toggle('selected', parseInt(c.dataset.val) === h.stake));
@@ -3084,7 +3157,7 @@ function saveHabitEdit() {
   const name = document.getElementById('edit-habit-name').value.trim();
   if (!name) { showToast('Enter a habit name', 'red'); return; }
   h.name = name;
-  h.emoji = editSelectedEmoji;
+  h.icon = editSelectedIcon;
   h.stake = editSelectedStake;
   const freqEl = document.querySelector('#edit-freq-picker .tag.selected');
   if (freqEl) h.freq = freqEl.textContent;
@@ -3212,6 +3285,13 @@ if ('serviceWorker' in navigator) {
     navigator.serviceWorker.register('sw.js').catch(() => {});
   });
 }
+
+// Build the custom-habit icon picker once the DOM is ready (replaces the old emoji row).
+(function initModalIconPicker(){
+  const build = () => buildIconPicker('modal-emoji-picker', modalSelectedIcon, n => modalSelectedIcon = n);
+  if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', build);
+  else build();
+})();
 
 /* ====================================================================
    ANTE — "Midnight Casino" parallax engine (vanilla, no libraries)
