@@ -1537,7 +1537,7 @@
   <div id="goal-config"></div>
   <div style="margin-top:auto">
     <button class="btn btn-primary" onclick="ob2Next()">Next →</button>
-    <button class="btn btn-ghost" style="margin-top:8px" onclick="goTo('screen-welcome')">← Back</button>
+    <button class="btn btn-ghost" style="margin-top:8px" onclick="(state.habits && state.habits.length) ? showTab('home') : goTo('screen-welcome')">← Back</button>
   </div>
 </div>
 
@@ -2875,6 +2875,7 @@ function backToCategories() {
 function onGoalSearch(v){ state._goalSearch = v; renderGoalList(); }
 function selectGoalFromSearch(id){
   const g = goalById(id);
+  if (!g) return;
   state.onboardData.categoryId = g.category;
   state._goalSearch = '';
   const si = document.getElementById('goal-search'); if (si) si.value = '';
@@ -2969,6 +2970,7 @@ function promptConnect(src){
 }
 function selectGoal(id){
   const g = goalById(id);
+  if (!g) return;
   state.onboardData.goalId = id;
   state.onboardData.target = g.target;
   state.onboardData.name = g.label;
