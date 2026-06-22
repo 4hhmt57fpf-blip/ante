@@ -8,6 +8,7 @@
 <!-- PWA / installable -->
 <link rel="manifest" href="manifest.json">
 <meta name="theme-color" content="#0a0a0b">
+<link rel="icon" type="image/svg+xml" href="assets/ante-mark.svg">
 <link rel="icon" type="image/png" href="assets/icon-192.png">
 <link rel="apple-touch-icon" href="assets/apple-touch-icon.png">
 <meta name="apple-mobile-web-app-capable" content="yes">
@@ -74,7 +75,7 @@
 
   .logo-mark {
     width: 80px; height: 80px;
-    background: linear-gradient(135deg, var(--gold), #2f7d57);
+    background: #16140f;
     border-radius: 22px;
     display: flex; align-items: center; justify-content: center;
     font-size: 36px;
@@ -515,7 +516,7 @@
 
   /* ── Login / auth ── */
   .login-wrap { display:flex; flex-direction:column; justify-content:center; min-height:100vh; padding:36px 24px; max-width:430px; margin:0 auto; }
-  .login-logo { width:64px; height:64px; border-radius:18px; background:linear-gradient(135deg,var(--gold-soft),var(--gold)); color:#1a1206; font-weight:900; font-size:34px; display:flex; align-items:center; justify-content:center; margin-bottom:24px; box-shadow:0 8px 24px rgba(230,185,78,.3); }
+  .login-logo { width:64px; height:64px; border-radius:18px; background:#16140f; display:flex; align-items:center; justify-content:center; margin-bottom:24px; box-shadow:0 10px 26px rgba(0,0,0,.5); }
   .login-title { font-size:34px; font-weight:800; letter-spacing:-1px; line-height:1.05; }
   .login-title span { color:var(--gold); }
   .login-sub { font-size:15px; color:var(--text-dim); margin:10px 0 28px; line-height:1.5; }
@@ -1022,7 +1023,7 @@
     opacity:1; transition:opacity .45s ease; --mint:#7fdca4;
   }
   .ante-vault.av-done{ opacity:0; pointer-events:none; }
-  .av-logoA{ position:absolute; top:6.5%; font-size:30px; font-weight:800; color:var(--mint); text-shadow:0 0 22px rgba(127,220,164,.5); }
+  .av-logoA{ position:absolute; top:6.5%; width:34px; height:34px; filter:drop-shadow(0 0 18px rgba(226,85,47,.5)); }
   .av-wordmark{ position:absolute; bottom:21%; font-size:30px; font-weight:300; letter-spacing:.62em; padding-left:.62em; color:#f4f5f4; transition:opacity .35s ease, transform .35s ease; }
   .av-tagline{ position:absolute; bottom:16.5%; font-size:13.5px; letter-spacing:.02em; color:#8a8f8c; transition:opacity .35s ease, transform .35s ease; }
   .av-bloom{ position:absolute; width:560px; height:560px; max-width:140vw; max-height:140vw; border-radius:50%;
@@ -1337,7 +1338,7 @@
 ══════════════════════════════════════════════ -->
 <div class="screen active" id="screen-login">
   <div class="login-wrap">
-    <div class="login-logo">A</div>
+    <div class="login-logo"><svg viewBox="0 0 100 100" width="46" height="46" aria-hidden="true" focusable="false"><circle cx="50" cy="50" r="42" fill="#E2552F"/><g fill="#F4EFE4"><rect x="48.3" y="11" width="3.4" height="8" rx="1.7" transform="rotate(0 50 50)"/><rect x="48.3" y="11" width="3.4" height="8" rx="1.7" transform="rotate(45 50 50)"/><rect x="48.3" y="11" width="3.4" height="8" rx="1.7" transform="rotate(90 50 50)"/><rect x="48.3" y="11" width="3.4" height="8" rx="1.7" transform="rotate(135 50 50)"/><rect x="48.3" y="11" width="3.4" height="8" rx="1.7" transform="rotate(180 50 50)"/><rect x="48.3" y="11" width="3.4" height="8" rx="1.7" transform="rotate(225 50 50)"/><rect x="48.3" y="11" width="3.4" height="8" rx="1.7" transform="rotate(270 50 50)"/><rect x="48.3" y="11" width="3.4" height="8" rx="1.7" transform="rotate(315 50 50)"/></g><circle cx="50" cy="50" r="28" fill="none" stroke="#F4EFE4" stroke-width="2.4"/><g stroke="#F4EFE4" stroke-width="3.6" stroke-linecap="round"><line x1="50" y1="24" x2="50" y2="76"/><line x1="50" y1="24" x2="50" y2="76" transform="rotate(60 50 50)"/><line x1="50" y1="24" x2="50" y2="76" transform="rotate(120 50 50)"/></g><circle cx="50" cy="50" r="7.5" fill="#F4EFE4"/><circle cx="50" cy="50" r="3" fill="#E2552F"/></svg></div>
     <div class="login-title">Bet on <span>Yourself.</span></div>
     <div class="login-sub">Sign in to stake on your habits, keep your streaks, and challenge friends.</div>
 
@@ -1363,7 +1364,7 @@
 </div>
 
 <div class="screen" id="screen-welcome">
-  <div class="logo-mark" id="heroLogo" data-depth="34" style="color:#16120a;font-weight:800">A<div class="sweep"></div></div>
+  <div class="logo-mark" id="heroLogo" data-depth="34"><svg viewBox="0 0 100 100" width="58" height="58" aria-hidden="true" focusable="false"><circle cx="50" cy="50" r="42" fill="#E2552F"/><g fill="#F4EFE4"><rect x="48.3" y="11" width="3.4" height="8" rx="1.7" transform="rotate(0 50 50)"/><rect x="48.3" y="11" width="3.4" height="8" rx="1.7" transform="rotate(45 50 50)"/><rect x="48.3" y="11" width="3.4" height="8" rx="1.7" transform="rotate(90 50 50)"/><rect x="48.3" y="11" width="3.4" height="8" rx="1.7" transform="rotate(135 50 50)"/><rect x="48.3" y="11" width="3.4" height="8" rx="1.7" transform="rotate(180 50 50)"/><rect x="48.3" y="11" width="3.4" height="8" rx="1.7" transform="rotate(225 50 50)"/><rect x="48.3" y="11" width="3.4" height="8" rx="1.7" transform="rotate(270 50 50)"/><rect x="48.3" y="11" width="3.4" height="8" rx="1.7" transform="rotate(315 50 50)"/></g><circle cx="50" cy="50" r="28" fill="none" stroke="#F4EFE4" stroke-width="2.4"/><g stroke="#F4EFE4" stroke-width="3.6" stroke-linecap="round"><line x1="50" y1="24" x2="50" y2="76"/><line x1="50" y1="24" x2="50" y2="76" transform="rotate(60 50 50)"/><line x1="50" y1="24" x2="50" y2="76" transform="rotate(120 50 50)"/></g><circle cx="50" cy="50" r="7.5" fill="#F4EFE4"/><circle cx="50" cy="50" r="3" fill="#E2552F"/></svg><div class="sweep"></div></div>
   <div class="welcome-title" data-depth="20">Bet on<br><span>Yourself.</span></div>
   <div class="welcome-sub" data-depth="16">Stake real money on your habits.<br>Complete them — or pay up.</div>
 
@@ -4804,7 +4805,7 @@ if ('serviceWorker' in navigator) {
 
 <!-- ===================== VAULT SPLASH MARKUP (realistic) ===================== -->
 <div id="anteVault" class="ante-vault" role="dialog" aria-modal="true" aria-label="Tap or swipe up to open your vault">
-  <div class="av-logoA" aria-hidden="true">A</div>
+  <div class="av-logoA" aria-hidden="true"><svg viewBox="0 0 100 100" width="34" height="34" aria-hidden="true" focusable="false"><circle cx="50" cy="50" r="42" fill="#E2552F"/><g fill="#F4EFE4"><rect x="48.3" y="11" width="3.4" height="8" rx="1.7" transform="rotate(0 50 50)"/><rect x="48.3" y="11" width="3.4" height="8" rx="1.7" transform="rotate(45 50 50)"/><rect x="48.3" y="11" width="3.4" height="8" rx="1.7" transform="rotate(90 50 50)"/><rect x="48.3" y="11" width="3.4" height="8" rx="1.7" transform="rotate(135 50 50)"/><rect x="48.3" y="11" width="3.4" height="8" rx="1.7" transform="rotate(180 50 50)"/><rect x="48.3" y="11" width="3.4" height="8" rx="1.7" transform="rotate(225 50 50)"/><rect x="48.3" y="11" width="3.4" height="8" rx="1.7" transform="rotate(270 50 50)"/><rect x="48.3" y="11" width="3.4" height="8" rx="1.7" transform="rotate(315 50 50)"/></g><circle cx="50" cy="50" r="28" fill="none" stroke="#F4EFE4" stroke-width="2.4"/><g stroke="#F4EFE4" stroke-width="3.6" stroke-linecap="round"><line x1="50" y1="24" x2="50" y2="76"/><line x1="50" y1="24" x2="50" y2="76" transform="rotate(60 50 50)"/><line x1="50" y1="24" x2="50" y2="76" transform="rotate(120 50 50)"/></g><circle cx="50" cy="50" r="7.5" fill="#F4EFE4"/><circle cx="50" cy="50" r="3" fill="#E2552F"/></svg></div>
   <div class="av-bloom" aria-hidden="true"></div>
   <div class="av-stage" id="avStage">
     <div class="av-core" aria-hidden="true"></div>
