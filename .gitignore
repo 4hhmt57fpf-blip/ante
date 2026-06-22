@@ -1,0 +1,16 @@
+# Local dev data (Canvas proxy)
+.canvas_data.json
+
+# Node / Capacitor
+node_modules/
+www/
+
+# macOS
+.DS_Store
+
+# Python
+__pycache__/
+
+# Payment backend secrets
+payments-backend/.env
+ios/build/

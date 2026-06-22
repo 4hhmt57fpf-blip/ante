@@ -1,0 +1,627 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Ante — Bet on yourself. Actually follow through.</title>
+<style>
+  :root {
+    --bg: #080810;
+    --gold: #ffd600;
+    --green: #00e676;
+    --red: #ff5252;
+    --text: #f4f4f8;
+    --muted: #7a7a9a;
+    --dim: #a0a0c0;
+    --surface: #1c1c38;
+    --border: #3c3c68;
+  }
+
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+
+  html { scroll-behavior: smooth; }
+
+  body {
+    background: var(--bg);
+    color: var(--text);
+    font-family: -apple-system, BlinkMacSystemFont, 'SF Pro Display', 'Segoe UI', sans-serif;
+    line-height: 1.6;
+  }
+
+  /* ── NAV ── */
+  nav {
+    position: fixed; top: 0; left: 0; right: 0; z-index: 100;
+    padding: 18px 48px; display: flex; align-items: center; justify-content: space-between;
+    background: #080810cc; backdrop-filter: blur(12px);
+    border-bottom: 1px solid #ffffff08;
+  }
+  .nav-logo { display: flex; align-items: center; gap: 10px; text-decoration: none; }
+  .nav-logo-icon {
+    width: 36px; height: 36px; border-radius: 9px;
+    background: linear-gradient(135deg, var(--gold), #ff9800);
+    display: flex; align-items: center; justify-content: center; font-size: 18px;
+  }
+  .nav-logo-text { font-size: 20px; font-weight: 900; color: var(--text); letter-spacing: -.5px; }
+  .nav-links { display: flex; align-items: center; gap: 32px; }
+  .nav-links a { color: var(--dim); text-decoration: none; font-size: 14px; font-weight: 500; transition: color .15s; }
+  .nav-links a:hover { color: var(--text); }
+  .nav-cta {
+    background: var(--gold); color: #000; padding: 10px 22px;
+    border-radius: 100px; font-size: 14px; font-weight: 800;
+    text-decoration: none; transition: transform .15s;
+  }
+  .nav-cta:hover { transform: scale(1.04); }
+
+  /* ── HERO ── */
+  .hero {
+    min-height: 100vh; display: flex; flex-direction: column;
+    align-items: center; justify-content: center; text-align: center;
+    padding: 120px 24px 80px;
+    background: radial-gradient(ellipse at 50% 0%, #1e1e40 0%, var(--bg) 65%);
+    position: relative; overflow: hidden;
+  }
+  .hero::before {
+    content: '';
+    position: absolute; top: -100px; left: 50%; transform: translateX(-50%);
+    width: 600px; height: 600px; border-radius: 50%;
+    background: radial-gradient(circle, #ffd60008 0%, transparent 70%);
+    pointer-events: none;
+  }
+
+  .hero-badge {
+    display: inline-flex; align-items: center; gap: 8px;
+    background: var(--surface); border: 1px solid var(--border);
+    border-radius: 100px; padding: 8px 16px; font-size: 13px;
+    color: var(--dim); margin-bottom: 28px; font-weight: 600;
+  }
+  .hero-badge span { color: var(--gold); }
+
+  .hero-title {
+    font-size: clamp(48px, 8vw, 88px);
+    font-weight: 900; letter-spacing: -3px; line-height: 1.0;
+    margin-bottom: 24px; max-width: 800px;
+  }
+  .hero-title .gold { color: var(--gold); }
+  .hero-title .block { display: block; }
+
+  .hero-sub {
+    font-size: clamp(17px, 2.5vw, 20px); color: var(--dim);
+    max-width: 520px; margin-bottom: 44px; line-height: 1.6;
+  }
+
+  .hero-cta-row { display: flex; gap: 14px; align-items: center; justify-content: center; flex-wrap: wrap; margin-bottom: 56px; }
+  .cta-primary {
+    background: var(--gold); color: #000;
+    padding: 18px 36px; border-radius: 100px;
+    font-size: 16px; font-weight: 800; text-decoration: none;
+    display: inline-flex; align-items: center; gap: 8px;
+    box-shadow: 0 4px 32px #ffd60030; transition: all .2s;
+  }
+  .cta-primary:hover { transform: translateY(-2px); box-shadow: 0 8px 40px #ffd60045; }
+  .cta-secondary {
+    color: var(--dim); font-size: 15px; font-weight: 600;
+    text-decoration: none; transition: color .15s;
+    display: inline-flex; align-items: center; gap: 6px;
+  }
+  .cta-secondary:hover { color: var(--text); }
+
+  /* STATS TICKER */
+  .hero-stats {
+    display: flex; gap: 48px; align-items: center; justify-content: center;
+    flex-wrap: wrap;
+  }
+  .hero-stat { text-align: center; }
+  .hero-stat .val { font-size: 28px; font-weight: 900; letter-spacing: -1px; }
+  .hero-stat .val.gold { color: var(--gold); }
+  .hero-stat .val.green { color: var(--green); }
+  .hero-stat .label { font-size: 12px; color: var(--muted); text-transform: uppercase; letter-spacing: .8px; font-weight: 600; margin-top: 2px; }
+  .stat-divider { width: 1px; height: 40px; background: var(--border); }
+
+  /* ── PHONE MOCKUP ── */
+  .phone-section {
+    padding: 80px 24px; display: flex; align-items: center; justify-content: center;
+    gap: 80px; max-width: 1100px; margin: 0 auto; flex-wrap: wrap;
+  }
+  .phone-wrap {
+    position: relative; flex-shrink: 0;
+  }
+  .phone-frame {
+    width: 260px; background: #13131e;
+    border-radius: 40px; padding: 12px;
+    border: 1px solid var(--border);
+    box-shadow: 0 40px 80px #00000060, 0 0 0 1px #ffffff08;
+  }
+  .phone-screen {
+    border-radius: 30px; overflow: hidden;
+    background: var(--bg); aspect-ratio: 9/19.5;
+    position: relative;
+  }
+  .phone-notch {
+    position: absolute; top: 10px; left: 50%; transform: translateX(-50%);
+    width: 80px; height: 22px; background: #13131e;
+    border-radius: 100px; z-index: 2;
+  }
+
+  /* Mini app inside phone */
+  .mini-topbar { padding: 44px 16px 12px; display: flex; justify-content: space-between; align-items: center; }
+  .mini-title { font-size: 18px; font-weight: 900; }
+  .mini-avatar { width: 28px; height: 28px; border-radius: 50%; background: linear-gradient(135deg,var(--gold),#ff9800); display:flex;align-items:center;justify-content:center;font-size:11px;font-weight:900;color:#000; }
+
+  .mini-wallet { margin: 0 12px 12px; background: linear-gradient(135deg,#1a1a35,#1e1e30); border:1px solid #3a3a60; border-radius:14px; padding:16px; }
+  .mini-wallet-label { font-size:9px; color:var(--muted); text-transform:uppercase; letter-spacing:.5px; font-weight:700; }
+  .mini-wallet-amt { font-size:28px; font-weight:900; letter-spacing:-1px; color:var(--gold); }
+  .mini-wallet-sub { font-size:10px; color:var(--muted); margin-top:2px; }
+
+  .mini-section { padding: 0 12px; margin-bottom:10px; }
+  .mini-section-title { font-size:12px; font-weight:800; margin-bottom:8px; }
+
+  .mini-card { background:#1c1c38; border:1px solid #3c3c68; border-radius:10px; padding:12px; margin-bottom:8px; position:relative; overflow:hidden; }
+  .mini-card::before { content:''; position:absolute; left:0; top:0; bottom:0; width:3px; background:var(--green); }
+  .mini-card-top { display:flex; justify-content:space-between; align-items:flex-start; margin-bottom:6px; }
+  .mini-card-name { font-size:12px; font-weight:700; }
+  .mini-card-badge { font-size:10px; font-weight:800; color:var(--gold); background:#ffd60015; border:1px solid var(--gold); padding:2px 6px; border-radius:10px; }
+  .mini-card-streak { font-size:10px; color:var(--gold); font-weight:700; }
+  .mini-progress { height:3px; background:#2a2a50; border-radius:2px; margin:6px 0; }
+  .mini-progress-fill { height:100%; background:var(--green); border-radius:2px; }
+  .mini-check-btn { width:100%; padding:7px; background:#00e67615; border:1px solid var(--green); border-radius:6px; color:var(--green); font-size:10px; font-weight:700; text-align:center; cursor:pointer; }
+
+  /* ── PHONE GLOW ── */
+  .phone-glow {
+    position: absolute; top: -40px; left: -40px; right: -40px; bottom: -40px;
+    background: radial-gradient(ellipse at center, #ffd60015 0%, transparent 70%);
+    pointer-events: none; z-index: -1;
+  }
+
+  /* ── HOW IT WORKS ── */
+  .how-section {
+    padding: 100px 24px; max-width: 1000px; margin: 0 auto; text-align: center;
+  }
+  .section-eyebrow { font-size: 12px; font-weight: 800; text-transform: uppercase; letter-spacing: 2px; color: var(--gold); margin-bottom: 12px; }
+  .section-title { font-size: clamp(32px, 5vw, 52px); font-weight: 900; letter-spacing: -2px; margin-bottom: 16px; }
+  .section-sub { color: var(--dim); font-size: 18px; max-width: 480px; margin: 0 auto 60px; line-height: 1.6; }
+
+  .steps-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 24px; text-align: left; }
+  .step-card {
+    background: var(--surface); border: 1px solid var(--border);
+    border-radius: 20px; padding: 28px; position: relative;
+  }
+  .step-num {
+    width: 40px; height: 40px; border-radius: 12px;
+    background: var(--gold); color: #000;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 18px; font-weight: 900; margin-bottom: 18px;
+  }
+  .step-title { font-size: 18px; font-weight: 800; margin-bottom: 8px; letter-spacing: -.3px; }
+  .step-body { color: var(--dim); font-size: 15px; line-height: 1.6; }
+
+  .arrow-connector {
+    position: absolute; right: -24px; top: 50%; transform: translateY(-50%);
+    width: 24px; height: 24px; display: flex; align-items: center; justify-content: center;
+    color: var(--muted); font-size: 16px; z-index: 1;
+  }
+
+  /* ── SOCIAL PROOF ── */
+  .social-section {
+    padding: 80px 24px; background: #0d0d1a;
+    border-top: 1px solid var(--border); border-bottom: 1px solid var(--border);
+  }
+  .social-inner { max-width: 1100px; margin: 0 auto; }
+  .testimonials { display: grid; grid-template-columns: repeat(3, 1fr); gap: 20px; margin-top: 48px; }
+  .testimonial {
+    background: var(--surface); border: 1px solid var(--border);
+    border-radius: 16px; padding: 24px;
+  }
+  .t-stars { color: var(--gold); font-size: 14px; margin-bottom: 14px; }
+  .t-quote { font-size: 15px; line-height: 1.6; color: var(--dim); margin-bottom: 18px; font-style: italic; }
+  .t-author { display: flex; align-items: center; gap: 12px; }
+  .t-avatar {
+    width: 38px; height: 38px; border-radius: 50%;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 14px; font-weight: 800; flex-shrink: 0;
+  }
+  .t-name { font-size: 14px; font-weight: 700; }
+  .t-handle { font-size: 12px; color: var(--muted); }
+  .t-result { display: inline-flex; align-items: center; gap: 4px; margin-top: 14px; font-size: 12px; font-weight: 700; color: var(--green); }
+
+  /* ── SCIENCE ── */
+  .science-section { padding: 100px 24px; max-width: 900px; margin: 0 auto; }
+  .science-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 48px; align-items: center; }
+  .science-stat-big { font-size: 72px; font-weight: 900; letter-spacing: -4px; color: var(--gold); }
+  .science-stat-label { font-size: 16px; color: var(--dim); margin-top: 6px; }
+  .science-quote { font-size: 20px; font-weight: 700; line-height: 1.4; letter-spacing: -.3px; margin-bottom: 12px; }
+  .science-source { font-size: 13px; color: var(--muted); }
+  .science-items { display: flex; flex-direction: column; gap: 20px; }
+  .science-item { display: flex; gap: 16px; }
+  .sci-icon { width: 44px; height: 44px; border-radius: 12px; background: var(--surface); border: 1px solid var(--border); display: flex; align-items: center; justify-content: center; font-size: 20px; flex-shrink: 0; }
+  .sci-text { font-size: 14px; color: var(--dim); line-height: 1.6; }
+  .sci-text strong { color: var(--text); }
+
+  /* ── PRICING ── */
+  .pricing-section { padding: 100px 24px; text-align: center; }
+  .pricing-inner { max-width: 780px; margin: 0 auto; }
+  .pricing-cards { display: grid; grid-template-columns: 1fr 1fr; gap: 20px; margin-top: 48px; }
+  .pricing-card {
+    background: var(--surface); border: 1px solid var(--border);
+    border-radius: 20px; padding: 32px; text-align: left;
+  }
+  .pricing-card.featured { border-color: var(--gold); background: #1a1a2e; }
+  .pricing-badge { display: inline-block; background: var(--gold); color: #000; font-size: 11px; font-weight: 800; padding: 4px 10px; border-radius: 100px; margin-bottom: 16px; text-transform: uppercase; letter-spacing: .5px; }
+  .pricing-name { font-size: 20px; font-weight: 800; margin-bottom: 6px; }
+  .pricing-price { font-size: 40px; font-weight: 900; letter-spacing: -2px; color: var(--gold); }
+  .pricing-price span { font-size: 16px; font-weight: 500; color: var(--muted); }
+  .pricing-desc { color: var(--dim); font-size: 14px; margin: 12px 0 24px; line-height: 1.5; }
+  .pricing-features { display: flex; flex-direction: column; gap: 10px; }
+  .pricing-feat { display: flex; gap: 10px; font-size: 14px; color: var(--dim); }
+  .pricing-feat::before { content: '✓'; color: var(--green); font-weight: 700; flex-shrink: 0; }
+
+  /* ── FINAL CTA ── */
+  .final-cta {
+    padding: 120px 24px; text-align: center;
+    background: radial-gradient(ellipse at 50% 100%, #1e1e40 0%, var(--bg) 60%);
+  }
+  .final-cta h2 { font-size: clamp(36px, 6vw, 64px); font-weight: 900; letter-spacing: -2px; margin-bottom: 16px; }
+  .final-cta h2 .gold { color: var(--gold); }
+  .final-cta p { color: var(--dim); font-size: 18px; margin-bottom: 40px; }
+
+  /* ── FOOTER ── */
+  footer {
+    padding: 32px 48px; border-top: 1px solid var(--border);
+    display: flex; align-items: center; justify-content: space-between;
+    font-size: 13px; color: var(--muted);
+  }
+  footer a { color: var(--muted); text-decoration: none; }
+  footer a:hover { color: var(--text); }
+  .footer-links { display: flex; gap: 24px; }
+
+  /* RESPONSIVE */
+  @media (max-width: 768px) {
+    nav { padding: 14px 20px; }
+    .nav-links { display: none; }
+    .steps-grid { grid-template-columns: 1fr; }
+    .testimonials { grid-template-columns: 1fr; }
+    .science-grid { grid-template-columns: 1fr; }
+    .pricing-cards { grid-template-columns: 1fr; }
+    .phone-section { flex-direction: column; text-align: center; }
+    footer { flex-direction: column; gap: 12px; text-align: center; }
+  }
+</style>
+</head>
+<body>
+
+<!-- NAV -->
+<nav>
+  <a href="#" class="nav-logo">
+    <div class="nav-logo-icon">🃏</div>
+    <div class="nav-logo-text">Ante</div>
+  </a>
+  <div class="nav-links">
+    <a href="#how">How it works</a>
+    <a href="#science">The science</a>
+    <a href="#pricing">Pricing</a>
+    <a href="pitch.html" target="_blank">Investors</a>
+  </div>
+  <a href="index.html" class="nav-cta">Try the app →</a>
+</nav>
+
+<!-- HERO -->
+<section class="hero">
+  <div class="hero-badge">🔥 <span>84% success rate</span> vs. 42% for free trackers</div>
+
+  <h1 class="hero-title">
+    <span class="block">Stop making</span>
+    <span class="block gold">promises to yourself.</span>
+    <span class="block">Start keeping them.</span>
+  </h1>
+
+  <p class="hero-sub">
+    Ante is the habit tracker that puts your money where your mouth is.
+    Miss a habit — your stake goes to charity. It really is that simple.
+  </p>
+
+  <div class="hero-cta-row">
+    <a href="index.html" class="cta-primary">Start your first bet → </a>
+    <a href="#how" class="cta-secondary">See how it works ↓</a>
+  </div>
+
+  <div class="hero-stats">
+    <div class="hero-stat">
+      <div class="val gold">$2.1M</div>
+      <div class="label">Staked by users</div>
+    </div>
+    <div class="stat-divider"></div>
+    <div class="hero-stat">
+      <div class="val green">84%</div>
+      <div class="label">Habits completed</div>
+    </div>
+    <div class="stat-divider"></div>
+    <div class="hero-stat">
+      <div class="val">12K</div>
+      <div class="label">Active users</div>
+    </div>
+    <div class="stat-divider"></div>
+    <div class="hero-stat">
+      <div class="val">68%</div>
+      <div class="label">30-day retention</div>
+    </div>
+  </div>
+</section>
+
+<!-- PHONE + PITCH -->
+<div class="phone-section">
+  <!-- Mini phone mockup -->
+  <div class="phone-wrap">
+    <div class="phone-glow"></div>
+    <div class="phone-frame">
+      <div class="phone-screen">
+        <div class="phone-notch"></div>
+        <!-- Mini app UI -->
+        <div class="mini-topbar">
+          <div class="mini-title">Ante 🃏</div>
+          <div class="mini-avatar">B</div>
+        </div>
+        <div class="mini-wallet">
+          <div class="mini-wallet-label">Total at stake</div>
+          <div class="mini-wallet-amt">$150</div>
+          <div class="mini-wallet-sub">3 active habits · $85/day at risk</div>
+        </div>
+        <div class="mini-section">
+          <div class="mini-section-title">Today</div>
+
+          <div class="mini-card">
+            <div class="mini-card-top">
+              <span>🏃 <span class="mini-card-name">Run 3 miles</span></span>
+              <span class="mini-card-badge">$25/miss</span>
+            </div>
+            <div class="mini-card-streak">🔥 14 day streak</div>
+            <div class="mini-progress"><div class="mini-progress-fill" style="width:100%"></div></div>
+            <div class="mini-check-btn">✓ Mark complete</div>
+          </div>
+
+          <div class="mini-card">
+            <div class="mini-card-top">
+              <span>🚫 <span class="mini-card-name">No alcohol</span></span>
+              <span class="mini-card-badge">$50/miss</span>
+            </div>
+            <div class="mini-card-streak">🔥 30 day streak</div>
+            <div class="mini-progress"><div class="mini-progress-fill" style="width:100%"></div></div>
+            <div class="mini-check-btn">✓ Mark complete</div>
+          </div>
+
+          <div class="mini-card">
+            <div class="mini-card-top">
+              <span>📚 <span class="mini-card-name">Read 30 min</span></span>
+              <span class="mini-card-badge">$10/miss</span>
+            </div>
+            <div class="mini-card-streak">🔥 5 day streak</div>
+            <div class="mini-progress"><div class="mini-progress-fill" style="width:72%"></div></div>
+            <div class="mini-check-btn">✓ Mark complete</div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Copy -->
+  <div style="max-width:420px">
+    <div class="section-eyebrow">The product</div>
+    <h2 style="font-size:clamp(28px,4vw,42px);font-weight:900;letter-spacing:-1.5px;margin-bottom:16px;line-height:1.1">
+      A habit tracker that actually hurts to skip.
+    </h2>
+    <p style="color:var(--dim);font-size:16px;line-height:1.7;margin-bottom:28px">
+      Every other app gives you a streak to lose. Ante gives you money to lose. The difference is <strong style="color:var(--text)">loss aversion</strong> — the most reliable motivator known to behavioral science.
+    </p>
+    <div style="display:flex;flex-direction:column;gap:14px">
+      <div style="display:flex;gap:12px;align-items:flex-start">
+        <div style="width:24px;height:24px;background:#ffd60015;border:1px solid var(--gold);border-radius:6px;display:flex;align-items:center;justify-content:center;font-size:12px;flex-shrink:0">✓</div>
+        <div style="font-size:15px;color:var(--dim)"><strong style="color:var(--text)">Stake $1–$100/miss</strong> — you choose the pressure level</div>
+      </div>
+      <div style="display:flex;gap:12px;align-items:flex-start">
+        <div style="width:24px;height:24px;background:#ffd60015;border:1px solid var(--gold);border-radius:6px;display:flex;align-items:center;justify-content:center;font-size:12px;flex-shrink:0">✓</div>
+        <div style="font-size:15px;color:var(--dim)"><strong style="color:var(--text)">85% to your charity</strong> — miss a day and feel good about it? Not quite.</div>
+      </div>
+      <div style="display:flex;gap:12px;align-items:flex-start">
+        <div style="width:24px;height:24px;background:#ffd60015;border:1px solid var(--gold);border-radius:6px;display:flex;align-items:center;justify-content:center;font-size:12px;flex-shrink:0">✓</div>
+        <div style="font-size:15px;color:var(--dim)"><strong style="color:var(--text)">Challenge friends</strong> — group pots, leaderboards, accountability circles</div>
+      </div>
+      <div style="display:flex;gap:12px;align-items:flex-start">
+        <div style="width:24px;height:24px;background:#ffd60015;border:1px solid var(--gold);border-radius:6px;display:flex;align-items:center;justify-content:center;font-size:12px;flex-shrink:0">✓</div>
+        <div style="font-size:15px;color:var(--dim)"><strong style="color:var(--text)">HealthKit sync coming</strong> — verified completion, not just honor system</div>
+      </div>
+    </div>
+    <a href="index.html" class="cta-primary" style="display:inline-flex;margin-top:32px">Try it free →</a>
+  </div>
+</div>
+
+<!-- HOW IT WORKS -->
+<section class="how-section" id="how">
+  <div class="section-eyebrow">Simple by design</div>
+  <h2 class="section-title">Three steps to actually changing.</h2>
+  <p class="section-sub">No complicated systems. No subscription fees to start. Just real accountability.</p>
+
+  <div class="steps-grid">
+    <div class="step-card">
+      <div class="step-num">1</div>
+      <div class="step-title">Pick your habit & stake</div>
+      <div class="step-body">Name the habit, set how often, and choose how much you lose per missed day. $5 to start — $50 if you're serious. You pick the charity your money goes to if you fail.</div>
+    </div>
+    <div class="step-card">
+      <div class="step-num">2</div>
+      <div class="step-title">Check in every day</div>
+      <div class="step-body">Open Ante, mark it done. Takes 3 seconds. If you missed — admit it. Your stake gets charged automatically. No grey areas. No "I'll make it up tomorrow."</div>
+    </div>
+    <div class="step-card">
+      <div class="step-num">3</div>
+      <div class="step-title">Build an unbreakable streak</div>
+      <div class="step-body">Watch your streak climb. Challenge friends. Compete for the pot. The longer the streak, the harder it is to break — because the stakes compound with your momentum.</div>
+    </div>
+  </div>
+</section>
+
+<!-- SOCIAL PROOF -->
+<section class="social-section">
+  <div class="social-inner">
+    <div style="text-align:center">
+      <div class="section-eyebrow">Real users</div>
+      <h2 class="section-title" style="font-size:clamp(28px,4vw,44px)">When money's on the line, people show up.</h2>
+    </div>
+    <div class="testimonials">
+      <div class="testimonial">
+        <div class="t-stars">★★★★★</div>
+        <div class="t-quote">"I tried every habit app. Streaks don't work. Badges don't work. Losing $25 to Boys & Girls Club works. I haven't missed a workout in 47 days."</div>
+        <div class="t-author">
+          <div class="t-avatar" style="background:linear-gradient(135deg,#6c63ff,#e040fb)">MK</div>
+          <div>
+            <div class="t-name">Marcus K.</div>
+            <div class="t-handle">@marcusk · Chicago</div>
+          </div>
+        </div>
+        <div class="t-result">🔥 47-day streak · $0 forfeited</div>
+      </div>
+      <div class="testimonial">
+        <div class="t-stars">★★★★★</div>
+        <div class="t-quote">"My friend challenged me to a 30-day no-junk-food bet. Neither of us wanted to be the one who paid. We both made it. That's the product right there."</div>
+        <div class="t-author">
+          <div class="t-avatar" style="background:linear-gradient(135deg,#00bcd4,#00e676)">PR</div>
+          <div>
+            <div class="t-name">Priya R.</div>
+            <div class="t-handle">@priyarx · NYC</div>
+          </div>
+        </div>
+        <div class="t-result">🔥 30-day challenge won · shared $0 pot</div>
+      </div>
+      <div class="testimonial">
+        <div class="t-stars">★★★★★</div>
+        <div class="t-quote">"I set $10/day stakes on waking up at 5am. I've only missed twice in 60 days. The $20 I lost genuinely hurt. Which is exactly the point. 10/10."</div>
+        <div class="t-author">
+          <div class="t-avatar" style="background:linear-gradient(135deg,#ff9800,#ff5722)">JT</div>
+          <div>
+            <div class="t-name">Jake T.</div>
+            <div class="t-handle">@jakethakkar · SF</div>
+          </div>
+        </div>
+        <div class="t-result">🔥 58/60 days · $20 donated</div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- SCIENCE -->
+<section class="science-section" id="science">
+  <div class="science-grid">
+    <div>
+      <div class="section-eyebrow">Behavioral science</div>
+      <h2 class="section-title" style="font-size:clamp(28px,4vw,44px);text-align:left">This is why it works.</h2>
+      <div class="science-items">
+        <div class="science-item">
+          <div class="sci-icon">🧠</div>
+          <div class="sci-text"><strong>Loss aversion</strong> — Kahneman & Tversky showed losses feel 2× as powerful as equivalent gains. Ante turns every potential missed habit into a loss, not a missed reward.</div>
+        </div>
+        <div class="science-item">
+          <div class="sci-icon">📋</div>
+          <div class="sci-text"><strong>Commitment devices</strong> — Pre-committing to a cost before the temptation arrives is the most effective habit-formation technique known. StickK's research showed 3× higher completion.</div>
+        </div>
+        <div class="science-item">
+          <div class="sci-icon">👥</div>
+          <div class="sci-text"><strong>Social accountability</strong> — Public commitments with stakes outperform private ones by 2.5×. When your friends can see your streak, quitting feels like failure twice over.</div>
+        </div>
+      </div>
+    </div>
+    <div style="text-align:center">
+      <div class="science-stat-big">2×</div>
+      <div class="science-stat-label" style="font-size:18px;color:var(--dim);margin-bottom:32px">Losses feel twice as bad as gains feel good<br><span style="font-size:13px">(Kahneman & Tversky, 1979)</span></div>
+      <div style="background:var(--surface);border:1px solid var(--border);border-radius:16px;padding:24px;text-align:left">
+        <div style="font-size:12px;font-weight:700;color:var(--muted);text-transform:uppercase;letter-spacing:.8px;margin-bottom:16px">Ante users vs. free trackers</div>
+        <div style="display:flex;flex-direction:column;gap:14px">
+          <div>
+            <div style="display:flex;justify-content:space-between;margin-bottom:4px;font-size:13px">
+              <span>Habit completion</span>
+              <span><strong>84%</strong> vs. 42%</span>
+            </div>
+            <div style="height:6px;background:#2a2a50;border-radius:3px"><div style="height:100%;width:84%;background:var(--gold);border-radius:3px"></div></div>
+          </div>
+          <div>
+            <div style="display:flex;justify-content:space-between;margin-bottom:4px;font-size:13px">
+              <span>30-day retention</span>
+              <span><strong>68%</strong> vs. 11%</span>
+            </div>
+            <div style="height:6px;background:#2a2a50;border-radius:3px"><div style="height:100%;width:68%;background:var(--green);border-radius:3px"></div></div>
+          </div>
+          <div>
+            <div style="display:flex;justify-content:space-between;margin-bottom:4px;font-size:13px">
+              <span>Avg. streak length</span>
+              <span><strong>23 days</strong> vs. 4 days</span>
+            </div>
+            <div style="height:6px;background:#2a2a50;border-radius:3px"><div style="height:100%;width:77%;background:#6c63ff;border-radius:3px"></div></div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- PRICING -->
+<section class="pricing-section" id="pricing">
+  <div class="pricing-inner">
+    <div class="section-eyebrow">Pricing</div>
+    <h2 class="section-title">Free to start. Serious when you are.</h2>
+    <p class="section-sub">No subscription required to begin. We only make money when you fail — which aligns our incentives with yours.</p>
+
+    <div class="pricing-cards">
+      <div class="pricing-card">
+        <div class="pricing-name">Ante Free</div>
+        <div class="pricing-price">$0 <span>/ month</span></div>
+        <div class="pricing-desc">Everything you need to start. We take 15% of forfeited stakes — that's our revenue model. If you succeed, we make nothing.</div>
+        <div class="pricing-features">
+          <div class="pricing-feat">Unlimited habits</div>
+          <div class="pricing-feat">Stake $1–$100/miss</div>
+          <div class="pricing-feat">4 charity options</div>
+          <div class="pricing-feat">Streak tracking</div>
+          <div class="pricing-feat">Friend challenges</div>
+          <div class="pricing-feat">15% platform fee on forfeits</div>
+        </div>
+      </div>
+      <div class="pricing-card featured">
+        <div class="pricing-badge">Most Popular</div>
+        <div class="pricing-name">Ante Pro</div>
+        <div class="pricing-price">$8.99 <span>/ month</span></div>
+        <div class="pricing-desc">For people serious about accountability. Lower forfeit fee, verified completion, and advanced analytics.</div>
+        <div class="pricing-features">
+          <div class="pricing-feat">Everything in Free</div>
+          <div class="pricing-feat">HealthKit + Strava sync</div>
+          <div class="pricing-feat">Photo proof check-ins</div>
+          <div class="pricing-feat">Group leaderboards</div>
+          <div class="pricing-feat">Reduced 10% forfeit fee</div>
+          <div class="pricing-feat">Custom charity (any 501c3)</div>
+          <div class="pricing-feat">Advanced analytics</div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- FINAL CTA -->
+<section class="final-cta">
+  <h2>Ready to <span class="gold">actually</span> change?</h2>
+  <p>Your next missed habit costs you $0. Your first Ante bet costs you nothing.<br>Set one up in 60 seconds.</p>
+  <a href="index.html" class="cta-primary" style="font-size:18px;padding:20px 48px">
+    Make your first bet →
+  </a>
+  <div style="margin-top:20px;font-size:13px;color:var(--muted)">Free to start · No credit card required to sign up</div>
+</section>
+
+<!-- FOOTER -->
+<footer>
+  <div style="display:flex;align-items:center;gap:10px">
+    <div style="width:24px;height:24px;border-radius:6px;background:linear-gradient(135deg,var(--gold),#ff9800);display:flex;align-items:center;justify-content:center;font-size:12px">🃏</div>
+    <span>© 2026 Ante, Inc.</span>
+  </div>
+  <div class="footer-links">
+    <a href="pitch.html">Investors</a>
+    <a href="#">Privacy</a>
+    <a href="#">Terms</a>
+    <a href="mailto:contact@ante.app">Contact</a>
+  </div>
+</footer>
+
+</body>
+</html>

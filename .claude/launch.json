@@ -1,0 +1,12 @@
+{
+  "version": "0.0.1",
+  "configurations": [
+    {
+      "name": "ante",
+      "runtimeExecutable": "python3",
+      "runtimeArgs": ["server.py"],
+      "port": 3847,
+      "cwd": "/Users/beckettlee/Desktop/ante"
+    }
+  ]
+}

@@ -1,0 +1,264 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Ante — Kinetic Noir Minimal</title>
+<style>
+:root{
+  --bg:#0a0a0b; --bg-2:#0f0f11; --surface:#151518; --surface2:#1c1c20;
+  --border:rgba(255,255,255,0.07); --gold:#e6b94e; --gold-soft:#f0cd76; --gold-dim:rgba(230,185,78,0.10);
+  --green:#4ade80; --red:#f87171; --text:#f5f5f6; --text-dim:#9b9ba4; --text-muted:#6c6c75;
+  --radius:20px; --radius-sm:14px; --radius-lg:28px;
+}
+*{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent}
+html,body{height:100%}
+body{
+  background:var(--bg);color:var(--text);
+  font-family:-apple-system,BlinkMacSystemFont,"SF Pro Display","Segoe UI",sans-serif;
+  display:flex;justify-content:center;overflow-x:hidden;
+}
+.app{position:relative;width:100%;max-width:430px;min-height:100dvh;overflow:hidden;background:var(--bg)}
+
+/* ============================================================
+   PARALLAX BACKGROUND  (ambient, lives behind every screen)
+   ============================================================ */
+.px-bg{position:fixed;inset:0;z-index:0;overflow:hidden;pointer-events:none;max-width:430px;margin:0 auto;background:radial-gradient(120% 90% at 50% 18%,var(--bg-2) 0%,var(--bg) 60%)}
+.px-layer{position:absolute;inset:-12%;will-change:transform;transform:translate3d(0,0,0)}
+
+/* enormous slow gold light-orbs bleeding off the edges */
+.orb{position:absolute;border-radius:50%;filter:blur(70px);opacity:.5;mix-blend-mode:screen}
+.orb-a{width:480px;height:480px;top:-180px;left:-160px;
+  background:radial-gradient(circle at 50% 50%,rgba(240,205,118,.55),rgba(230,185,78,.18) 42%,transparent 70%)}
+.orb-b{width:560px;height:560px;bottom:-260px;right:-220px;
+  background:radial-gradient(circle at 50% 50%,rgba(230,185,78,.40),rgba(230,185,78,.10) 45%,transparent 72%)}
+.orb-c{width:300px;height:300px;top:38%;left:62%;opacity:.28;
+  background:radial-gradient(circle at 50% 50%,rgba(240,205,118,.40),transparent 68%)}
+
+/* thin gold horizon line that shifts with gyro */
+.horizon{position:absolute;left:-20%;right:-20%;top:50%;height:1px;
+  background:linear-gradient(90deg,transparent,rgba(230,185,78,.16) 18%,rgba(240,205,118,.6) 50%,rgba(230,185,78,.16) 82%,transparent);
+  box-shadow:0 0 22px rgba(230,185,78,.22)}
+.horizon::after{content:"";position:absolute;left:0;right:0;top:-60px;height:120px;
+  background:radial-gradient(60% 100% at 50% 50%,rgba(230,185,78,.07),transparent 70%)}
+
+/* faint vignette to seat everything in the dark */
+.vignette{position:fixed;inset:0;z-index:2;pointer-events:none;max-width:430px;margin:0 auto;
+  background:radial-gradient(120% 80% at 50% 30%,transparent 55%,rgba(0,0,0,.55) 100%)}
+
+/* fine film grain — animated, GPU-cheap, on top of everything */
+.grain{position:fixed;inset:-50%;z-index:3;pointer-events:none;opacity:.05;will-change:transform;
+  background-image:url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='160' height='160'><filter id='n'><feTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='2' stitchTiles='stitch'/><feColorMatrix type='saturate' values='0'/></filter><rect width='160' height='160' filter='url(%23n)'/></svg>");
+  animation:grain 1.6s steps(4) infinite}
+@keyframes grain{
+  0%{transform:translate3d(0,0,0)} 25%{transform:translate3d(-4%,3%,0)}
+  50%{transform:translate3d(3%,-4%,0)} 75%{transform:translate3d(-3%,-2%,0)} 100%{transform:translate3d(2%,4%,0)}}
+
+/* ============================================================
+   WELCOME SCREEN
+   ============================================================ */
+.screen{position:relative;z-index:4;display:none;min-height:100dvh;flex-direction:column;
+  align-items:center;justify-content:center;padding:48px 28px calc(40px + env(safe-area-inset-bottom))}
+.screen.active{display:flex}
+
+.hero{width:100%;max-width:360px;display:flex;flex-direction:column;align-items:center;text-align:center}
+
+/* logo — its own parallax plane, deepest in front */
+.logo{width:80px;height:80px;border-radius:22px;display:flex;align-items:center;justify-content:center;
+  font-size:42px;font-weight:700;color:#1a1407;will-change:transform;
+  background:linear-gradient(155deg,var(--gold-soft),var(--gold));
+  box-shadow:0 18px 50px -12px rgba(230,185,78,.5),inset 0 1px 0 rgba(255,255,255,.4);
+  position:relative}
+.logo::after{content:"";position:absolute;inset:0;border-radius:22px;
+  background:linear-gradient(155deg,rgba(255,255,255,.35),transparent 45%);mix-blend-mode:overlay}
+
+.title{margin-top:30px;font-size:38px;line-height:1.04;font-weight:700;letter-spacing:-.02em;
+  perspective:700px}
+.title .word{display:inline-block;will-change:transform;transform:translateZ(0)}
+.title .gold{color:var(--gold)}
+
+.subtitle{margin-top:18px;font-size:16px;line-height:1.5;color:var(--text-dim);max-width:300px;will-change:transform}
+
+/* how-it-works card */
+.card{margin-top:34px;width:100%;background:var(--surface);border:1px solid var(--border);
+  border-radius:var(--radius);padding:20px;text-align:left;will-change:transform;
+  box-shadow:0 24px 60px -28px rgba(0,0,0,.8)}
+.card-h{font-size:12px;letter-spacing:.14em;text-transform:uppercase;color:var(--text-muted);margin-bottom:14px}
+.step{display:flex;align-items:center;gap:13px;padding:7px 0}
+.step .n{width:26px;height:26px;flex:none;border-radius:9px;background:var(--gold-dim);color:var(--gold);
+  display:flex;align-items:center;justify-content:center;font-size:13px;font-weight:600}
+.step p{font-size:14px;color:var(--text-dim)}
+.step b{color:var(--text);font-weight:600}
+
+.cta{margin-top:30px;width:100%;display:flex;flex-direction:column;gap:12px;will-change:transform}
+.btn{height:54px;border-radius:var(--radius-sm);border:0;font-size:16px;font-weight:600;cursor:pointer;
+  display:flex;align-items:center;justify-content:center;transition:transform .12s ease}
+.btn:active{transform:scale(.975)}
+.btn-primary{background:linear-gradient(150deg,var(--gold-soft),var(--gold));color:#1a1407;
+  box-shadow:0 14px 34px -12px rgba(230,185,78,.55)}
+.btn-ghost{background:transparent;color:var(--text-dim);border:1px solid var(--border)}
+
+.gyro-hint{margin-top:22px;font-size:12px;color:var(--text-muted);letter-spacing:.03em;
+  display:flex;align-items:center;gap:7px;opacity:.85;transition:opacity .4s}
+.gyro-hint.hide{opacity:0}
+.gyro-hint i{width:6px;height:6px;border-radius:50%;background:var(--gold);box-shadow:0 0 8px var(--gold);
+  animation:pulse 1.8s ease-in-out infinite}
+@keyframes pulse{0%,100%{opacity:.4;transform:scale(1)}50%{opacity:1;transform:scale(1.5)}}
+
+@media (prefers-reduced-motion:reduce){
+  .grain{animation:none}
+  .px-layer,.logo,.title .word,.card,.cta,.subtitle{transform:none!important;transition:none!important}
+}
+</style>
+</head>
+<body>
+<div class="app">
+
+  <!-- ambient parallax background (behind all screens) -->
+  <div class="px-bg" aria-hidden="true">
+    <div class="px-layer" data-depth="0.012"><div class="orb orb-a"></div></div>
+    <div class="px-layer" data-depth="0.020"><div class="orb orb-b"></div></div>
+    <div class="px-layer" data-depth="0.030"><div class="orb orb-c"></div></div>
+    <div class="px-layer" data-depth="0.045" data-axis="tilt"><div class="horizon"></div></div>
+  </div>
+  <div class="vignette" aria-hidden="true"></div>
+  <div class="grain" aria-hidden="true"></div>
+
+  <!-- WELCOME -->
+  <section class="screen active" id="screen-welcome">
+    <div class="hero">
+      <div class="logo" data-depth="0.10">A</div>
+      <h1 class="title">
+        <span class="word" data-depth="0.05">Bet</span>
+        <span class="word" data-depth="0.07">on</span>
+        <span class="word gold" data-depth="0.11">Yourself.</span>
+      </h1>
+      <p class="subtitle" data-depth="0.03">Put real money on your habits. Show up, or pay up.</p>
+
+      <div class="card" data-depth="0.04">
+        <div class="card-h">How it works</div>
+        <div class="step"><div class="n">1</div><p>Pick a habit and <b>ante up</b> your stake.</p></div>
+        <div class="step"><div class="n">2</div><p>Check in daily to <b>defend your money</b>.</p></div>
+        <div class="step"><div class="n">3</div><p>Miss a day, <b>you forfeit</b> the pot.</p></div>
+      </div>
+
+      <div class="cta" data-depth="0.02">
+        <button class="btn btn-primary" id="enableBtn">Ante Up</button>
+        <button class="btn btn-ghost">I already have an account</button>
+      </div>
+
+      <div class="gyro-hint" id="hint"><i></i><span>Tilt your phone</span></div>
+    </div>
+  </section>
+
+</div>
+
+<script>
+/* ============================================================
+   ANTE — KINETIC NOIR PARALLAX ENGINE
+   - spring-smoothed pointer / gyro / scroll
+   - single rAF loop, transform/opacity only
+   - iOS DeviceOrientation permission on first tap
+   ============================================================ */
+(function(){
+  const reduce = matchMedia('(prefers-reduced-motion: reduce)');
+  const layers = [...document.querySelectorAll('[data-depth]')];
+  const grain  = document.querySelector('.grain');
+  const hint   = document.getElementById('hint');
+  const enableBtn = document.getElementById('enableBtn');
+
+  // normalized input targets (-1..1) and spring state
+  let tx=0, ty=0;            // target tilt  (pointer/gyro)
+  let cx=0, cy=0;           // current (spring) tilt
+  let sy=0, csy=0;          // target/current scroll offset (px)
+  let raf=null, running=false;
+
+  const clamp=(v,a=-1,b=1)=>v<a?a:v>b?b:v;
+  const lerp =(a,b,t)=>a+(b-a)*t;
+
+  /* ---- POINTER (desktop / no-gyro fallback) ---- */
+  function onPointer(e){
+    const w=innerWidth, h=innerHeight;
+    tx = clamp((e.clientX / w - .5) * 2);
+    ty = clamp((e.clientY / h - .5) * 2);
+    start();
+  }
+
+  /* ---- GYRO ---- */
+  let gyroOn=false, baseGamma=null, baseBeta=null;
+  function onOrient(e){
+    if(e.gamma==null && e.beta==null) return;
+    // capture a neutral baseline on first reading (however the user holds the phone)
+    if(baseGamma===null){ baseGamma=e.gamma; baseBeta=e.beta; }
+    // gamma: left/right (-90..90), beta: front/back (-180..180)
+    tx = clamp((e.gamma - baseGamma) / 30);
+    ty = clamp((e.beta  - baseBeta ) / 30);
+    if(!gyroOn){ gyroOn=true; window.removeEventListener('mousemove',onPointer); hint && hint.classList.add('hide'); }
+    start();
+  }
+  function bindGyro(){ window.addEventListener('deviceorientation', onOrient, true); }
+
+  function requestGyro(){
+    if(typeof DeviceOrientationEvent!=='undefined' &&
+       typeof DeviceOrientationEvent.requestPermission==='function'){
+      DeviceOrientationEvent.requestPermission()
+        .then(s=>{ if(s==='granted') bindGyro(); })
+        .catch(()=>{});
+    } else if('DeviceOrientationEvent' in window){
+      bindGyro(); // android / non-gated
+    }
+  }
+
+  /* ---- SCROLL ---- */
+  function onScroll(){ sy = scrollY || document.documentElement.scrollTop || 0; start(); }
+
+  /* ---- rAF LOOP ---- */
+  function frame(){
+    // critically-damped-ish spring toward target (buttery)
+    cx  = lerp(cx,  tx, 0.085);
+    cy  = lerp(cy,  ty, 0.085);
+    csy = lerp(csy, sy, 0.12);
+
+    for(const el of layers){
+      const d = parseFloat(el.dataset.depth) || 0;
+      const axis = el.dataset.axis;
+      const px = cx * d * 130;          // horizontal tilt travel
+      const py = cy * d * 130;          // vertical tilt travel
+      const ps = csy * d * 0.9;         // scroll travel
+      if(axis==='tilt'){
+        // horizon: vertical drift on tilt + a hair of rotation
+        el.style.transform=`translate3d(0,${(py*1.6 - ps).toFixed(2)}px,0) rotate(${(cx*d*30).toFixed(3)}deg)`;
+      }else{
+        el.style.transform=`translate3d(${px.toFixed(2)}px,${(py - ps).toFixed(2)}px,0)`;
+      }
+    }
+    if(grain) grain.style.transform=`translate3d(${(cx*6).toFixed(2)}px,${(cy*6).toFixed(2)}px,0)`;
+
+    // settle: stop the loop when nothing is moving (saves battery)
+    const moving = Math.abs(cx-tx)>1e-3 || Math.abs(cy-ty)>1e-3 || Math.abs(csy-sy)>0.3;
+    if(moving){ raf=requestAnimationFrame(frame); }
+    else { running=false; raf=null; }
+  }
+  function start(){ if(!running && !reduce.matches){ running=true; raf=requestAnimationFrame(frame); } }
+
+  /* ---- WIRE UP ---- */
+  function init(){
+    if(reduce.matches) return;            // honor reduced-motion: no listeners, no loop
+    window.addEventListener('mousemove', onPointer, {passive:true});
+    window.addEventListener('scroll', onScroll, {passive:true});
+    // first tap anywhere = the user gesture iOS needs to request gyro
+    const onFirstTap=()=>{ requestGyro(); window.removeEventListener('pointerdown',onFirstTap); };
+    window.addEventListener('pointerdown', onFirstTap, {once:true});
+    // primary CTA also requests (explicit, reliable on iOS)
+    enableBtn && enableBtn.addEventListener('click', requestGyro);
+    start();
+  }
+  // re-evaluate if the user toggles reduced-motion live
+  reduce.addEventListener?.('change', ()=>{ if(reduce.matches){ cx=cy=tx=ty=csy=sy=0; layers.forEach(l=>l.style.transform=''); }else start(); });
+
+  if(document.readyState!=='loading') init();
+  else document.addEventListener('DOMContentLoaded', init);
+})();
+</script>
+</body>
+</html>

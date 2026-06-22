@@ -1,0 +1,32 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<style>
+  body { width: 300px; margin: 0; padding: 16px; background: #0a0a0b; color: #f5f5f6;
+         font-family: -apple-system, 'Segoe UI', sans-serif; }
+  h1 { font-size: 16px; margin: 0 0 4px; }
+  p { font-size: 12px; color: #9b9ba4; margin: 0 0 12px; line-height: 1.45; }
+  label { font-size: 11px; color: #6c6c75; display: block; margin: 10px 0 4px;
+          text-transform: uppercase; letter-spacing: .5px; }
+  input { width: 100%; box-sizing: border-box; background: #1c1c20;
+          border: 1px solid rgba(255,255,255,.1); border-radius: 8px; color: #fff;
+          padding: 9px; font-size: 13px; }
+  button { width: 100%; margin-top: 14px; background: #e6b94e; color: #16120a; border: none;
+           border-radius: 8px; padding: 11px; font-weight: 700; font-size: 14px; cursor: pointer; }
+  button:active { opacity: .85; }
+  #status { font-size: 12px; margin-top: 11px; line-height: 1.45; color: #9b9ba4; }
+</style>
+</head>
+<body>
+  <h1>🎓 Ante · Canvas Sync</h1>
+  <p>Reads your assignments through your logged-in Canvas — no token needed — and sends them to Ante.</p>
+  <label>Your Canvas URL</label>
+  <input id="host" placeholder="canvas.umich.edu" autocapitalize="off" autocorrect="off" spellcheck="false">
+  <label>Ante server</label>
+  <input id="server" value="http://localhost:3847" autocapitalize="off" autocorrect="off" spellcheck="false">
+  <button id="sync">Sync my Canvas to Ante</button>
+  <div id="status"></div>
+  <script src="popup.js"></script>
+</body>
+</html>
