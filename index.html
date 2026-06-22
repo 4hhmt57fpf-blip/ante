@@ -735,6 +735,17 @@
   .connect-card.connected .connect-btn { border-color: var(--green); color: var(--green); background: var(--green-dim); }
 
   /* ── goal example chips ── */
+  /* Smart intent banner */
+  .intent-banner{ display:none; align-items:center; gap:12px; background:var(--surface); border:1.5px solid var(--gold); border-radius:var(--radius-sm); padding:13px 14px; margin-bottom:12px; cursor:pointer; -webkit-tap-highlight-color:transparent; animation:intentPop .25s cubic-bezier(.34,1.56,.64,1); }
+  .intent-banner.visible{ display:flex; }
+  .intent-banner:active{ background:var(--surface2); transform:scale(.98); }
+  .intent-ico{ font-size:26px; flex-shrink:0; }
+  .intent-body{ flex:1; min-width:0; }
+  .intent-title{ font-size:14px; font-weight:700; color:var(--text); }
+  .intent-sub{ font-size:12px; color:var(--text-muted); margin-top:1px; }
+  .intent-cta{ font-size:13px; font-weight:800; color:var(--gold); white-space:nowrap; flex-shrink:0; }
+  @keyframes intentPop{ from{ opacity:0; transform:translateY(-6px) scale(.97); } to{ opacity:1; transform:none; } }
+
   .goal-examples { margin-bottom:14px; }
   .goal-ex-label { font-size:11px; font-weight:700; letter-spacing:.5px; text-transform:uppercase; color:var(--text-muted); margin-bottom:8px; }
   .goal-ex-chips { display:flex; flex-wrap:wrap; gap:8px; }
@@ -1499,6 +1510,11 @@
   <div class="onboard-q" id="ob2-q">What do you want to work on?</div>
   <div class="onboard-hint" id="ob2-hint">Pick a category — each one uses a different app to verify you.</div>
   <input class="input-field" id="goal-search" placeholder="Search what you want to do…" oninput="onGoalSearch(this.value)" autocomplete="off" style="margin-bottom:10px">
+  <div class="intent-banner" id="intent-banner" onclick="commitIntent()">
+    <div class="intent-ico" id="intent-ico">💡</div>
+    <div class="intent-body"><div class="intent-title" id="intent-title"></div><div class="intent-sub" id="intent-sub"></div></div>
+    <div class="intent-cta">Set up →</div>
+  </div>
   <div class="goal-examples" id="goal-examples">
     <div class="goal-ex-label">Popular bets</div>
     <div class="goal-ex-chips">
@@ -2785,11 +2801,82 @@ function startSearchPlaceholder(){
   tick();
 }
 
+// ── Smart intent detection ──────────────────────────────────────────────────
+const INTENT_MAP = [
+  { patterns:['social media','no social','social','instagram','tiktok','twitter','facebook','reddit','snapchat','youtube time','phone time','less phone','no phone','doomscroll','scroll less','screen time','limit apps','app limit','less screen','phone less'],
+    goalId:'screen',    emoji:'📵', title:'Cap your screen time', sub:'Digital · connects Screen Time' },
+  { patterns:['run','running','jog','jogging','5k','10k run','marathon','morning run','miles'],
+    goalId:'run',       emoji:'🏃', title:'Run every day',         sub:'Fitness · connects Apple Health' },
+  { patterns:['steps','walk','walking','10,000','10000','10k steps','step count'],
+    goalId:'steps',     emoji:'👟', title:'Walk 10,000 steps',     sub:'Fitness · connects Apple Health' },
+  { patterns:['workout','exercise','lift','lifting','train','training','strength','crossfit','gym session','weights'],
+    goalId:'exercise',  emoji:'🏋️', title:'30 min of exercise',    sub:'Fitness · connects Apple Health' },
+  { patterns:['gym','gym check','check in','go to gym','gym visit','show up to gym'],
+    goalId:'gym',       emoji:'📍', title:'Get to the gym',        sub:'Places · connects GPS' },
+  { patterns:['meditate','meditation','mindful','mindfulness','breathe','breathing','stress less','calm down'],
+    goalId:'meditate',  emoji:'🧘', title:'Meditate 10 min',       sub:'Wellness · connects Apple Health' },
+  { patterns:['sleep','sleeping','bedtime','wake up','rest','insomnia','bed by','sleep 8','sleep more','tired'],
+    goalId:'sleep',     emoji:'😴', title:'Sleep 7+ hours',        sub:'Wellness · connects Apple Health' },
+  { patterns:['read','reading','book','books','pages','chapter','kindle','read daily'],
+    goalId:'read_min',  emoji:'📖', title:'Read 20 minutes',       sub:'Reading · connects Kindle' },
+  { patterns:['duolingo','language','spanish','french','german','japanese','chinese','vocab','learn language'],
+    goalId:'duo',       emoji:'🦉', title:'Complete a Duolingo lesson', sub:'Learning · connects Duolingo' },
+  { patterns:['homework','assignment','class','school','canvas','deadline','submit','college','university','gpa','no missing'],
+    goalId:'cv_ontime', emoji:'🎓', title:'Submit assignments on time', sub:'School · connects Canvas' },
+];
+
+let _currentIntent = null;
+
+function detectIntent(q) {
+  q = (q || '').toLowerCase().trim();
+  if (q.length < 3) return null;
+  for (const intent of INTENT_MAP) {
+    if (intent.patterns.some(p => q.includes(p) || p.startsWith(q))) return intent;
+  }
+  return null;
+}
+
+function showIntentBanner(intent) {
+  const banner = document.getElementById('intent-banner');
+  if (!banner) return;
+  if (!intent) { banner.classList.remove('visible'); _currentIntent = null; return; }
+  _currentIntent = intent;
+  document.getElementById('intent-ico').textContent   = intent.emoji;
+  document.getElementById('intent-title').textContent = intent.title;
+  document.getElementById('intent-sub').textContent   = intent.sub;
+  // Force re-animation on each new intent
+  banner.classList.remove('visible');
+  void banner.offsetWidth;
+  banner.classList.add('visible');
+}
+
+function commitIntent() {
+  const intent = _currentIntent;
+  if (!intent) return;
+  const g = goalById(intent.goalId);
+  if (!g) return;
+  // Pre-select the goal
+  state.onboardData.goalId     = g.id;
+  state.onboardData.categoryId = g.category;
+  state.onboardData.target     = g.target;
+  state.onboardData.name       = g.label;
+  // Filter connect screen to this category's apps
+  state._connectCat = g.category;
+  renderConnectList();
+  // Clear search, hide banner
+  const si = document.getElementById('goal-search'); if (si) { si.value = ''; startSearchPlaceholder(); }
+  showIntentBanner(null);
+  const ex = document.getElementById('goal-examples'); if (ex) ex.classList.remove('hidden');
+  goTo('screen-ob1');
+}
+// ────────────────────────────────────────────────────────────────────────────
+
 function onGoalSearch(v){
   state._goalSearch = v;
   const ex = document.getElementById('goal-examples');
   if (ex) ex.classList.toggle('hidden', v.trim().length > 0);
-  if (!v.trim()) startSearchPlaceholder(); else stopSearchPlaceholder();
+  if (!v.trim()) { startSearchPlaceholder(); showIntentBanner(null); }
+  else { stopSearchPlaceholder(); showIntentBanner(detectIntent(v)); }
   renderGoalList();
 }
 function tapGoalExample(q){
