@@ -318,6 +318,46 @@
   .challenge-banner .cb-title { font-size: 17px; font-weight: 700; margin: 6px 0 4px; }
   .challenge-banner .cb-sub { font-size: 13px; color: var(--text-muted); margin-bottom: 14px; }
 
+  /* ── FRIENDS (fr-* namespace) ── */
+  .fr-search-wrap { padding: 12px 20px 4px; position: relative; }
+  .fr-search-icon { position: absolute; left: 34px; top: 50%; transform: translateY(-50%); color: var(--text-muted); pointer-events: none; display: flex; }
+  .fr-search-input { width: 100%; background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius-sm); padding: 11px 14px 11px 42px; color: var(--text); font-size: 15px; outline: none; box-sizing: border-box; transition: border-color .15s; }
+  .fr-search-input::placeholder { color: var(--text-muted); }
+  .fr-search-input:focus { border-color: var(--border-strong); }
+  .fr-results { margin: 6px 20px 0; background: var(--surface); border: 1px solid var(--border-strong); border-radius: var(--radius); overflow: hidden; display: none; }
+  .fr-results.open { display: block; }
+  .fr-result-row { display: flex; align-items: center; gap: 12px; padding: 12px 14px; border-bottom: 1px solid var(--border); }
+  .fr-result-row:last-child { border-bottom: none; }
+  .fr-r-av { width: 38px; height: 38px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-weight: 700; font-size: 14px; flex-shrink: 0; color: #fff; }
+  .fr-r-info { flex: 1; min-width: 0; }
+  .fr-r-name { font-size: 14px; font-weight: 700; color: var(--text); }
+  .fr-r-handle { font-size: 12px; color: var(--text-muted); }
+  .fr-add-btn { padding: 6px 14px; border-radius: 20px; font-size: 13px; font-weight: 700; background: rgba(127,220,164,.12); color: var(--gold); border: 1px solid rgba(127,220,164,.25); cursor: pointer; white-space: nowrap; flex-shrink: 0; }
+  .fr-add-btn.added { background: rgba(255,255,255,.04); color: var(--text-muted); border-color: var(--border); pointer-events: none; }
+  .fr-section { padding: 0 20px; margin-top: 20px; }
+  .fr-section-head { display: flex; align-items: center; justify-content: space-between; margin-bottom: 12px; }
+  .fr-section-title { font-size: 12px; font-weight: 700; text-transform: uppercase; letter-spacing: 1.2px; color: var(--text-muted); }
+  .fr-invite-btn { font-size: 13px; font-weight: 700; color: var(--gold); background: rgba(127,220,164,.08); border: 1px solid rgba(127,220,164,.2); border-radius: 20px; padding: 5px 14px; cursor: pointer; }
+  .fr-empty { background: var(--surface); border: 1px dashed var(--border-strong); border-radius: var(--radius); padding: 28px 20px; text-align: center; }
+  .fr-empty-icon { font-size: 32px; margin-bottom: 10px; }
+  .fr-empty-title { font-size: 15px; font-weight: 700; color: var(--text); margin-bottom: 6px; }
+  .fr-empty-sub { font-size: 13px; color: var(--text-muted); line-height: 1.5; margin-bottom: 16px; }
+  .fr-friend-card { background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius); padding: 14px; display: flex; align-items: center; gap: 12px; margin-bottom: 10px; }
+  .fr-friend-card:last-child { margin-bottom: 0; }
+  .fr-f-av { width: 42px; height: 42px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-weight: 700; font-size: 15px; flex-shrink: 0; color: #fff; }
+  .fr-f-info { flex: 1; min-width: 0; }
+  .fr-f-name { font-size: 15px; font-weight: 700; color: var(--text); }
+  .fr-f-habit { font-size: 12px; color: var(--text-muted); margin-top: 2px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+  .fr-f-badge { font-size: 11px; font-weight: 700; padding: 3px 9px; border-radius: 20px; white-space: nowrap; flex-shrink: 0; }
+  .fr-f-badge.win { background: var(--green-dim); color: var(--green); }
+  .fr-f-badge.loss { background: var(--red-dim); color: var(--red); }
+  .fr-f-actions { display: flex; flex-direction: column; gap: 6px; flex-shrink: 0; }
+  .fr-challenge-btn { padding: 7px 13px; border-radius: var(--radius-sm); font-size: 12px; font-weight: 700; background: var(--surface2); border: 1px solid var(--border); color: var(--text); cursor: pointer; flex-shrink: 0; white-space: nowrap; }
+  .fr-sponsor-btn { padding: 7px 13px; border-radius: var(--radius-sm); font-size: 12px; font-weight: 700; background: var(--gold-dim); border: 1px solid rgba(226,85,47,.3); color: var(--gold); cursor: pointer; flex-shrink: 0; white-space: nowrap; }
+  .fr-divider { display: flex; align-items: center; gap: 12px; padding: 20px 20px 0; }
+  .fr-divider-line { flex: 1; height: 1px; background: var(--border); }
+  .fr-divider-label { font-size: 11px; font-weight: 700; text-transform: uppercase; letter-spacing: 1.4px; color: var(--text-muted); }
+
   /* ── STATS ── */
   #screen-stats { padding-bottom: 100px; }
   .stats-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; padding: 0 20px; margin-bottom: 20px; }
@@ -1571,8 +1611,6 @@
     </div>
     <div style="display:flex;align-items:center;gap:14px">
       <button class="ai-btn" onclick="openHelp()" aria-label="Ask Ante AI"><svg width="15" height="15" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M12 2l1.7 4.8L18.5 8.5l-4.8 1.7L12 15l-1.7-4.8L5.5 8.5l4.8-1.7z"/><path d="M19 13.5l.9 2.4 2.6 1-2.6.9-.9 2.6-.9-2.6-2.6-.9 2.6-1z"/></svg>Ask AI</button>
-      <button class="help-btn" onclick="openSponsor()" aria-label="Sponsor someone"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="8" width="18" height="4" rx="1"/><path d="M12 8v13"/><path d="M19 12v9H5v-9"/><path d="M7.5 8a2.5 2.5 0 0 1 0-5C11 3 12 8 12 8z"/><path d="M16.5 8a2.5 2.5 0 0 0 0-5C13 3 12 8 12 8z"/></svg></button>
-      <button class="help-btn" onclick="openHelp()" aria-label="Help"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><path d="M9.09 9a3 3 0 0 1 5.83 1c0 2-3 3-3 3"/><path d="M12 17h.01"/></svg></button>
       <div class="brand-date" id="home-date" onclick="showTab('stats')"></div>
     </div>
   </div>
@@ -1669,17 +1707,39 @@
 <div class="screen" id="screen-feed">
   <div class="topbar">
     <div class="topbar-title">Friends</div>
-    <div class="avatar" style="background:linear-gradient(135deg,#2c2c32,#1f1f24)">👥</div>
+    <button class="fr-invite-btn" onclick="inviteFriends()">+ Invite</button>
   </div>
 
-  <div class="challenge-banner">
-    <div class="cb-label">🔥 Live Challenge</div>
-    <div class="cb-title">30-Day No Junk Food</div>
-    <div class="cb-sub">4 friends in · $10/miss each · Ends Jul 18</div>
-    <button class="btn btn-primary btn-small" onclick="showToast('🎉 Joined! $10 locked in.','green')">Join for $10 →</button>
+  <!-- Add a friend -->
+  <div class="fr-section-title" style="padding:0 20px;margin-bottom:8px">Add a friend</div>
+  <div class="fr-search-wrap">
+    <div class="fr-search-icon">
+      <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.35-4.35"/></svg>
+    </div>
+    <input class="fr-search-input" id="fr-search" type="search" placeholder="Search by name or @handle" autocomplete="off"
+      oninput="searchFriends(this.value)"
+      onfocus="searchFriends(this.value)"
+      onblur="setTimeout(hideFriendSearch, 200)">
+  </div>
+  <div class="fr-results" id="fr-results"></div>
+
+  <!-- Your Friends list -->
+  <div class="fr-section">
+    <div class="fr-section-head">
+      <span class="fr-section-title">Your Friends</span>
+      <span id="fr-count" style="font-size:12px;color:var(--text-muted);font-weight:600"></span>
+    </div>
+    <div id="fr-friends-list"></div>
   </div>
 
-  <div class="feed-list" id="feed-container"></div>
+  <!-- Activity divider -->
+  <div class="fr-divider">
+    <div class="fr-divider-line"></div>
+    <div class="fr-divider-label">Activity</div>
+    <div class="fr-divider-line"></div>
+  </div>
+
+  <div class="feed-list" id="feed-container" style="margin-top:14px"></div>
 
   <div class="bottom-nav">
     <div class="nav-item" onclick="showTab('home')">
@@ -2211,7 +2271,7 @@ function showTab(tab) {
   });
   if (tab === 'home') renderHabits();
   if (tab === 'stats') renderStats();
-  if (tab === 'feed') renderFeed();
+  if (tab === 'feed') renderFriends();
   window.scrollTo(0, 0);
 }
 
@@ -4316,28 +4376,180 @@ function bindRoutinePointer() {
 // ─────────────────────────────────────────────
 // RENDER FEED
 // ─────────────────────────────────────────────
-const FEED_DATA = [
-  { name: 'Marcus K.', initials: 'MK', color: '#34343c,#26262c', time: '2m ago', body: 'Just hit 30 days of cold showers. No way I\'m losing $10 to charity 🧊', stake: 10, result: 'win', streak: 30 },
-  { name: 'Anika R.', initials: 'AR', color: '#34343c,#26262c', time: '18m ago', body: 'Missed my run today. $25 to Red Cross 😭 Starting fresh tomorrow.', stake: 25, result: 'loss', streak: 0 },
-  { name: 'Jake T.', initials: 'JT', color: '#34343c,#26262c', time: '1h ago', body: 'Week 3 of waking up at 5am. The $50 at risk is a better alarm than any clock', stake: 50, result: 'win', streak: 21 },
-  { name: 'Priya S.', initials: 'PS', color: '#34343c,#26262c', time: '3h ago', body: 'Meditation streak: 7 days straight. $5 bets hit different when you actually want to keep them', stake: 5, result: 'win', streak: 7 },
+// ─────────────────────────────────────────────
+// FRIENDS
+// ─────────────────────────────────────────────
+const FRIEND_ROSTER = [
+  { id:'mk', name:'Marcus K.', handle:'@marcus_k', initials:'MK', grad:'#5b5bf6,#3b3b8c',
+    habit:'Cold Showers · 30-day streak', stake:10, result:'win', streak:30,
+    body:'Just hit 30 days of cold showers. No way I\'m losing $10 to charity 🧊', time:'2m ago' },
+  { id:'ar', name:'Anika R.', handle:'@anika_r', initials:'AR', grad:'#e85d75,#8c1c2e',
+    habit:'Daily Run · missed yesterday', stake:25, result:'loss', streak:0,
+    body:'Missed my run today. $25 to Red Cross 😭 Starting fresh tomorrow.', time:'18m ago' },
+  { id:'jt', name:'Jake T.', handle:'@jake_t', initials:'JT', grad:'#f59e0b,#92400e',
+    habit:'5AM Wakeup · 21-day streak', stake:50, result:'win', streak:21,
+    body:'Week 3 of waking up at 5am. The $50 at risk is a better alarm than any clock', time:'1h ago' },
+  { id:'ps', name:'Priya S.', handle:'@priya_s', initials:'PS', grad:'#10b981,#065f46',
+    habit:'Meditation · 7-day streak', stake:5, result:'win', streak:7,
+    body:'Meditation streak: 7 days straight. $5 bets hit different when you actually want to keep them', time:'3h ago' },
+  { id:'cm', name:'Chris M.', handle:'@chris_m', initials:'CM', grad:'#8b5cf6,#4c1d95',
+    habit:'Read 30min · 14-day streak', stake:15, result:'win', streak:14,
+    body:'Two weeks straight of reading before bed. Sleep is better, mind is clearer 📚', time:'5h ago' },
+  { id:'zw', name:'Zoe W.', handle:'@zoe_w', initials:'ZW', grad:'#ec4899,#831843',
+    habit:'No alcohol · 60-day streak', stake:20, result:'win', streak:60,
+    body:'60 days dry. Saving the $20/miss AND the $200/month I used to spend on drinks 💸', time:'Yesterday' },
 ];
+
+function renderFriends() {
+  const friends = state.friends || [];
+  const listEl = document.getElementById('fr-friends-list');
+  const countEl = document.getElementById('fr-count');
+  if (!listEl) return;
+
+  if (countEl) countEl.textContent = friends.length ? friends.length + ' friend' + (friends.length > 1 ? 's' : '') : '';
+
+  if (!friends.length) {
+    listEl.innerHTML = `
+      <div class="fr-empty">
+        <div class="fr-empty-icon">👥</div>
+        <div class="fr-empty-title">No friends yet</div>
+        <div class="fr-empty-sub">Search above to find friends, or send your invite link — they see your streak when they join.</div>
+        <button class="btn btn-primary" style="width:100%" onclick="inviteFriends()">Send invite link</button>
+      </div>`;
+  } else {
+    listEl.innerHTML = friends.map(f => `
+      <div class="fr-friend-card">
+        <div class="fr-f-av" style="background:linear-gradient(135deg,${f.grad})">${f.initials}</div>
+        <div class="fr-f-info">
+          <div class="fr-f-name">${f.name}</div>
+          <div class="fr-f-habit">${f.habit}</div>
+        </div>
+        <span class="fr-f-badge ${f.result}">${f.result === 'win' ? '🔥 ' + f.streak + 'd' : '💸 miss'}</span>
+        <div class="fr-f-actions">
+          <button class="fr-challenge-btn" onclick="challengeFriend('${f.id}')">Challenge</button>
+          <button class="fr-sponsor-btn" onclick="sponsorFriend('${f.id}')">Sponsor</button>
+        </div>
+      </div>`).join('');
+  }
+
+  renderFeed();
+}
 
 function renderFeed() {
   const container = document.getElementById('feed-container');
-  container.innerHTML = FEED_DATA.map(f => `
+  if (!container) return;
+  const friends = state.friends || [];
+
+  const myItems = [];
+  (state.habits || []).forEach(h => {
+    const last = (h.completedDays || []).slice(-1)[0];
+    if (last) myItems.push({
+      name: (state.profile && state.profile.name) ? state.profile.name : 'You',
+      initials: (state.profile && state.profile.name) ? state.profile.name[0].toUpperCase() : 'Y',
+      grad: '#7fdca4,#34a36b',
+      time: last === todayStr() ? 'Today' : 'Yesterday',
+      body: 'Completed ' + (h.name || 'a habit') + ' — ' + (h.currentStreak || 1) + '-day streak running 🔥',
+      stake: h.stake || 0, result: 'win', streak: h.currentStreak || 1
+    });
+  });
+
+  const addedIds = new Set(friends.map(f => f.id));
+  const friendItems = FRIEND_ROSTER.filter(r => addedIds.has(r.id));
+  const feedItems = myItems.concat(addedIds.size ? friendItems : FRIEND_ROSTER.slice(0, 4));
+
+  if (!feedItems.length) {
+    container.innerHTML = '<div style="padding:24px 0;text-align:center;color:var(--text-muted);font-size:14px">Add friends to see their activity here.</div>';
+    return;
+  }
+
+  container.innerHTML = feedItems.map(f => `
     <div class="feed-card">
       <div class="feed-top">
-        <div class="feed-avatar" style="background:linear-gradient(135deg,${f.color})">${f.initials}</div>
+        <div class="feed-avatar" style="background:linear-gradient(135deg,${f.grad})">${f.initials}</div>
         <div class="feed-meta">
           <div class="feed-name">${f.name} <span style="color:var(--text-muted);font-weight:400;font-size:12px">· $${f.stake}/miss</span></div>
           <div class="feed-time">${f.time}</div>
         </div>
       </div>
       <div class="feed-body">${f.body}</div>
-      <div class="feed-result ${f.result}">${f.result === 'win' ? `🔥 ${f.streak}-day streak` : '💸 Forfeited $' + f.stake}</div>
+      <div class="feed-result ${f.result}">${f.result === 'win' ? '🔥 ' + f.streak + '-day streak' : '💸 Forfeited $' + f.stake}</div>
     </div>
   `).join('');
+}
+
+function searchFriends(q) {
+  const el = document.getElementById('fr-results');
+  if (!el) return;
+  const val = (q || '').trim().toLowerCase();
+  if (!val) { el.classList.remove('open'); el.innerHTML = ''; return; }
+  const added = new Set((state.friends || []).map(f => f.id));
+  const hits = FRIEND_ROSTER.filter(r =>
+    r.name.toLowerCase().includes(val) || r.handle.toLowerCase().includes(val)
+  );
+  if (!hits.length) {
+    el.innerHTML = '<div class="fr-result-row" style="justify-content:center;color:var(--text-muted);font-size:13px">No results — try a different name</div>';
+  } else {
+    el.innerHTML = hits.map(r => `
+      <div class="fr-result-row">
+        <div class="fr-r-av" style="background:linear-gradient(135deg,${r.grad})">${r.initials}</div>
+        <div class="fr-r-info">
+          <div class="fr-r-name">${r.name}</div>
+          <div class="fr-r-handle">${r.handle}</div>
+        </div>
+        <button class="fr-add-btn ${added.has(r.id) ? 'added' : ''}" onclick="addFriend('${r.id}')">${added.has(r.id) ? 'Added ✓' : 'Add'}</button>
+      </div>`).join('');
+  }
+  el.classList.add('open');
+}
+
+function hideFriendSearch() {
+  const el = document.getElementById('fr-results');
+  if (el) { el.classList.remove('open'); el.innerHTML = ''; }
+  const inp = document.getElementById('fr-search');
+  if (inp) inp.value = '';
+}
+
+function addFriend(id) {
+  const person = FRIEND_ROSTER.find(r => r.id === id);
+  if (!person) return;
+  state.friends = state.friends || [];
+  if (state.friends.find(f => f.id === id)) return;
+  state.friends.push(person);
+  saveState();
+  showToast(person.name + ' added!', 'green');
+  searchFriends(document.getElementById('fr-search') ? document.getElementById('fr-search').value : '');
+  renderFriends();
+}
+
+function challengeFriend(id) {
+  const f = (state.friends || []).find(p => p.id === id) || FRIEND_ROSTER.find(r => r.id === id);
+  if (!f) return;
+  if (!state.habits || !state.habits.length) { showToast('Add a habit first to start a challenge!', ''); return; }
+  showToast('Challenge sent to ' + f.name + ' 🔥', 'green');
+}
+
+function sponsorFriend(id) {
+  const f = (state.friends || []).find(p => p.id === id) || FRIEND_ROSTER.find(r => r.id === id);
+  if (!f) { openSponsor(); return; }
+  const sp = ensureSponsored();
+  if (!sp.members.find(m => m.name === f.name)) {
+    sp.members.push({ id: 'm' + Date.now(), name: f.name, code: sponsorCode(), spendable: 0, future: 0, streak: 0 });
+    saveState();
+  }
+  openSponsor();
+  showToast('Set a stake to sponsor ' + f.name, 'gold');
+}
+
+function inviteFriends() {
+  const url = 'https://ante.app';
+  const text = 'Join me on Ante — I\'m staking real money on my habits. Miss a day, lose cash. Try it:';
+  if (navigator.share) {
+    navigator.share({ title: 'Join Ante', text, url }).catch(function(){});
+  } else {
+    navigator.clipboard.writeText(text + ' ' + url)
+      .then(function(){ showToast('Invite link copied!', 'green'); })
+      .catch(function(){ showToast('Share: ' + url, ''); });
+  }
 }
 
 // ─────────────────────────────────────────────
