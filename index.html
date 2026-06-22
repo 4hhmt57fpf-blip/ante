@@ -2322,15 +2322,55 @@ const APPS = [
   { id:'camera_app',   label:'Photo + AI',   source:'camera',     cats:['custom'],             icon:'📸', sub:'AI checks your photo against your goal.' },
 ];
 
-// Real brand logos for sources that map to an actual app (id-free + gradient-free
-// so they can render many times inline without duplicate-ID collisions). Others keep emoji.
+// Real brand logos for sources (Apple Health, Canvas) — inline SVG, id-free.
 const SOURCE_LOGOS = {
   health: '<rect width="48" height="48" rx="11" fill="#fdfdfd"/><path d="M24 35.2c-.55 0-1.06-.2-1.45-.55C16.9 29.6 13.2 26.25 13.2 21.6c0-3.05 2.35-5.4 5.35-5.4 1.95 0 3.6 1.05 4.55 2.65l.9 1.5.9-1.5c.95-1.6 2.6-2.65 4.55-2.65 3 0 5.35 2.35 5.35 5.4 0 4.65-3.7 8-9.35 13.05-.39.35-.9.55-1.45.55z" fill="#fb1c40"/>',
   canvas: '<rect width="48" height="48" rx="11" fill="#E72429"/><g fill="#ffffff"><circle cx="24" cy="11.5" r="3.1"/><circle cx="24" cy="36.5" r="3.1"/><circle cx="11.5" cy="24" r="3.1"/><circle cx="36.5" cy="24" r="3.1"/><circle cx="15.16" cy="15.16" r="2.7"/><circle cx="32.84" cy="32.84" r="2.7"/><circle cx="15.16" cy="32.84" r="2.7"/><circle cx="32.84" cy="15.16" r="2.7"/></g><circle cx="24" cy="24" r="4.6" fill="none" stroke="#ffffff" stroke-width="2.3"/>'
 };
-// Inline source badge: real logo where we have one, else the emoji fallback (for innerHTML contexts only).
+
+// Per-app icon config: brand bg color + Simple Icons slug (CDN), or inline SVG path.
+// CDN URL: https://cdn.simpleicons.org/{slug}/ffffff  (white logo on brand bg)
+const APP_ICON_CFG = {
+  apple_health: { svgKey:'health' },
+  strava:       { bg:'#FC4C02', slug:'strava' },
+  whoop:        { bg:'#0A0A0A', slug:'whoop' },
+  fitbit:       { bg:'#00B0B9', slug:'fitbit' },
+  garmin:       { bg:'#007CC3', slug:'garmin' },
+  oura:         { bg:'#201D1F', slug:'ouraring' },
+  screen_time:  { bg:'#007AFF', path:'M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm.5 5v5.25l4.5 2.67-.75 1.23L11 13V7h1.5z' },
+  canvas:       { svgKey:'canvas' },
+  kindle:       { bg:'#FF9900', slug:'amazon' },
+  audible:      { bg:'#F8991D', slug:'audible' },
+  duolingo:     { bg:'#58CC02', slug:'duolingo' },
+  babbel:       { bg:'#73BA1D', slug:'babbel' },
+  gps_loc:      { bg:'#34C759', path:'M12 2C8.13 2 5 5.13 5 9c0 5.25 7 13 7 13s7-7.75 7-13c0-3.87-3.13-7-7-7zm0 9.5c-1.38 0-2.5-1.12-2.5-2.5s1.12-2.5 2.5-2.5 2.5 1.12 2.5 2.5-1.12 2.5-2.5 2.5z' },
+  camera_app:   { bg:'#1C1C1E', path:'M12 9a3 3 0 100 6 3 3 0 000-6zM9 3L7.17 5H4a2 2 0 00-2 2v12a2 2 0 002 2h16a2 2 0 002-2V7a2 2 0 00-2-2h-3.17L15 3z' },
+};
+
+function appIcon(id, size) {
+  size = size || 36;
+  const r = Math.round(size * 0.23);
+  const cfg = APP_ICON_CFG[id];
+  if (!cfg) {
+    const app = APPS.find(a => a.id === id);
+    return `<span style="font-size:${Math.round(size*0.72)}px;width:${size}px;height:${size}px;display:inline-flex;align-items:center;justify-content:center">${app ? app.icon : '●'}</span>`;
+  }
+  if (cfg.svgKey) {
+    return `<svg viewBox="0 0 48 48" width="${size}" height="${size}" style="border-radius:${r}px;display:block;flex-shrink:0" aria-hidden="true">${SOURCE_LOGOS[cfg.svgKey]}</svg>`;
+  }
+  const is = Math.round(size * 0.57);
+  if (cfg.slug) {
+    const fb = (APPS.find(a=>a.id===id)||{}).icon || '●';
+    return `<div style="width:${size}px;height:${size}px;border-radius:${r}px;background:${cfg.bg};display:inline-flex;align-items:center;justify-content:center;flex-shrink:0;overflow:hidden"><img src="https://cdn.simpleicons.org/${cfg.slug}/ffffff" width="${is}" height="${is}" loading="lazy" style="display:block" onerror="this.style.display='none';this.insertAdjacentHTML('afterend','<span style=\\"color:#fff;font-size:${is}px;line-height:1\\">${fb}</span>')"></div>`;
+  }
+  return `<div style="width:${size}px;height:${size}px;border-radius:${r}px;background:${cfg.bg};display:inline-flex;align-items:center;justify-content:center;flex-shrink:0"><svg viewBox="0 0 24 24" width="${is}" height="${is}" fill="white" style="display:block">${cfg.path}</svg></div>`;
+}
+
+// Inline source badge: real logo where we have one, else emoji fallback.
 function srcBadge(src, px){
   px = px || 15;
+  const srcToApp = { health:'apple_health', canvas:'canvas' };
+  if (srcToApp[src]) return `<span style="display:inline-flex;vertical-align:-2px;margin-right:2px">${appIcon(srcToApp[src], px)}</span>`;
   const inner = SOURCE_LOGOS[src];
   if (inner) return `<span style="display:inline-flex;vertical-align:-2px;margin-right:1px"><svg viewBox="0 0 48 48" width="${px}" height="${px}" style="border-radius:4px" aria-hidden="true">${inner}</svg></span>`;
   return (SOURCES[src] ? SOURCES[src].icon : '');
@@ -2428,7 +2468,7 @@ function renderConnectList(){
     const on = a.source === 'canvas' ? !!(state.canvas && state.canvas.connected) : !!state.connections[a.source];
     const label = on ? 'Connected ✓' : (a.source === 'canvas' ? 'Set up' : 'Connect');
     return `<div class="connect-card ${on?'connected':''}">
-      <div class="ci">${a.icon}</div>
+      <div class="ci">${appIcon(a.id, 36)}</div>
       <div class="cc-body"><div class="cc-name">${a.label}</div><div class="cc-sub">${a.sub || ''}</div></div>
       <button class="connect-btn" onclick="connectApp('${a.id}')">${label}</button>
     </div>`;
