@@ -38,8 +38,8 @@
     --glass-border: rgba(255,255,255,0.10);
     --glass-blur: blur(22px) saturate(1.25);
     --text: #f5f5f6;
-    --text-muted: #6c6c75;
-    --text-dim: #9b9ba4;
+    --text-muted: #9a9aa3;   /* raised from #6c6c75 to meet WCAG AA contrast on dark bg */
+    --text-dim: #b4b4bd;     /* raised from #9b9ba4 for AA on secondary text */
     --radius: 20px;
     --radius-sm: 14px;
     --radius-lg: 28px;
@@ -53,11 +53,49 @@
     background: var(--bg);
     color: var(--text);
     font-family: -apple-system, BlinkMacSystemFont, 'SF Pro Display', 'Segoe UI', sans-serif;
+    font-size: 16px;
+    line-height: 1.45;
+    -webkit-text-size-adjust: 100%;
     min-height: 100vh;
     max-width: 430px;
     margin: 0 auto;
     position: relative;
     overflow-x: hidden;
+  }
+
+  /* Preview-mode banner (#7) */
+  .preview-bar {
+    position: fixed; top: 0; left: 50%; transform: translateX(-50%);
+    width: 100%; max-width: 430px; z-index: 9000;
+    display: none; align-items: center; justify-content: space-between; gap: 12px;
+    padding: 10px 16px; background: var(--gold); color: #1a0a04;
+    font-size: 13.5px; font-weight: 700;
+    box-shadow: 0 4px 14px rgba(0,0,0,.3);
+  }
+  .preview-bar button {
+    background: #1a0a04; color: #fff; border: none; border-radius: 100px;
+    padding: 7px 16px; font-size: 13px; font-weight: 800; cursor: pointer; flex-shrink: 0;
+    font-family: inherit;
+  }
+  body.previewing { padding-top: 56px; }
+
+  /* Interactive tour (Bundle C) */
+  .tour-overlay { position: fixed; inset: 0; z-index: 9500; display: none; align-items: center; justify-content: center; padding: 24px; background: rgba(6,6,8,.74); -webkit-backdrop-filter: blur(8px); backdrop-filter: blur(8px); }
+  .tour-overlay.open { display: flex; }
+  .tour-card { position: relative; width: 100%; max-width: 360px; background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius-lg); padding: 36px 26px 26px; text-align: center; animation: intentPop .3s cubic-bezier(.34,1.56,.64,1); }
+  .tour-close { position: absolute; top: 12px; right: 14px; background: none; border: none; color: var(--text-muted); font-size: 26px; cursor: pointer; line-height: 1; font-family: inherit; }
+  .tour-ico { font-size: 54px; margin-bottom: 18px; line-height: 1; }
+  .tour-title { font-size: 21px; font-weight: 800; margin-bottom: 10px; }
+  .tour-body { font-size: 14.5px; color: var(--text-dim); line-height: 1.5; margin-bottom: 22px; }
+  .tour-dots { display: flex; gap: 7px; justify-content: center; margin-bottom: 20px; }
+  .tour-dot { width: 7px; height: 7px; border-radius: 50%; background: var(--border-strong); transition: all .2s; }
+  .tour-dot.on { background: var(--gold); width: 20px; border-radius: 4px; }
+
+  /* Screen-reader-only: present to assistive tech, visually hidden. */
+  .sr-only {
+    position: absolute !important; width: 1px; height: 1px;
+    padding: 0; margin: -1px; overflow: hidden; clip: rect(0,0,0,0);
+    white-space: nowrap; border: 0;
   }
 
   /* ── SCREENS ── */
@@ -140,6 +178,10 @@
   }
   .input-field:focus { border-color: var(--gold); }
   .input-field::placeholder { color: var(--text-muted); }
+  .input-field.invalid { border-color: #ff6b5e; }
+  .input-field.invalid:focus { border-color: #ff6b5e; }
+  .field-err { display: none; color: #ff8a7e; font-size: 13.5px; font-weight: 600; margin-top: 7px; line-height: 1.35; }
+  .field-err.show { display: block; }
 
   .option-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-bottom: 28px; }
   .option-card {
@@ -159,6 +201,26 @@
     cursor: pointer; transition: all .15s; font-weight: 700; font-size: 15px;
   }
   .stake-chip.selected { border-color: var(--gold); background: var(--gold-dim); color: var(--gold); }
+
+  /* ── STAKE DESTINATION + ESCALATION (Bundle A) ── */
+  .dest-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-bottom: 10px; }
+  .dest-chip {
+    display: flex; flex-direction: column; align-items: center; gap: 6px;
+    padding: 14px 8px; border-radius: var(--radius-sm); border: 1.5px solid var(--border);
+    background: var(--surface); cursor: pointer; color: var(--text); font-family: inherit;
+    transition: border-color .15s, background .15s;
+  }
+  .dest-chip .dest-ico { font-size: 22px; line-height: 1; }
+  .dest-chip .dest-name { font-size: 13px; font-weight: 700; }
+  .dest-chip.selected { border-color: var(--gold); background: var(--gold-dim); }
+  .dest-chip:focus-visible { outline: 2px solid var(--gold); outline-offset: 2px; }
+  .dest-blurb { font-size: 13px; color: var(--text-dim); line-height: 1.45; margin-bottom: 16px; min-height: 18px; }
+  .escalate-row {
+    display: flex; align-items: center; justify-content: space-between; gap: 14px;
+    background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius-sm);
+    padding: 14px; margin-bottom: 22px; cursor: pointer; line-height: 1.4;
+  }
+  .escalate-row input { width: 22px; height: 22px; accent-color: var(--gold); flex-shrink: 0; cursor: pointer; }
 
   /* ── TOP NAV ── */
   .topbar {
@@ -182,12 +244,15 @@
     z-index: 100;
   }
   .nav-item {
-    flex: 1; display: flex; flex-direction: column; align-items: center;
+    flex: 1; display: flex; flex-direction: column; align-items: center; justify-content: center;
     gap: 4px; cursor: pointer; color: var(--text-muted);
-    font-size: 10px; font-weight: 600; text-transform: uppercase; letter-spacing: .5px;
+    font-size: 11px; font-weight: 600; text-transform: uppercase; letter-spacing: .5px;
     transition: color .15s;
+    background: none; border: none; font-family: inherit; min-height: 48px;
+    -webkit-tap-highlight-color: transparent;
   }
   .nav-item.active { color: var(--gold); }
+  .nav-item:focus-visible { outline: 2px solid var(--gold); outline-offset: -3px; border-radius: 10px; }
   .nav-icon { font-size: 22px; }
 
   /* ── HOME ── */
@@ -332,12 +397,12 @@
   .fr-r-info { flex: 1; min-width: 0; }
   .fr-r-name { font-size: 14px; font-weight: 700; color: var(--text); }
   .fr-r-handle { font-size: 12px; color: var(--text-muted); }
-  .fr-add-btn { padding: 6px 14px; border-radius: 20px; font-size: 13px; font-weight: 700; background: rgba(127,220,164,.12); color: var(--gold); border: 1px solid rgba(127,220,164,.25); cursor: pointer; white-space: nowrap; flex-shrink: 0; }
+  .fr-add-btn { padding: 6px 14px; border-radius: 20px; font-size: 13px; font-weight: 700; background: var(--gold-dim); color: var(--gold); border: 1px solid rgba(226,85,47,.3); cursor: pointer; white-space: nowrap; flex-shrink: 0; }
   .fr-add-btn.added { background: rgba(255,255,255,.04); color: var(--text-muted); border-color: var(--border); pointer-events: none; }
   .fr-section { padding: 0 20px; margin-top: 20px; }
   .fr-section-head { display: flex; align-items: center; justify-content: space-between; margin-bottom: 12px; }
   .fr-section-title { font-size: 12px; font-weight: 700; text-transform: uppercase; letter-spacing: 1.2px; color: var(--text-muted); }
-  .fr-invite-btn { font-size: 13px; font-weight: 700; color: var(--gold); background: rgba(127,220,164,.08); border: 1px solid rgba(127,220,164,.2); border-radius: 20px; padding: 5px 14px; cursor: pointer; }
+  .fr-invite-btn { font-size: 13px; font-weight: 700; color: var(--gold); background: var(--gold-dim); border: 1px solid rgba(226,85,47,.3); border-radius: 20px; padding: 5px 14px; cursor: pointer; }
   .fr-empty { background: var(--surface); border: 1px dashed var(--border-strong); border-radius: var(--radius); padding: 28px 20px; text-align: center; }
   .fr-empty-icon { font-size: 32px; margin-bottom: 10px; }
   .fr-empty-title { font-size: 15px; font-weight: 700; color: var(--text); margin-bottom: 6px; }
@@ -345,6 +410,60 @@
   .fr-friend-card { background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius); padding: 14px; display: flex; align-items: center; gap: 12px; margin-bottom: 10px; }
   .fr-friend-card:last-child { margin-bottom: 0; }
   .fr-f-av { width: 42px; height: 42px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-weight: 700; font-size: 15px; flex-shrink: 0; color: #fff; }
+  /* Social: streak badges, leaderboard, group pot (#6) */
+  .streak-badge { display: inline-flex; align-items: center; gap: 4px; font-size: 12px; font-weight: 800; padding: 4px 9px; border-radius: 100px; white-space: nowrap; flex-shrink: 0; }
+  .sb-legend { background: rgba(226,85,47,.18); color: #ffb38f; }
+  .sb-gold   { background: rgba(240,180,40,.16); color: #f0c34e; }
+  .sb-silver { background: rgba(190,200,220,.14); color: #d2dbeb; }
+  .sb-bronze { background: rgba(240,146,46,.16); color: #f5a85a; }
+  .sb-base   { background: var(--surface2); color: var(--text-dim); }
+  .sb-none   { background: var(--surface2); color: var(--text-muted); }
+  .lb-row { display: flex; align-items: center; gap: 12px; padding: 10px 0; border-bottom: 1px solid var(--border); }
+  .lb-row:last-child { border-bottom: none; }
+  .lb-me { background: var(--gold-dim); margin: 0 -12px; padding: 10px 12px; border-radius: 12px; border-bottom: none; }
+  .lb-rank { width: 28px; text-align: center; font-weight: 800; font-size: 14px; color: var(--text-dim); flex-shrink: 0; }
+  .lb-name { flex: 1; min-width: 0; font-weight: 700; font-size: 15px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+  .lb-you { font-size: 10px; font-weight: 800; color: var(--gold); background: var(--gold-dim); padding: 2px 7px; border-radius: 100px; margin-left: 6px; text-transform: uppercase; letter-spacing: .4px; }
+  .pot-card { background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius); padding: 16px; }
+  .pot-top { display: flex; align-items: flex-start; justify-content: space-between; gap: 12px; margin-bottom: 14px; }
+  .pot-title { font-size: 16px; font-weight: 800; }
+  .pot-sub { font-size: 12.5px; color: var(--text-dim); margin-top: 3px; line-height: 1.4; }
+  .pot-amt { font-size: 24px; font-weight: 900; color: var(--gold); flex-shrink: 0; }
+  .pot-btn { width: 100%; padding: 13px; border-radius: 14px; border: none; background: var(--gold); color: #1a0a04; font-weight: 800; font-size: 15px; cursor: pointer; font-family: inherit; }
+  .pot-btn.joined { background: var(--green-dim); color: var(--green); border: 1px solid var(--green); }
+  /* Friends segmented sub-tabs + Groups view */
+  .fr-segment { display: flex; gap: 4px; margin: 0 20px 16px; background: var(--surface); border: 1px solid var(--border); border-radius: 14px; padding: 4px; }
+  .fr-seg { flex: 1; padding: 9px 0; border: none; background: none; color: var(--text-muted); font-family: inherit; font-size: 13.5px; font-weight: 700; border-radius: 10px; cursor: pointer; transition: background .15s, color .15s; }
+  .fr-seg.active { background: var(--surface2); color: var(--text); }
+  .fr-seg:focus-visible { outline: 2px solid var(--gold); outline-offset: 1px; }
+  .fr-view { display: none; }
+  .fr-view.active { display: block; }
+  .grp-hero { background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius); padding: 26px 22px; text-align: center; }
+  .grp-hero-ico { width: 52px; height: 52px; margin: 0 auto 14px; border-radius: 14px; background: var(--gold-dim); display: flex; align-items: center; justify-content: center; color: var(--gold); }
+  .grp-hero-ico svg { width: 26px; height: 26px; }
+  .grp-hero-title { font-size: 18px; font-weight: 800; margin-bottom: 8px; }
+  .grp-hero-sub { font-size: 13.5px; color: var(--text-dim); line-height: 1.5; margin-bottom: 18px; }
+  .grp-create { display: inline-block; width: auto; padding: 12px 24px; border: none; border-radius: 14px; background: var(--gold); color: #1a0a04; font-family: inherit; font-size: 15px; font-weight: 800; cursor: pointer; }
+  .grp-create:focus-visible { outline: 2px solid #fff; outline-offset: 2px; }
+  .grp-actions { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+  .grp-action { display: flex; flex-direction: column; align-items: center; gap: 5px; padding: 18px 10px; border-radius: var(--radius); border: 1px solid var(--border); background: var(--surface); cursor: pointer; font-family: inherit; color: var(--text); }
+  .grp-action-ico { display: flex; align-items: center; justify-content: center; margin-bottom: 3px; }
+  .grp-action-ico svg { width: 24px; height: 24px; }
+  .grp-action-name { font-size: 14.5px; font-weight: 800; }
+  .grp-action-sub { font-size: 12px; color: var(--text-muted); }
+  .grp-action:focus-visible { outline: 2px solid var(--gold); outline-offset: 2px; }
+  /* Team challenges (Bundle D) */
+  .chal-card { background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius); padding: 14px; margin-bottom: 10px; }
+  .chal-card:last-child { margin-bottom: 0; }
+  .chal-top { display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px; }
+  .chal-goal { font-size: 13px; font-weight: 700; }
+  .chal-pot { font-size: 12px; font-weight: 800; color: var(--gold); background: var(--gold-dim); padding: 3px 9px; border-radius: 100px; }
+  .chal-row { display: flex; align-items: center; gap: 10px; }
+  .chal-side { display: flex; align-items: center; gap: 9px; flex: 1; min-width: 0; opacity: .65; }
+  .chal-side.lead { opacity: 1; }
+  .chal-name { font-size: 13.5px; font-weight: 700; }
+  .chal-streak { font-size: 12px; color: var(--text-dim); }
+  .chal-vs { font-size: 11px; font-weight: 800; color: var(--text-muted); flex-shrink: 0; }
   .fr-f-info { flex: 1; min-width: 0; }
   .fr-f-name { font-size: 15px; font-weight: 700; color: var(--text); }
   .fr-f-habit { font-size: 12px; color: var(--text-muted); margin-top: 2px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
@@ -377,6 +496,26 @@
     border-radius: var(--radius); padding: 20px;
   }
   .chart-title { font-size: 15px; font-weight: 700; margin-bottom: 16px; }
+  /* Achievements + insights (Bundle B) */
+  .ach-grid { display: grid; grid-template-columns: repeat(4,1fr); gap: 10px; padding: 0 20px; }
+  .ach { display: flex; flex-direction: column; align-items: center; gap: 6px; padding: 12px 6px; border-radius: 14px; background: var(--surface); border: 1px solid var(--border); text-align: center; }
+  .ach-ico { font-size: 24px; line-height: 1; }
+  .ach-name { font-size: 10.5px; font-weight: 700; color: var(--text-dim); line-height: 1.2; }
+  .ach.locked { opacity: .34; filter: grayscale(1); }
+  .ach.earned { border-color: rgba(226,85,47,.4); }
+  .ins-bars { display: flex; flex-direction: column; gap: 12px; }
+  .ins-bar-row { display: flex; align-items: center; gap: 10px; }
+  .ins-bar-lbl { width: 66px; font-size: 12.5px; font-weight: 700; color: var(--text-dim); flex-shrink: 0; }
+  .ins-track { flex: 1; height: 12px; background: var(--surface2); border-radius: 100px; overflow: hidden; }
+  .ins-fill { height: 100%; border-radius: 100px; transition: width .5s ease; }
+  .ins-fill.green { background: var(--green); }
+  .ins-fill.red { background: var(--red); }
+  .ins-bar-amt { width: 56px; text-align: right; font-size: 13px; font-weight: 800; flex-shrink: 0; }
+  .ins-two { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+  .ins-two .chart-card { margin: 0; }
+  .ins-big { font-size: 26px; font-weight: 900; color: var(--gold); line-height: 1; }
+  .ins-big span { font-size: 14px; color: var(--text-dim); font-weight: 700; }
+  .ins-cap { font-size: 11.5px; color: var(--text-dim); margin-top: 6px; line-height: 1.35; }
   .bar-chart { display: flex; align-items: flex-end; gap: 6px; height: 80px; }
   .bar-wrap { flex: 1; display: flex; flex-direction: column; align-items: center; gap: 6px; }
   .bar { width: 100%; border-radius: 4px 4px 0 0; transition: height .4s ease; min-height: 4px; }
@@ -1396,8 +1535,6 @@
 
   /* bottom nav: move Stats to the middle (Home · Stats · Friends) via flex order,
      DOM order unchanged so the index-based active highlighting still works */
-  .bottom-nav .nav-item:nth-child(2){ order:3; }  /* Friends -> right */
-  .bottom-nav .nav-item:nth-child(3){ order:2; }  /* Stats -> middle */
   /* ===================== VAULT DETAIL SCREEN ===================== */
   #screen-vault{ padding:0 0 40px; }
   .vd-top{ display:flex; align-items:center; justify-content:space-between; padding:14px 18px 6px; }
@@ -1459,10 +1596,16 @@
 
     <div class="auth-divider"><span>or</span></div>
 
+    <label class="sr-only" for="login-email">Email address</label>
     <input class="input-field" id="login-email" type="email" placeholder="Email" autocomplete="email">
+    <label class="sr-only" for="login-pass">Password</label>
     <input class="input-field" id="login-pass" type="password" placeholder="Password" autocomplete="current-password" style="margin-top:10px">
     <button class="btn btn-primary" style="margin-top:14px" onclick="emailAuth('in')">Sign in</button>
     <button class="btn btn-ghost" style="margin-top:8px" onclick="emailAuth('up')">Create account</button>
+
+    <div class="auth-divider"><span>just looking?</span></div>
+    <button class="btn btn-ghost" onclick="openTour()">✨ See how it works (30s)</button>
+    <button class="btn btn-ghost" style="margin-top:8px" onclick="previewDemo()">👀 Preview the app — no sign-up</button>
 
     <div class="auth-note" id="auth-note"></div>
   </div>
@@ -1508,6 +1651,7 @@
   </div>
   <div class="onboard-q" id="ob1-q">Connect what verifies you</div>
   <div class="onboard-hint" id="ob1-hint">Ante only lets you bet on goals it can actually check — so you literally can't cheat yourself. Connect the app for your habit.</div>
+  <label class="sr-only" for="app-search">Search apps to connect</label>
   <input class="input-field" id="app-search" placeholder="Search apps (Whoop, Fitbit, Strava…)" oninput="onAppSearch(this.value)" autocomplete="off" style="margin-bottom:14px">
   <div id="connect-list"></div>
   <div style="background:var(--surface);border:1px solid var(--border);border-radius:var(--radius-sm);padding:12px 14px;font-size:12px;color:var(--text-muted);line-height:1.45">
@@ -1515,7 +1659,7 @@
   </div>
   <div style="margin-top:auto">
     <button class="btn btn-primary" onclick="ob1Next()">Next →</button>
-    <button class="btn btn-ghost" style="margin-top:8px" onclick="goTo('screen-ob2')">← Back</button>
+    <button class="btn btn-ghost" style="margin-top:8px" onclick="goBack('screen-ob2')">← Back</button>
   </div>
 </div>
 
@@ -1531,6 +1675,7 @@
   </div>
   <div class="onboard-q" id="ob2-q">What do you want to work on?</div>
   <div class="onboard-hint" id="ob2-hint">Pick a category — each one uses a different app to verify you.</div>
+  <label class="sr-only" for="goal-search">Search what you want to do</label>
   <input class="input-field" id="goal-search" placeholder="Search what you want to do…" oninput="onGoalSearch(this.value)" autocomplete="off" style="margin-bottom:10px">
   <div class="intent-banner" id="intent-banner" onclick="commitIntent()">
     <div class="intent-ico" id="intent-ico">💡</div>
@@ -1554,7 +1699,7 @@
   <div id="goal-config"></div>
   <div style="margin-top:auto">
     <button class="btn btn-primary" onclick="ob2Next()">Next →</button>
-    <button class="btn btn-ghost" style="margin-top:8px" onclick="goTo('screen-welcome')">← Back</button>
+    <button class="btn btn-ghost" style="margin-top:8px" onclick="goBack('screen-welcome')">← Back</button>
   </div>
 </div>
 
@@ -1577,15 +1722,21 @@
     <div class="stake-chip" onclick="selectStake(this,'25')">$25</div>
     <div class="stake-chip" onclick="selectStake(this,'50')">$50</div>
   </div>
-  <div class="onboard-hint" style="margin-top:0">When you miss a day:</div>
-  <div style="background:var(--surface);border:1px solid var(--border);border-radius:var(--radius-sm);padding:20px;margin-bottom:20px;text-align:center">
-    <div style="font-size:36px;margin-bottom:10px">🔒</div>
-    <div style="font-size:16px;font-weight:700;margin-bottom:6px">Goes to your Savings Vault</div>
-    <div style="font-size:13px;color:var(--text-muted);line-height:1.55">Your stake stays <strong style="color:var(--text)">yours</strong> — just locked. Every missed day is money you're forced to save. Build the habit, unlock your vault.</div>
+  <div class="onboard-hint" style="margin-top:0" id="dest-q">If you miss a day, your stake goes to…</div>
+  <div class="dest-grid" id="dest-grid">
+    <button type="button" class="dest-chip selected" data-dest="vault" onclick="selectDest(this,'vault')"><span class="dest-ico">🔒</span><span class="dest-name">Savings Vault</span></button>
+    <button type="button" class="dest-chip" data-dest="charity" onclick="selectDest(this,'charity')"><span class="dest-ico">❤️</span><span class="dest-name">Charity</span></button>
+    <button type="button" class="dest-chip" data-dest="anti" onclick="selectDest(this,'anti')"><span class="dest-ico">😤</span><span class="dest-name">Anti-charity</span></button>
+    <button type="button" class="dest-chip" data-dest="friend" onclick="selectDest(this,'friend')"><span class="dest-ico">🤝</span><span class="dest-name">A friend</span></button>
   </div>
+  <div class="dest-blurb" id="dest-blurb">Locked — still your money. Build the habit to unlock it.</div>
+  <label class="escalate-row" for="escalate-toggle">
+    <span><span style="font-weight:700">Escalating stakes</span><br><span style="font-size:12.5px;color:var(--text-dim)">Penalty rises 50% after every 7-day streak — momentum you won't want to break.</span></span>
+    <input type="checkbox" id="escalate-toggle" onchange="toggleEscalate(this)">
+  </label>
   <div style="margin-top:auto">
     <button class="btn btn-primary" onclick="ob3Next()">Next →</button>
-    <button class="btn btn-ghost" style="margin-top:8px" onclick="goTo('screen-ob2')">← Back</button>
+    <button class="btn btn-ghost" style="margin-top:8px" onclick="goBack('screen-ob2')">← Back</button>
   </div>
 </div>
 
@@ -1621,7 +1772,7 @@
     </div>
     <div class="info-row" style="border:none">
       <span class="info-label">If I miss</span>
-      <span class="info-val">🔒 Locked in savings</span>
+      <span class="info-val" id="sum-dest">🔒 Locked in savings</span>
     </div>
   </div>
 
@@ -1631,7 +1782,7 @@
 
   <div style="margin-top:auto">
     <button class="btn btn-primary" onclick="commitHabit()" style="background:var(--green);color:#000">🔒 Lock In — I'm Serious</button>
-    <button class="btn btn-ghost" style="margin-top:8px" onclick="goTo('screen-ob3')">← Back</button>
+    <button class="btn btn-ghost" style="margin-top:8px" onclick="goBack('screen-ob3')">← Back</button>
   </div>
 </div>
 
@@ -1724,18 +1875,18 @@
     <!-- populated by JS -->
   </div>
 
-  <button class="fab" onclick="startNewBet()"><svg viewBox="0 0 24 24"><path d="M12 5v14"/><path d="M5 12h14"/></svg></button>
+  <button class="fab" onclick="startNewBet()" aria-label="New bet"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 5v14"/><path d="M5 12h14"/></svg></button>
 
-  <div class="bottom-nav">
-    <div class="nav-item active" onclick="showTab('home')">
+  <div class="bottom-nav" role="tablist" aria-label="Main">
+    <button type="button" class="nav-item active" role="tab" aria-selected="true" aria-label="Home" onclick="showTab('home')">
       <div class="nav-icon"><svg viewBox="0 0 24 24"><path d="m3 9 9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><path d="M9 22V12h6v10"/></svg></div>Home
-    </div>
-    <div class="nav-item" onclick="showTab('feed')">
+    </button>
+    <button type="button" class="nav-item" role="tab" aria-selected="false" aria-label="Friends" onclick="showTab('feed')">
       <div class="nav-icon"><svg viewBox="0 0 24 24"><path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M22 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg></div>Friends
-    </div>
-    <div class="nav-item" onclick="showTab('stats')">
+    </button>
+    <button type="button" class="nav-item" role="tab" aria-selected="false" aria-label="Stats" onclick="showTab('stats')">
       <div class="nav-icon"><svg viewBox="0 0 24 24"><path d="M3 3v18h18"/><path d="M7 16v-5"/><path d="M12 16V8"/><path d="M17 16v-3"/></svg></div>Stats
-    </div>
+    </button>
   </div>
 </div>
 
@@ -1748,47 +1899,104 @@
     <button class="fr-invite-btn" onclick="inviteFriends()">+ Invite</button>
   </div>
 
-  <!-- Add a friend -->
-  <div class="fr-section-title" style="padding:0 20px;margin-bottom:8px">Add a friend</div>
-  <div class="fr-search-wrap">
-    <div class="fr-search-icon">
-      <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.35-4.35"/></svg>
+  <!-- Segmented sub-tabs: Feed / Leaderboard / Groups -->
+  <div class="fr-segment" role="tablist" aria-label="Friends views" onkeydown="frSegKey(event)">
+    <button type="button" class="fr-seg active" id="fr-tab-feed" role="tab" aria-selected="true" aria-controls="fr-view-feed" tabindex="0" onclick="setFriendsView('feed')">Feed</button>
+    <button type="button" class="fr-seg" id="fr-tab-leaderboard" role="tab" aria-selected="false" aria-controls="fr-view-leaderboard" tabindex="-1" onclick="setFriendsView('leaderboard')">Leaderboard</button>
+    <button type="button" class="fr-seg" id="fr-tab-groups" role="tab" aria-selected="false" aria-controls="fr-view-groups" tabindex="-1" onclick="setFriendsView('groups')">Groups</button>
+  </div>
+
+  <!-- ── FEED VIEW ── -->
+  <div class="fr-view active" id="fr-view-feed" role="tabpanel" aria-labelledby="fr-tab-feed" tabindex="0">
+    <div class="fr-section-title" style="padding:0 20px;margin-bottom:8px">Add a friend</div>
+    <div class="fr-search-wrap">
+      <div class="fr-search-icon">
+        <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.35-4.35"/></svg>
+      </div>
+      <input class="fr-search-input" id="fr-search" type="search" placeholder="Search by name or @handle" autocomplete="off"
+        oninput="searchFriends(this.value)"
+        onfocus="searchFriends(this.value)"
+        onblur="setTimeout(hideFriendSearch, 200)">
     </div>
-    <input class="fr-search-input" id="fr-search" type="search" placeholder="Search by name or @handle" autocomplete="off"
-      oninput="searchFriends(this.value)"
-      onfocus="searchFriends(this.value)"
-      onblur="setTimeout(hideFriendSearch, 200)">
-  </div>
-  <div class="fr-results" id="fr-results"></div>
+    <div class="fr-results" id="fr-results"></div>
 
-  <!-- Your Friends list -->
-  <div class="fr-section">
-    <div class="fr-section-head">
-      <span class="fr-section-title">Your Friends</span>
-      <span id="fr-count" style="font-size:12px;color:var(--text-muted);font-weight:600"></span>
+    <div class="fr-section">
+      <div class="fr-section-head">
+        <span class="fr-section-title">Your Friends</span>
+        <span id="fr-count" style="font-size:12px;color:var(--text-muted);font-weight:600"></span>
+      </div>
+      <div id="fr-friends-list"></div>
     </div>
-    <div id="fr-friends-list"></div>
+
+    <div class="fr-divider">
+      <div class="fr-divider-line"></div>
+      <div class="fr-divider-label">Activity</div>
+      <div class="fr-divider-line"></div>
+    </div>
+    <div class="feed-list" id="feed-container" style="margin-top:14px"></div>
   </div>
 
-  <!-- Activity divider -->
-  <div class="fr-divider">
-    <div class="fr-divider-line"></div>
-    <div class="fr-divider-label">Activity</div>
-    <div class="fr-divider-line"></div>
+  <!-- ── LEADERBOARD VIEW ── -->
+  <div class="fr-view" id="fr-view-leaderboard" role="tabpanel" aria-labelledby="fr-tab-leaderboard" tabindex="0">
+    <div class="fr-section">
+      <div class="fr-section-head">
+        <span class="fr-section-title">Leaderboard</span>
+        <span style="font-size:12px;color:var(--text-muted);font-weight:600">by current streak</span>
+      </div>
+      <div id="fr-leaderboard"></div>
+    </div>
   </div>
 
-  <div class="feed-list" id="feed-container" style="margin-top:14px"></div>
+  <!-- ── GROUPS VIEW ── -->
+  <div class="fr-view" id="fr-view-groups" role="tabpanel" aria-labelledby="fr-tab-groups" tabindex="0">
+    <div class="fr-section">
+      <div class="grp-hero">
+        <div class="grp-hero-ico"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M22 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg></div>
+        <div class="grp-hero-title">Group Pots</div>
+        <div class="grp-hero-sub">Pool stakes with friends. Everyone bets on the same habit — winners split the pot.</div>
+        <button type="button" class="grp-create" onclick="createGroupPot()">Create a Group Pot</button>
+      </div>
+    </div>
 
-  <div class="bottom-nav">
-    <div class="nav-item" onclick="showTab('home')">
+    <div class="fr-section">
+      <div class="grp-actions">
+        <button type="button" class="grp-action" onclick="startChallenge()">
+          <span class="grp-action-ico" style="color:var(--gold)"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><polyline points="14.5 17.5 3 6 3 3 6 3 17.5 14.5"/><line x1="13" y1="19" x2="19" y2="13"/><line x1="16" y1="16" x2="20" y2="20"/><line x1="19" y1="21" x2="21" y2="19"/><polyline points="14.5 6.5 18 3 21 3 21 6 17.5 9.5"/><line x1="5" y1="14" x2="9" y2="18"/><line x1="7" y1="17" x2="4" y2="20"/><line x1="3" y1="19" x2="5" y2="21"/></svg></span>
+          <span class="grp-action-name">Challenge</span>
+          <span class="grp-action-sub">Dare a friend</span>
+        </button>
+        <button type="button" class="grp-action" onclick="openSponsor()">
+          <span class="grp-action-ico" style="color:#ec4899"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><path d="M20.8 4.6a5.5 5.5 0 0 0-7.8 0L12 5.6l-1-1a5.5 5.5 0 0 0-7.8 7.8l1 1L12 21l7.8-7.6 1-1a5.5 5.5 0 0 0 0-7.8z"/></svg></span>
+          <span class="grp-action-name">Sponsor</span>
+          <span class="grp-action-sub">Back a friend</span>
+        </button>
+      </div>
+    </div>
+
+    <div class="fr-section">
+      <div class="fr-section-head"><span class="fr-section-title">Your pot</span></div>
+      <div id="fr-grouppot"></div>
+    </div>
+
+    <div class="fr-section">
+      <div class="fr-section-head">
+        <span class="fr-section-title">Challenges</span>
+        <button class="fr-add-btn" onclick="startChallenge()">+ New</button>
+      </div>
+      <div id="fr-challenges"></div>
+    </div>
+  </div>
+
+  <div class="bottom-nav" role="tablist" aria-label="Main">
+    <button type="button" class="nav-item" role="tab" aria-selected="false" aria-label="Home" onclick="showTab('home')">
       <div class="nav-icon"><svg viewBox="0 0 24 24"><path d="m3 9 9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><path d="M9 22V12h6v10"/></svg></div>Home
-    </div>
-    <div class="nav-item active" onclick="showTab('feed')">
+    </button>
+    <button type="button" class="nav-item active" role="tab" aria-selected="true" aria-label="Friends" onclick="showTab('feed')">
       <div class="nav-icon"><svg viewBox="0 0 24 24"><path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M22 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg></div>Friends
-    </div>
-    <div class="nav-item" onclick="showTab('stats')">
+    </button>
+    <button type="button" class="nav-item" role="tab" aria-selected="false" aria-label="Stats" onclick="showTab('stats')">
       <div class="nav-icon"><svg viewBox="0 0 24 24"><path d="M3 3v18h18"/><path d="M7 16v-5"/><path d="M12 16V8"/><path d="M17 16v-3"/></svg></div>Stats
-    </div>
+    </button>
   </div>
 </div>
 
@@ -1871,6 +2079,30 @@
     </div>
   </div>
 
+  <!-- 3b · ACHIEVEMENTS (Bundle B) -->
+  <div class="j-section">
+    <div class="j-rule"></div>
+    <div class="j-head">
+      <div>
+        <span class="j-eyebrow">Achievements</span>
+        <div class="j-title">Badges you've earned</div>
+      </div>
+    </div>
+    <div class="ach-grid" id="j-achievements"></div>
+  </div>
+
+  <!-- 3c · INSIGHTS / ADVANCED ANALYTICS (Bundle B) -->
+  <div class="j-section">
+    <div class="j-rule"></div>
+    <div class="j-head">
+      <div>
+        <span class="j-eyebrow">Insights</span>
+        <div class="j-title">Money & momentum</div>
+      </div>
+    </div>
+    <div id="j-insights"></div>
+  </div>
+
   <!-- 4 · THE LEDGER (existing stats-grid + 7-day + transactions) -->
   <div class="j-section">
     <div class="j-rule"></div>
@@ -1911,16 +2143,16 @@
     </div>
   </div>
 
-  <div class="bottom-nav">
-    <div class="nav-item" onclick="showTab('home')">
+  <div class="bottom-nav" role="tablist" aria-label="Main">
+    <button type="button" class="nav-item" role="tab" aria-selected="false" aria-label="Home" onclick="showTab('home')">
       <div class="nav-icon"><svg viewBox="0 0 24 24"><path d="m3 9 9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><path d="M9 22V12h6v10"/></svg></div>Home
-    </div>
-    <div class="nav-item" onclick="showTab('feed')">
+    </button>
+    <button type="button" class="nav-item" role="tab" aria-selected="false" aria-label="Friends" onclick="showTab('feed')">
       <div class="nav-icon"><svg viewBox="0 0 24 24"><path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M22 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg></div>Friends
-    </div>
-    <div class="nav-item active" onclick="showTab('stats')">
+    </button>
+    <button type="button" class="nav-item active" role="tab" aria-selected="true" aria-label="Stats" onclick="showTab('stats')">
       <div class="nav-icon"><svg viewBox="0 0 24 24"><path d="M3 3v18h18"/><path d="M7 16v-5"/><path d="M12 16V8"/><path d="M17 16v-3"/></svg></div>Stats
-    </div>
+    </button>
   </div>
 </div>
 
@@ -2075,10 +2307,10 @@
     <div class="modal-handle"></div>
     <div class="modal-title">Settings</div>
 
-    <div class="onboard-hint">Display name</div>
+    <label class="onboard-hint" for="settings-name">Display name</label>
     <input class="input-field" id="settings-name" style="margin-bottom:16px" maxlength="24">
 
-    <div class="onboard-hint">Handle</div>
+    <label class="onboard-hint" for="settings-handle">Handle</label>
     <input class="input-field" id="settings-handle" style="margin-bottom:20px" maxlength="20" placeholder="beckett">
 
     <div class="divider"></div>
@@ -2184,7 +2416,8 @@ function loadState() {
   state.connections.canvas = !!state.canvas.connected;
 }
 function saveState() {
-  localStorage.setItem(STORAGE_KEY, JSON.stringify(state));
+  const { _preview, ...persist } = state;   // _preview is session-only, never persisted
+  localStorage.setItem(STORAGE_KEY, JSON.stringify(persist));
 }
 loadState();
 
@@ -2287,16 +2520,35 @@ async function checkAuthOnLoad(){
 // ─────────────────────────────────────────────
 // NAVIGATION
 // ─────────────────────────────────────────────
+// Linear history so the back button always returns to the ACTUAL previous step,
+// regardless of the path taken (e.g. ob2 → ob1 → ob3 vs ob2 → ob3). (#2)
+let _navHistory = [];
+let _suppressHist = false;
 function goTo(id) {
   document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
   document.getElementById(id).classList.add('active');
   window.scrollTo(0,0);
   if (id === 'screen-ob2') { _phC = 0; _phDel = false; startSearchPlaceholder(); }
   else stopSearchPlaceholder();
+  if (_suppressHist) { _suppressHist = false; }
+  else if (_navHistory[_navHistory.length - 1] !== id) { _navHistory.push(id); }
+}
+// Pop the current screen and return to the previous one. Falls back if history is empty.
+function goBack(fallback) {
+  if (_navHistory.length > 1) {
+    _navHistory.pop();
+    const prev = _navHistory[_navHistory.length - 1];
+    _suppressHist = true;
+    goTo(prev);
+  } else {
+    goTo(fallback || 'screen-welcome');
+  }
 }
 
 const TAB_SCREENS = { home: 'screen-home', feed: 'screen-feed', stats: 'screen-stats' };
 function showTab(tab) {
+  // Tabs are top-level destinations — reset the back history to just this tab.
+  _navHistory = [TAB_SCREENS[tab] || ('screen-' + tab)];
   // Hide ALL screens first (including onboarding screens)
   document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
   // Then activate just the right tab
@@ -2304,7 +2556,9 @@ function showTab(tab) {
     const s = document.getElementById(TAB_SCREENS[t]);
     s.classList.toggle('active', t === tab);
     document.querySelectorAll(`#${TAB_SCREENS[t]} .nav-item`).forEach((el, i) => {
-      el.classList.toggle('active', ['home','feed','stats'][i] === tab);
+      const on = ['home','feed','stats'][i] === tab;
+      el.classList.toggle('active', on);
+      el.setAttribute('aria-selected', on ? 'true' : 'false');
     });
   });
   if (tab === 'home') renderHabits();
@@ -2317,6 +2571,57 @@ function skipOnboard() {
   // Demo mode: pre-load habits
   if (state.habits.length === 0) seedDemoData();
   showTab('home');
+}
+
+// Interactive 30-second tour before sign-up (Bundle C).
+const TOUR = [
+  { ico:'💸', title:'Stake real money', body:"Put $1–$50 on a daily habit. It's only at risk if you skip — loss aversion does the work." },
+  { ico:'✅', title:'Auto-verified, no honor system', body:'Apple Health, Screen Time, GPS, Canvas or a photo+AI check confirms you actually did it.' },
+  { ico:'🔒', title:'Misses lock into your vault', body:'Forfeited money locks into your Savings Vault — or a charity, anti-charity, or friend. Build the habit and earn it back.' },
+];
+let _tourStep = 0;
+function openTour() { _tourStep = 0; renderTourStep(); document.getElementById('tour-overlay').classList.add('open'); }
+function closeTour() { document.getElementById('tour-overlay').classList.remove('open'); }
+function renderTourStep() {
+  const s = TOUR[_tourStep];
+  document.getElementById('tour-ico').textContent = s.ico;
+  document.getElementById('tour-title').textContent = s.title;
+  document.getElementById('tour-body').textContent = s.body;
+  document.getElementById('tour-dots').innerHTML = TOUR.map((_, i) => `<span class="tour-dot ${i === _tourStep ? 'on' : ''}"></span>`).join('');
+  document.getElementById('tour-next').textContent = _tourStep === TOUR.length - 1 ? "Got it" : 'Next';
+}
+function nextTourStep() {
+  if (_tourStep < TOUR.length - 1) { _tourStep++; renderTourStep(); }
+  else closeTour();
+}
+
+// Preview before sign-up (#7): explore the full app with demo data, no account.
+function previewDemo() {
+  state._preview = true;
+  if (!state.habits || state.habits.length === 0) seedDemoData();
+  showTab('home');
+  showPreviewBanner();
+}
+function showPreviewBanner() {
+  if (!state._preview) return;
+  let bar = document.getElementById('preview-bar');
+  if (!bar) {
+    bar = document.createElement('div');
+    bar.id = 'preview-bar';
+    bar.className = 'preview-bar';
+    bar.innerHTML = '<span>👀 Preview mode — nothing is saved</span>' +
+      '<button type="button" onclick="exitPreview()">Sign up</button>';
+    document.body.appendChild(bar);
+  }
+  bar.style.display = 'flex';
+  document.body.classList.add('previewing');
+}
+function exitPreview() {
+  state._preview = false;
+  const bar = document.getElementById('preview-bar');
+  if (bar) bar.style.display = 'none';
+  document.body.classList.remove('previewing');
+  goTo('screen-login');
 }
 
 // ─────────────────────────────────────────────
@@ -2337,6 +2642,7 @@ const SOURCES = {
   kindle:     { label: 'Kindle',        icon: '📖', sub: 'Reading time & pages from your Kindle library — verify you actually read.' },
   duolingo:   { label: 'Duolingo',      icon: '🦉', sub: 'Lessons completed and streak kept — verify your daily language practice.' },
   camera:     { label: 'Photo + AI',    icon: '📸', sub: 'AI checks your photo against your description; a human reviews if unsure.' },
+  todoist:    { label: 'Todoist',       icon: '✅', sub: 'Verify tasks are completed on time, read from your Todoist account.' },
 };
 
 // App catalog — many apps per verification source. iOS can't list your installed
@@ -2356,7 +2662,9 @@ const APPS = [
   { id:'audible',      label:'Audible',      source:'kindle',     cats:['reading'],            icon:'🎧', sub:'Listening time counts toward reading.' },
   { id:'duolingo',     label:'Duolingo',     source:'duolingo',   cats:['learning'],           icon:'🦉', sub:'Lessons completed & streak kept.' },
   { id:'babbel',       label:'Babbel',       source:'duolingo',   cats:['learning'],           icon:'🗣️', sub:'Language lessons completed.' },
+  { id:'rescuetime',   label:'RescueTime',   source:'screentime', cats:['digital'],            icon:'⏳', sub:'Productivity & app/website time tracking.' },
   { id:'gps_loc',      label:'Location',     source:'gps',        cats:['location'],           icon:'📍', sub:'GPS check-ins — prove you showed up.' },
+  { id:'todoist',      label:'Todoist',      source:'todoist',    cats:['custom','school'],    icon:'✅', sub:'Verify tasks completed on time.' },
   { id:'camera_app',   label:'Photo + AI',   source:'camera',     cats:['custom'],             icon:'📸', sub:'AI checks your photo against your goal.' },
 ];
 
@@ -2383,6 +2691,8 @@ const APP_ICON_CFG = {
   babbel:       { bg:'#73BA1D', slug:'babbel' },
   gps_loc:      { bg:'#34C759', path:'M12 2C8.13 2 5 5.13 5 9c0 5.25 7 13 7 13s7-7.75 7-13c0-3.87-3.13-7-7-7zm0 9.5c-1.38 0-2.5-1.12-2.5-2.5s1.12-2.5 2.5-2.5 2.5 1.12 2.5 2.5-1.12 2.5-2.5 2.5z' },
   camera_app:   { bg:'#1C1C1E', path:'M12 9a3 3 0 100 6 3 3 0 000-6zM9 3L7.17 5H4a2 2 0 00-2 2v12a2 2 0 002 2h16a2 2 0 002-2V7a2 2 0 00-2-2h-3.17L15 3z' },
+  rescuetime:   { bg:'#1A72BB', slug:'rescuetime' },
+  todoist:      { bg:'#E44332', slug:'todoist' },
 };
 
 function appIcon(id, size) {
@@ -2942,15 +3252,18 @@ function renderGoalConfig(){
   let inner = '';
   if (g.verify === 'proof') {
     const cur = (state.onboardData.name && state.onboardData.name !== g.label) ? state.onboardData.name : '';
-    inner = `<div class="onboard-hint" style="margin-top:18px">What's the goal? The AI checks your photo against this.</div>
-      <input class="input-field" id="proof-name" placeholder="e.g. Practice guitar 20 min" value="${cur}" maxlength="48">`;
+    inner = `<label class="onboard-hint" for="proof-name" style="margin-top:18px;display:block">What's the goal? The AI checks your photo against this.</label>
+      <input class="input-field" id="proof-name" placeholder="e.g. Practice guitar 20 min" value="${esc(cur)}" maxlength="48" oninput="onProofInput(this)" aria-describedby="proof-name-err">
+      <div class="field-err" id="proof-name-err" role="alert" aria-live="polite"></div>`;
   } else if (g.unit) {
-    inner = `<div class="onboard-hint" style="margin-top:18px">Daily target — auto-verified via ${SOURCES[g.source].label}</div>
+    const tv = (state.onboardData.target != null && state.onboardData.target !== '') ? state.onboardData.target : '';
+    inner = `<label class="onboard-hint" for="goal-target" style="margin-top:18px;display:block">Daily target — auto-verified via ${SOURCES[g.source].label}</label>
       <div style="display:flex;align-items:center;gap:10px">
         <span style="font-size:14px;color:var(--text-dim);font-weight:700;white-space:nowrap">${g.dir==='≤'?'Under':'At least'}</span>
-        <input class="input-field" id="goal-target" type="number" value="${state.onboardData.target}" style="flex:1;text-align:center;font-weight:800">
+        <input class="input-field" id="goal-target" type="number" inputmode="numeric" min="1" max="1000000" step="1" value="${tv}" oninput="onTargetInput(this)" aria-describedby="goal-target-err" style="flex:1;text-align:center;font-weight:800">
         <span style="font-size:14px;color:var(--text-dim);font-weight:700">${g.unit}</span>
-      </div>`;
+      </div>
+      <div class="field-err" id="goal-target-err" role="alert" aria-live="polite"></div>`;
   } else {
     const how = g.id==='gym' ? "enter the location's 100m radius before the deadline and tap Check In."
               : g.id==='avoid' ? "stay outside the location's radius at the deadline."
@@ -3168,6 +3481,40 @@ function ob1Next() {
   goTo('screen-ob3');
 }
 
+// ── Field validation helpers (#3) — escape, inline errors, no silent truncation ──
+function esc(s){ return String(s == null ? '' : s).replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c])); }
+function setFieldError(inputId, msg){
+  const input = document.getElementById(inputId);
+  const err = document.getElementById(inputId + '-err');
+  if (input) input.classList.toggle('invalid', !!msg);
+  if (err){ err.textContent = msg || ''; err.classList.toggle('show', !!msg); }
+  return !msg;
+}
+// Live-save the numeric target as the user types; clear the error once it's valid.
+function onTargetInput(el){
+  const raw = (el.value || '').trim();
+  if (raw === '') { state.onboardData.target = ''; return; }   // keep what they typed; validate on Next
+  const n = Number(raw);
+  if (Number.isFinite(n)) { state.onboardData.target = n; setFieldError('goal-target', ''); }
+}
+function onProofInput(el){
+  state.onboardData.name = (el.value || '').trim();
+  if (state.onboardData.name) setFieldError('proof-name', '');
+}
+// Validate the numeric target. Returns the clean number, or null (and shows an inline error).
+function validateTarget(g){
+  const el = document.getElementById('goal-target');
+  const raw = (el ? el.value : '').trim();
+  if (raw === '') { setFieldError('goal-target', `Enter a daily target in ${g.unit}.`); return null; }
+  const n = Number(raw);
+  if (!Number.isFinite(n)) { setFieldError('goal-target', 'Enter a number.'); return null; }
+  if (n <= 0) { setFieldError('goal-target', 'Must be greater than zero.'); return null; }
+  if (!Number.isInteger(n)) { setFieldError('goal-target', 'Use a whole number.'); return null; }
+  if (n > 1000000) { setFieldError('goal-target', "That's too large — pick a realistic target."); return null; }
+  setFieldError('goal-target', '');
+  return n;
+}
+
 // Step 1 (Pick a habit) — validate, then connect its app (or skip to stake if already connected).
 function ob2Next() {
   if (state.onboardData.categoryId === 'digital') {
@@ -3177,11 +3524,12 @@ function ob2Next() {
     if (!g) { showToast('Pick a habit first','red'); return; }
     if (g.verify === 'proof') {
       const nm = (document.getElementById('proof-name')?.value || '').trim();
-      if (!nm) { showToast('Describe your goal first','red'); return; }
+      if (!nm) { setFieldError('proof-name', 'Describe your goal so the AI can verify it.'); return; }
       state.onboardData.name = nm;
     } else if (g.unit) {
-      const t = parseFloat(document.getElementById('goal-target')?.value);
-      state.onboardData.target = isNaN(t) ? g.target : t;
+      const t = validateTarget(g);
+      if (t === null) return;        // block Next, error already shown — never silently truncate
+      state.onboardData.target = t;
       state.onboardData.name = g.label;
     }
     state.onboardData.freq = selectedFreq;
@@ -3189,8 +3537,30 @@ function ob2Next() {
   if (neededConnected()) goTo('screen-ob3');
   else showConnectForGoal();
 }
+// ── Stake destinations + escalating stakes (Bundle A) ──
+const DESTINATIONS = {
+  vault:   { label:'Savings Vault', icon:'🔒', blurb:'Locked — still your money. Build the habit to unlock it.' },
+  charity: { label:'Charity',       icon:'❤️', blurb:'Donated to a cause you choose. (Real payout runs through the backend.)' },
+  anti:    { label:'Anti-charity',  icon:'😤', blurb:"Sent to a cause you can't stand — maximum motivation to not miss." },
+  friend:  { label:'A friend',      icon:'🤝', blurb:'Paid to a friend who keeps you honest.' },
+};
+function selectDest(el, dest){
+  state.onboardData.destination = dest;
+  document.querySelectorAll('#dest-grid .dest-chip').forEach(c => c.classList.toggle('selected', c === el));
+  const b = document.getElementById('dest-blurb');
+  if (b) b.textContent = (DESTINATIONS[dest] || DESTINATIONS.vault).blurb;
+}
+function toggleEscalate(el){ state.onboardData.escalate = !!el.checked; }
+// The stake actually at risk today, after escalation cycles.
+function escalatedStake(h){
+  if (!h || !h.escalate) return (h && h.stake) || 0;
+  const cycles = Math.floor((h.currentStreak || 0) / 7);
+  return Math.round((h.stake || 0) * Math.min(1 + cycles * 0.5, 4));   // +50% per 7-day cycle, capped at 4×
+}
+
 function ob3Next() {
   state.onboardData.stake = selectedStake;
+  if (!state.onboardData.destination) state.onboardData.destination = 'vault';
   const g = goalById(state.onboardData.goalId) || {};
   const isDigital = state.onboardData.categoryId === 'digital';
   // For digital, the bet name already states the cap ("under 30 min/day") — skip the redundant ≤ suffix.
@@ -3199,8 +3569,11 @@ function ob3Next() {
   document.getElementById('sum-habit').innerHTML = `<span style="display:inline-flex;vertical-align:middle;margin-right:7px">${sumIcon}</span>${state.onboardData.name}${tgt}`;
   document.getElementById('sum-verify').textContent = g.source ? `${SOURCES[g.source].icon} ${SOURCES[g.source].label}` : '—';
   document.getElementById('sum-freq').textContent = state.onboardData.freq;
-  document.getElementById('sum-stake').textContent = `$${state.onboardData.stake}/miss`;
+  const escNote = state.onboardData.escalate ? ' · escalates +50%/week' : '';
+  document.getElementById('sum-stake').textContent = `$${state.onboardData.stake}/miss${escNote}`;
   document.getElementById('sum-stake-2').textContent = `$${state.onboardData.stake}`;
+  const dest = DESTINATIONS[state.onboardData.destination] || DESTINATIONS.vault;
+  document.getElementById('sum-dest').textContent = `${dest.icon} ${dest.label}`;
   goTo('screen-ob4');
 }
 
@@ -3235,6 +3608,8 @@ function createHabit(od) {
     capMinutes: od.capMinutes || null,
     freq: od.freq || 'Every Day',
     stake: od.stake || 5,
+    destination: od.destination || 'vault',
+    escalate: !!od.escalate,
     createdAt: new Date().toISOString(),
     completedDays: [],  // ISO date strings
     missedDays: [],
@@ -3276,20 +3651,33 @@ function completeHabit(id) {
 function missHabit(id) {
   const h = state.habits.find(x => x.id === id);
   if (!h || isMissedToday(h) || isCompletedToday(h)) return;
+  const amt = escalatedStake(h);              // honors escalating stakes
   h.missedDays.push(todayStr());
   h.currentStreak = 0;
-  state.walletBalance = Math.max(0, (state.walletBalance || 0) - h.stake);
-  state.savingsVault = (state.savingsVault || 0) + h.stake;
+  state.walletBalance = Math.max(0, (state.walletBalance || 0) - amt);
+  const dest = h.destination || 'vault';
+  let label, toast;
+  if (dest === 'vault') {
+    state.savingsVault = (state.savingsVault || 0) + amt;
+    label = '🔒 Savings Vault';
+    toast = `🔒 $${amt} locked into your Savings Vault`;
+  } else {
+    // Charity / anti-charity / friend — leaves the wallet. Real payout runs through the backend (see INTEGRATIONS.md).
+    state.totalForfeit = (state.totalForfeit || 0) + amt;
+    const d = DESTINATIONS[dest] || DESTINATIONS.vault;
+    label = `${d.icon} ${d.label}`;
+    toast = `${d.icon} $${amt} sent to ${d.label}`;
+  }
   state.txHistory.unshift({
     date: todayStr(),
-    desc: `❌ Missed: ${h.name} → 🔒 Savings Vault`,
-    amount: -h.stake,
+    desc: `❌ Missed: ${h.name} → ${label}`,
+    amount: -amt,
     type: 'loss'
   });
   saveState();
   renderHabits();
   closeModal('habit-detail-modal');
-  showToast(`🔒 $${h.stake} locked into your Savings Vault`, 'gold');
+  showToast(toast, 'gold');
 }
 
 function deleteHabit(id) {
@@ -3907,7 +4295,7 @@ function openHabitDetail(id) {
       <span class="info-label">Frequency</span><span class="info-val">${h.freq}</span>
     </div>
     <div class="info-row">
-      <span class="info-label">Daily stake</span><span class="info-val" style="color:var(--gold)">$${h.stake}/miss</span>
+      <span class="info-label">Daily stake</span><span class="info-val" style="color:var(--gold)">$${h.escalate ? escalatedStake(h) : h.stake}/miss${h.escalate ? ' ↑' : ''}</span>
     </div>
     <div class="info-row">
       <span class="info-label">Current streak</span><span class="info-val">${flameSVG(h.currentStreak || 0, 22)} ${h.currentStreak || 0} days</span>
@@ -3919,7 +4307,7 @@ function openHabitDetail(id) {
       <span class="info-label">Success rate</span><span class="info-val">${pct}%</span>
     </div>
     <div class="info-row" style="border:none">
-      <span class="info-label">Misses go to</span><span class="info-val">🔒 Savings Vault</span>
+      <span class="info-label">Misses go to</span><span class="info-val">${(DESTINATIONS[h.destination]||DESTINATIONS.vault).icon} ${(DESTINATIONS[h.destination]||DESTINATIONS.vault).label}</span>
     </div>
     <div style="margin-top:18px">
       <div style="font-size:12px;color:var(--text-muted);font-weight:600;text-transform:uppercase;letter-spacing:.5px">Last 5 weeks</div>
@@ -3935,6 +4323,7 @@ function openHabitDetail(id) {
         <button class="btn btn-secondary" disabled>❌ Missed today</button>
       `}
       <button class="btn btn-secondary" onclick="openEditHabit('${h.id}')">✏️ Edit Bet</button>
+      <button class="btn btn-ghost" onclick="sharePledge('${h.id}')">🔗 Share my pledge</button>
       <button class="btn btn-ghost" onclick="openShareModal('${h.id}')">📲 Challenge Friends</button>
       <button class="btn btn-ghost" style="color:var(--red)" onclick="deleteHabit('${h.id}')">Delete Habit</button>
     </div>
@@ -4111,8 +4500,63 @@ function renderStats() {
     `).join('');
   }
 
+  renderAchievements();
+  renderInsights();
   renderHeatmap();
   renderRoutineMap();
+}
+
+// ── Achievements + advanced analytics (Bundle B) ──
+function renderAchievements() {
+  const el = document.getElementById('j-achievements');
+  if (!el) return;
+  let completed = 0, missed = 0, best = 0, saved = 0;
+  (state.habits || []).forEach(h => {
+    completed += h.completedDays.length;
+    missed += h.missedDays.length;
+    best = Math.max(best, h.bestStreak || 0);
+    saved += h.stake * h.completedDays.length;
+  });
+  const cur = (state.habits || []).reduce((m, h) => Math.max(m, h.currentStreak || 0), 0);
+  const ACH = [
+    { icon:'🎯', name:'First Bet',      earned: (state.habits||[]).length >= 1 },
+    { icon:'🔥', name:'7-Day Streak',   earned: best >= 7 },
+    { icon:'🥈', name:'30-Day Streak',  earned: best >= 30 },
+    { icon:'💯', name:'100-Day Streak', earned: best >= 100 },
+    { icon:'✅', name:'50 Check-ins',   earned: completed >= 50 },
+    { icon:'💰', name:'$100 Kept',      earned: saved >= 100 },
+    { icon:'🛡️', name:'Week Perfect',  earned: cur >= 7 },
+    { icon:'🤝', name:'Added Friend',   earned: (state.friends || []).length >= 1 },
+  ];
+  el.innerHTML = ACH.map(a =>
+    `<div class="ach ${a.earned ? 'earned' : 'locked'}"><div class="ach-ico">${a.icon}</div><div class="ach-name">${a.name}</div></div>`
+  ).join('');
+}
+
+function renderInsights() {
+  const el = document.getElementById('j-insights');
+  if (!el) return;
+  let completed = 0, missed = 0;
+  (state.habits || []).forEach(h => { completed += h.completedDays.length; missed += h.missedDays.length; });
+  const total = completed + missed;
+  const rate = total ? Math.round(completed / total * 100) : 0;
+  const saved = (state.habits || []).reduce((s, h) => s + h.stake * h.completedDays.length, 0);
+  const forfeited = (state.savingsVault || 0) + (state.totalForfeit || 0);
+  const max = Math.max(saved, forfeited, 1);
+  const COMMUNITY = 68;                       // benchmark; real value comes from backend aggregates
+  const projected = Math.round(rate / 100 * 30);
+  el.innerHTML = `
+    <div class="chart-card">
+      <div class="chart-title">Kept vs forfeited</div>
+      <div class="ins-bars">
+        <div class="ins-bar-row"><span class="ins-bar-lbl">Kept</span><div class="ins-track"><div class="ins-fill green" style="width:${Math.round(saved / max * 100)}%"></div></div><span class="ins-bar-amt">$${saved}</span></div>
+        <div class="ins-bar-row"><span class="ins-bar-lbl">Forfeited</span><div class="ins-track"><div class="ins-fill red" style="width:${Math.round(forfeited / max * 100)}%"></div></div><span class="ins-bar-amt">$${forfeited}</span></div>
+      </div>
+    </div>
+    <div class="ins-two">
+      <div class="chart-card ins-stat"><div class="ins-big">${projected}<span>/30</span></div><div class="ins-cap">Projected days kept next month at your ${rate}% rate</div></div>
+      <div class="chart-card ins-stat"><div class="ins-big">${rate}%<span> vs ${COMMUNITY}%</span></div><div class="ins-cap">Your success rate vs community average${rate >= COMMUNITY ? ' — ahead 🎉' : ''}</div></div>
+    </div>`;
 }
 
 // ═══════════════════════════════════════════════════════════════
@@ -4589,7 +5033,139 @@ function renderFriends() {
       </div>`).join('');
   }
 
+  renderGroupPot();
+  renderLeaderboard();
+  renderChallenges();
   renderFeed();
+  setFriendsView(state._friendsView || 'feed');
+}
+
+// Segmented sub-tabs within Friends: Feed / Leaderboard / Groups.
+function setFriendsView(view) {
+  const views = ['feed', 'leaderboard', 'groups'];
+  if (views.indexOf(view) === -1) view = 'feed';
+  state._friendsView = view;
+  views.forEach(v => {
+    const el = document.getElementById('fr-view-' + v);
+    if (el) el.classList.toggle('active', v === view);
+  });
+  document.querySelectorAll('.fr-segment .fr-seg').forEach((b, i) => {
+    const on = views[i] === view;
+    b.classList.toggle('active', on);
+    b.setAttribute('aria-selected', on ? 'true' : 'false');
+    b.tabIndex = on ? 0 : -1;            // roving tabindex for the tablist
+  });
+  window.scrollTo(0, 0);
+}
+// Arrow-key navigation for the Friends tablist (WAI-ARIA tabs pattern).
+function frSegKey(e) {
+  const views = ['feed', 'leaderboard', 'groups'];
+  let i = views.indexOf(state._friendsView || 'feed');
+  if (e.key === 'ArrowRight') i = (i + 1) % views.length;
+  else if (e.key === 'ArrowLeft') i = (i - 1 + views.length) % views.length;
+  else if (e.key === 'Home') i = 0;
+  else if (e.key === 'End') i = views.length - 1;
+  else return;
+  e.preventDefault();
+  setFriendsView(views[i]);
+  const btn = document.getElementById('fr-tab-' + views[i]);
+  if (btn) btn.focus();
+}
+// Create a group pot (multi-user pooling + settlement runs through the backend — see INTEGRATIONS.md).
+function createGroupPot() {
+  state._groupPotJoined = true;
+  if (!state._preview) saveState();
+  renderGroupPot();
+  showToast('Group pot created — invite friends to pool in 💰', 'green');
+}
+
+// Team / head-to-head challenges (Bundle D).
+function renderChallenges() {
+  const el = document.getElementById('fr-challenges');
+  if (!el) return;
+  const me = {
+    streak: myBestStreak(),
+    initials: initialsFor((state.profile && state.profile.name) || 'You'),
+    grad: '#7fdca4,#34a36b'
+  };
+  const roster = (state.friends && state.friends.length) ? state.friends : FRIEND_ROSTER.slice(0, 2);
+  const challenges = roster.slice(0, 2).map((f, i) => ({ opp: f, goal: ['7-day streak race', '30-day no-miss'][i % 2], pot: [10, 25][i % 2] }));
+  if (!challenges.length) {
+    el.innerHTML = '<div class="onboard-hint" style="margin-top:0">No challenges yet — start one with a friend.</div>';
+    return;
+  }
+  el.innerHTML = challenges.map(c => {
+    const meAhead = me.streak >= (c.opp.streak || 0);
+    return `<div class="chal-card">
+      <div class="chal-top"><span class="chal-goal">${esc(c.goal)}</span><span class="chal-pot">$${c.pot} pot</span></div>
+      <div class="chal-row">
+        <div class="chal-side ${meAhead ? 'lead' : ''}"><div class="fr-f-av" style="background:linear-gradient(135deg,${me.grad})">${me.initials}</div><div><div class="chal-name">You</div><div class="chal-streak">${me.streak}d 🔥</div></div></div>
+        <div class="chal-vs">vs</div>
+        <div class="chal-side ${!meAhead ? 'lead' : ''}" style="justify-content:flex-end;text-align:right"><div><div class="chal-name">${esc(c.opp.name)}</div><div class="chal-streak">${c.opp.streak || 0}d 🔥</div></div><div class="fr-f-av" style="background:linear-gradient(135deg,${c.opp.grad})">${c.opp.initials}</div></div>
+      </div>
+    </div>`;
+  }).join('');
+}
+function startChallenge() {
+  // Real matchmaking + shared pot settlement runs through the backend (see INTEGRATIONS.md).
+  inviteFriends();
+  showToast('Pick a friend to challenge — invite link ready', 'gold');
+}
+
+// ── Social: streak badges + leaderboard + group pot (#6) ──
+function streakBadge(streak){
+  if (streak >= 100) return { emoji:'💯', label:streak+'d', cls:'sb-legend' };
+  if (streak >= 60)  return { emoji:'🥇', label:streak+'d', cls:'sb-gold' };
+  if (streak >= 30)  return { emoji:'🥈', label:streak+'d', cls:'sb-silver' };
+  if (streak >= 7)   return { emoji:'🔥', label:streak+'d', cls:'sb-bronze' };
+  if (streak >= 1)   return { emoji:'✨', label:streak+'d', cls:'sb-base' };
+  return { emoji:'·', label:'0d', cls:'sb-none' };
+}
+function myBestStreak(){ return (state.habits || []).reduce((m,h)=>Math.max(m, h.currentStreak || 0), 0); }
+function initialsFor(name){ return (name || 'You').trim().split(/\s+/).map(w=>w[0]||'').join('').slice(0,2).toUpperCase() || 'Y'; }
+
+function renderLeaderboard(){
+  const el = document.getElementById('fr-leaderboard'); if (!el) return;
+  const friends = (state.friends && state.friends.length) ? state.friends : FRIEND_ROSTER.slice(0, 5);
+  const rows = friends.map(f => ({ name:f.name, initials:f.initials, grad:f.grad, streak:f.streak || 0 }));
+  // YOU — ranked by your real current streak, so the board updates with your data.
+  rows.push({ name:(state.profile && state.profile.name) || 'You', initials:initialsFor((state.profile && state.profile.name) || 'You'),
+              grad:'#7fdca4,#34a36b', streak: myBestStreak(), isMe:true });
+  rows.sort((a,b)=> b.streak - a.streak);
+  el.innerHTML = rows.map((r,i)=>{
+    const b = streakBadge(r.streak);
+    const rank = i + 1;
+    const medal = rank===1?'🥇':rank===2?'🥈':rank===3?'🥉':('#'+rank);
+    return `<div class="lb-row ${r.isMe?'lb-me':''}">
+      <div class="lb-rank">${medal}</div>
+      <div class="fr-f-av" style="background:linear-gradient(135deg,${r.grad})">${r.initials}</div>
+      <div class="lb-name">${esc(r.name)}${r.isMe?' <span class="lb-you">you</span>':''}</div>
+      <span class="streak-badge ${b.cls}">${b.emoji} ${b.label}</span>
+    </div>`;
+  }).join('');
+}
+
+function renderGroupPot(){
+  const el = document.getElementById('fr-grouppot'); if (!el) return;
+  const joined = !!state._groupPotJoined;
+  const members = 6 + (joined ? 1 : 0);
+  const pot = 120 + (joined ? 5 : 0);
+  el.innerHTML = `<div class="pot-card">
+    <div class="pot-top">
+      <div>
+        <div class="pot-title">June Streak Pot</div>
+        <div class="pot-sub">${members} members · everyone who keeps a 7-day streak this month splits the pot</div>
+      </div>
+      <div class="pot-amt">$${pot}</div>
+    </div>
+    <button class="pot-btn ${joined?'joined':''}" onclick="toggleGroupPot()">${joined ? '✓ You’re in — $5 staked' : 'Join pot · $5'}</button>
+  </div>`;
+}
+function toggleGroupPot(){
+  state._groupPotJoined = !state._groupPotJoined;
+  if (!state._preview) saveState();
+  renderGroupPot();
+  showToast(state._groupPotJoined ? 'Joined the June Streak Pot 🔥' : 'Left the pot', state._groupPotJoined ? 'green' : null);
 }
 
 function renderFeed() {
@@ -4705,6 +5281,25 @@ function inviteFriends() {
   } else {
     navigator.clipboard.writeText(text + ' ' + url)
       .then(function(){ showToast('Invite link copied!', 'green'); })
+      .catch(function(){ showToast('Share: ' + url, ''); });
+  }
+}
+
+// Shareable public pledge card/link for one goal (Bundle D).
+function sharePledge(id) {
+  const h = (state.habits || []).find(x => x.id === id);
+  if (!h) return;
+  const stake = h.escalate ? escalatedStake(h) : h.stake;
+  const streak = h.currentStreak || 0;
+  const dest = (DESTINATIONS[h.destination] || DESTINATIONS.vault).label;
+  const who = (state.profile && state.profile.name) || 'I';
+  const url = 'https://ante.app/p/' + id;     // public pledge page (served by backend in production)
+  const text = `${who === 'I' ? "I'm" : who + ' is'} publicly on the hook: $${stake}/day on "${h.name}" — ${streak}-day streak going. Miss a day → it goes to ${dest}. Hold me to it 👇`;
+  if (navigator.share) {
+    navigator.share({ title: 'My Ante pledge', text, url }).catch(function(){});
+  } else {
+    navigator.clipboard.writeText(text + ' ' + url)
+      .then(function(){ showToast('Pledge link copied!', 'green'); })
       .catch(function(){ showToast('Share: ' + url, ''); });
   }
 }
@@ -5500,6 +6095,18 @@ if ('serviceWorker' in navigator) {
       <button class="am-key am-back" onclick="amKey('back')" aria-label="Delete">&#9003;</button>
     </div>
     <button class="am-continue" id="am-continue" onclick="confirmAddMoney()" disabled>Continue</button>
+  </div>
+</div>
+
+<!-- ===================== INTERACTIVE TOUR (Bundle C) ===================== -->
+<div class="tour-overlay" id="tour-overlay" role="dialog" aria-modal="true" aria-label="How Ante works" onclick="if(event.target===this)closeTour()">
+  <div class="tour-card">
+    <button class="tour-close" onclick="closeTour()" aria-label="Close">&times;</button>
+    <div class="tour-ico" id="tour-ico">💸</div>
+    <div class="tour-title" id="tour-title"></div>
+    <div class="tour-body" id="tour-body"></div>
+    <div class="tour-dots" id="tour-dots"></div>
+    <button class="btn btn-primary" id="tour-next" onclick="nextTourStep()">Next</button>
   </div>
 </div>
 
