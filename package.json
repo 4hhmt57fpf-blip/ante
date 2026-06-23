@@ -6,6 +6,7 @@
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
     "sync:web": "cp index.html manifest.json sw.js www/ && rm -rf www/assets && cp -R assets www/assets && npx cap copy ios",
+    "sync:watch": "node scripts/sync-watch.js",
     "ios": "npm run sync:web && npx cap open ios"
   },
   "repository": {
