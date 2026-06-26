@@ -19,6 +19,27 @@ people's money, which is what avoids money-transmitter licensing.
 > and add a mandate checkbox stating the card **will** be charged on a miss —
 > Stripe requires explicit consent for off-session charges. Confirm with counsel.
 
+## Security: who can trigger a charge
+
+`/charge-on-miss` **moves money**, so it is locked down and must only ever be
+called by your own trusted miss-detection job (server-to-server):
+
+- It requires `Authorization: Bearer $CHARGE_SECRET`. Requests without the secret
+  are rejected (`401`), and if `CHARGE_SECRET` is unset the endpoint refuses to
+  charge at all (`503`, fail-closed). **Never put `CHARGE_SECRET` in the app/browser.**
+- The charge **amount is derived server-side** from the stored stake — it ignores
+  any amount in the request body and is clamped to `[$0.50, $400]`. The app records
+  the stake via `POST /register-stake` (`{ anteUserId, habitId, amountCents }`) when
+  a bet is locked in, edited, or escalates; `index.html`'s `registerStake()` does
+  this automatically once `PAYMENTS.BACKEND_URL` is set.
+
+> **Follow-up (not done here):** the browser-facing endpoints (`/create-customer`,
+> `/create-setup-intent`, `/save-payment-method`, `/register-stake`) trust the
+> client-supplied `anteUserId`, so a caller can act under any user id. A charge
+> still needs `CHARGE_SECRET` and is amount-capped, so the blast radius is bounded,
+> but before scaling add real per-user auth (e.g. a Supabase Auth JWT verified on
+> the backend) and key these endpoints off the verified user instead of the body.
+
 ## What you provide
 
 1. **Stripe account** → Publishable key (`pk_…`) + Secret key (`sk_…`).
@@ -29,6 +50,7 @@ people's money, which is what avoids money-transmitter licensing.
    `4hhmt57fpf-blip.github.io` there (Stripe auto-hosts the verification file).
 4. **Deploy** `payments-backend/` (Vercel / Render / Fly / Railway) and set env:
    `STRIPE_SECRET_KEY`, `STRIPE_PUBLISHABLE_KEY`, `STRIPE_WEBHOOK_SECRET`,
+   `CHARGE_SECRET` (a long random string — `openssl rand -hex 32`),
    `ALLOWED_ORIGIN=https://4hhmt57fpf-blip.github.io`.
 5. **Webhook**: in Stripe, add an endpoint at `https://YOUR_BACKEND/webhook`, copy
    its `whsec_…` into `STRIPE_WEBHOOK_SECRET`.
