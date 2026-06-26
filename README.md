@@ -47,4 +47,4 @@ python3 -m http.server 8000
 
 **Current User Count**: 0
 
-**Target**: 50 real users with 7+ day retention before YC pitch
+**Target**: 50 real users with 7+ day retention 
