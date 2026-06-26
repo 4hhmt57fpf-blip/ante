@@ -18,7 +18,7 @@ try:
 except Exception:
     SSL_CTX = ssl.create_default_context()
 
-PORT = 3847
+PORT = int(os.environ.get('PORT', 3847))  # honor an assigned PORT (preview autoPort); default to 3847
 DIRECTORY = os.path.dirname(os.path.abspath(__file__))
 CANVAS_STORE = os.path.join(DIRECTORY, '.canvas_data.json')  # local only, gitignored
 

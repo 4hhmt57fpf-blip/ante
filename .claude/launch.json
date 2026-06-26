@@ -6,6 +6,7 @@
       "runtimeExecutable": "python3",
       "runtimeArgs": ["server.py"],
       "port": 3847,
+      "autoPort": true,
       "cwd": "/Users/beckettlee/Desktop/ante"
     }
   ]

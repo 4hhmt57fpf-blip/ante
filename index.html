@@ -1922,8 +1922,8 @@
     <button type="button" class="nav-item active" role="tab" aria-selected="true" aria-label="Home" onclick="showTab('home')">
       <div class="nav-icon"><svg viewBox="0 0 24 24"><path d="m3 9 9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><path d="M9 22V12h6v10"/></svg></div>Home
     </button>
-    <button type="button" class="nav-item" role="tab" aria-selected="false" aria-label="Friends" onclick="showTab('feed')">
-      <div class="nav-icon"><svg viewBox="0 0 24 24"><path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M22 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg></div>Friends
+    <button type="button" class="nav-item" role="tab" aria-selected="false" aria-label="Community" onclick="showTab('feed')">
+      <div class="nav-icon"><svg viewBox="0 0 24 24"><path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M22 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg></div>Community
     </button>
     <button type="button" class="nav-item" role="tab" aria-selected="false" aria-label="Stats" onclick="showTab('stats')">
       <div class="nav-icon"><svg viewBox="0 0 24 24"><path d="M3 3v18h18"/><path d="M7 16v-5"/><path d="M12 16V8"/><path d="M17 16v-3"/></svg></div>Stats
@@ -1946,7 +1946,7 @@
 
 <div class="screen" id="screen-feed">
   <div class="topbar">
-    <div class="topbar-title">Friends</div>
+    <div class="topbar-title">Community</div>
     <button class="fr-invite-btn" onclick="inviteFriends()">+ Invite</button>
   </div>
 
@@ -1954,7 +1954,7 @@
   <div class="fr-segment" role="tablist" aria-label="Friends views" onkeydown="frSegKey(event)">
     <button type="button" class="fr-seg active" id="fr-tab-feed" role="tab" aria-selected="true" aria-controls="fr-view-feed" tabindex="0" onclick="setFriendsView('feed')">Feed</button>
     <button type="button" class="fr-seg" id="fr-tab-leaderboard" role="tab" aria-selected="false" aria-controls="fr-view-leaderboard" tabindex="-1" onclick="setFriendsView('leaderboard')">Leaderboard</button>
-    <button type="button" class="fr-seg" id="fr-tab-groups" role="tab" aria-selected="false" aria-controls="fr-view-groups" tabindex="-1" onclick="setFriendsView('groups')">Groups</button>
+    <button type="button" class="fr-seg" id="fr-tab-groups" role="tab" aria-selected="false" aria-controls="fr-view-groups" tabindex="-1" onclick="setFriendsView('groups')">Challenges</button>
   </div>
 
   <!-- ── FEED VIEW ── -->
@@ -2042,8 +2042,8 @@
     <button type="button" class="nav-item" role="tab" aria-selected="false" aria-label="Home" onclick="showTab('home')">
       <div class="nav-icon"><svg viewBox="0 0 24 24"><path d="m3 9 9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><path d="M9 22V12h6v10"/></svg></div>Home
     </button>
-    <button type="button" class="nav-item active" role="tab" aria-selected="true" aria-label="Friends" onclick="showTab('feed')">
-      <div class="nav-icon"><svg viewBox="0 0 24 24"><path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M22 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg></div>Friends
+    <button type="button" class="nav-item active" role="tab" aria-selected="true" aria-label="Community" onclick="showTab('feed')">
+      <div class="nav-icon"><svg viewBox="0 0 24 24"><path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M22 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg></div>Community
     </button>
     <button type="button" class="nav-item" role="tab" aria-selected="false" aria-label="Stats" onclick="showTab('stats')">
       <div class="nav-icon"><svg viewBox="0 0 24 24"><path d="M3 3v18h18"/><path d="M7 16v-5"/><path d="M12 16V8"/><path d="M17 16v-3"/></svg></div>Stats
@@ -2198,8 +2198,8 @@
     <button type="button" class="nav-item" role="tab" aria-selected="false" aria-label="Home" onclick="showTab('home')">
       <div class="nav-icon"><svg viewBox="0 0 24 24"><path d="m3 9 9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><path d="M9 22V12h6v10"/></svg></div>Home
     </button>
-    <button type="button" class="nav-item" role="tab" aria-selected="false" aria-label="Friends" onclick="showTab('feed')">
-      <div class="nav-icon"><svg viewBox="0 0 24 24"><path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M22 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg></div>Friends
+    <button type="button" class="nav-item" role="tab" aria-selected="false" aria-label="Community" onclick="showTab('feed')">
+      <div class="nav-icon"><svg viewBox="0 0 24 24"><path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M22 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg></div>Community
     </button>
     <button type="button" class="nav-item active" role="tab" aria-selected="true" aria-label="Stats" onclick="showTab('stats')">
       <div class="nav-icon"><svg viewBox="0 0 24 24"><path d="M3 3v18h18"/><path d="M7 16v-5"/><path d="M12 16V8"/><path d="M17 16v-3"/></svg></div>Stats
@@ -2483,7 +2483,7 @@ loadState();
 // local DEMO mode so the whole flow works end-to-end. Only the PUBLIC anon key
 // ever lives in the app (safe to ship); no secrets here.
 // ─────────────────────────────────────────────
-const AUTH = { SUPABASE_URL: '', SUPABASE_ANON_KEY: '' };
+const AUTH = { SUPABASE_URL: 'https://pgcwxowpadwhbrlkmnjc.supabase.co', SUPABASE_ANON_KEY: 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InBnY3d4b3dwYWR3aGJybGttbmpjIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODI0Mjg0MTUsImV4cCI6MjA5ODAwNDQxNX0.dk78gEuVgZdbgNpO6VE3RHPM9aGrrxyd_4agfSHvT2A' };
 let _sb = null;
 function authConfigured(){ return !!(AUTH.SUPABASE_URL && AUTH.SUPABASE_ANON_KEY); }
 function currentUser(){ return state.user || null; }
@@ -2500,6 +2500,127 @@ function ensureSupabase(){
     document.head.appendChild(s);
   });
 }
+// Current Supabase access token (auto-refreshed by the SDK), or null if not signed in.
+async function sbAccessToken() {
+  const sb = await ensureSupabase();
+  if (!sb) return null;
+  const { data } = await sb.auth.getSession();
+  return data?.session?.access_token || null;
+}
+
+// ── CLOUD SYNC (Phase 1) ──────────────────────────────────────────────
+// localStorage stays the offline cache; Supabase is the cross-device source.
+// Per-row last-write-wins via updatedAt. Deletes use a deleted_at tombstone.
+function nowIso() { return new Date().toISOString(); }
+function stamp(o) { o.updatedAt = nowIso(); return o; }
+
+function habitToRow(h) {
+  return {
+    id: h.id, user_id: currentUser().id,
+    name: h.name, emoji: h.emoji, icon: h.icon, color: h.color, category: h.category,
+    source: h.source, metric: h.metric, dir: h.dir, target: h.target, unit: h.unit, verify: h.verify,
+    apps: h.apps || [], cap_minutes: h.capMinutes ?? null,
+    freq: h.freq, stake: h.stake, destination: h.destination, escalate: !!h.escalate,
+    completed_days: h.completedDays || [], missed_days: h.missedDays || [],
+    current_streak: h.currentStreak || 0, best_streak: h.bestStreak || 0,
+    created_at: h.createdAt, updated_at: h.updatedAt || nowIso(), deleted_at: h.deletedAt || null,
+    raw: h,   // full app object → preserves app-only fields (goalId, charity, gpsLat/lng/radius)
+  };
+}
+function rowToHabit(r) {
+  // If `raw` (the full app object) is present, use it as the base so app-only fields survive
+  // the round-trip; otherwise fall back to the structured columns (legacy rows). Server
+  // timestamps stay authoritative.
+  const base = (r.raw && typeof r.raw === 'object') ? r.raw : {
+    id: r.id, name: r.name, emoji: r.emoji, icon: r.icon, color: r.color, category: r.category,
+    source: r.source, metric: r.metric, dir: r.dir, target: r.target, unit: r.unit, verify: r.verify,
+    apps: r.apps || [], capMinutes: r.cap_minutes,
+    freq: r.freq, stake: r.stake, destination: r.destination, escalate: !!r.escalate,
+    completedDays: r.completed_days || [], missedDays: r.missed_days || [],
+    currentStreak: r.current_streak || 0, bestStreak: r.best_streak || 0,
+  };
+  return { ...base, id: r.id, createdAt: r.created_at, updatedAt: r.updated_at, deletedAt: r.deleted_at };
+}
+
+async function cloudPull() {
+  const sb = await ensureSupabase(); if (!sb || !currentUser()) return;
+  const uid = currentUser().id;
+  const [{ data: hRows }, { data: pRow }, { data: txRows }] = await Promise.all([
+    sb.from('habits').select('*').eq('user_id', uid),
+    sb.from('profiles').select('*').eq('id', uid).maybeSingle(),
+    sb.from('transactions').select('*').eq('user_id', uid),
+  ]);
+  const byId = {};
+  (state.habits || []).forEach(h => { byId[h.id] = h; });
+  (hRows || []).forEach(r => {
+    if (r.deleted_at) { delete byId[r.id]; return; }
+    const local = byId[r.id];
+    if (!local || new Date(r.updated_at) >= new Date(local.updatedAt || 0)) byId[r.id] = rowToHabit(r);
+  });
+  state.habits = Object.values(byId).filter(h => !h.deletedAt);
+  if (pRow) {
+    if (!state.profile.updatedAt || new Date(pRow.updated_at) >= new Date(state.profile.updatedAt)) {
+      state.profile.name = pRow.name ?? state.profile.name;
+      state.profile.handle = pRow.handle ?? state.profile.handle;
+      state.profile.reminderTime = pRow.reminder_time ?? state.profile.reminderTime;
+      state.profile.reminderOn = pRow.reminder_on ?? state.profile.reminderOn;
+      state.profile.updatedAt = pRow.updated_at;
+    }
+  }
+  if (txRows && txRows.length) {
+    const seen = new Set((state.txHistory || []).map(t => t.id).filter(Boolean));
+    txRows.forEach(t => { if (!seen.has(t.id)) state.txHistory.unshift({ id: t.id, date: t.date, desc: t.desc, amount: t.amount, type: t.type }); });
+  }
+  saveState();
+  if (typeof renderHabits === 'function') renderHabits();
+}
+
+function markDirty(kind, id) {
+  state._dirty = state._dirty || [];
+  if (!state._dirty.some(d => d.kind === kind && d.id === id)) state._dirty.push({ kind, id });
+  saveState();
+}
+
+async function cloudPushHabit(h) {
+  const sb = await ensureSupabase(); if (!sb || !currentUser()) return;
+  stamp(h);
+  const { error } = await sb.from('habits').upsert(habitToRow(h), { onConflict: 'id' });
+  if (error) markDirty('habit', h.id);
+}
+async function cloudDeleteHabit(id) {
+  const sb = await ensureSupabase(); if (!sb || !currentUser()) return;
+  const { error } = await sb.from('habits').update({ deleted_at: nowIso(), updated_at: nowIso() }).eq('id', id);
+  if (error) markDirty('habitDelete', id);
+}
+async function cloudPushProfile() {
+  const sb = await ensureSupabase(); if (!sb || !currentUser()) return;
+  state.profile.updatedAt = nowIso();
+  const p = state.profile;
+  const { error } = await sb.from('profiles').upsert({
+    id: currentUser().id, name: p.name, handle: p.handle,
+    reminder_time: p.reminderTime, reminder_on: !!p.reminderOn, updated_at: p.updatedAt,
+  }, { onConflict: 'id' });
+  if (error) markDirty('profile', currentUser().id);
+}
+async function cloudPushTx(tx) {
+  const sb = await ensureSupabase(); if (!sb || !currentUser() || !tx) return;
+  if (!tx.id) tx.id = 't_' + Math.random().toString(36).slice(2) + Date.now().toString(36);
+  const { error } = await sb.from('transactions').upsert({
+    id: tx.id, user_id: currentUser().id, date: tx.date, desc: tx.desc, amount: tx.amount, type: tx.type,
+  }, { onConflict: 'id' });
+  if (error) markDirty('tx', tx.id);
+}
+async function cloudFlushDirty() {
+  if (!state._dirty || !state._dirty.length || !currentUser()) return;
+  const pending = state._dirty.splice(0); saveState();
+  for (const d of pending) {
+    if (d.kind === 'habit') { const h = (state.habits || []).find(x => x.id === d.id); if (h) await cloudPushHabit(h); }
+    else if (d.kind === 'habitDelete') await cloudDeleteHabit(d.id);
+    else if (d.kind === 'profile') await cloudPushProfile();
+    else if (d.kind === 'tx') { const t = (state.txHistory || []).find(x => x.id === d.id); if (t) await cloudPushTx(t); }
+  }
+}
+
 // ── LOCAL ACCOUNTS — real, device-local auth used until Supabase keys are set.
 // Passwords are never stored in plaintext: each account gets a random salt and a
 // SHA-256(salt|password) hash. Signup blocks duplicate emails; login checks the hash.
@@ -2580,9 +2701,11 @@ async function emailAuth(mode){                 // 'in' | 'up'
 function afterLogin(){
   state.profile = state.profile || {};
   if (!state.profile.name && state.user && state.user.name) state.profile.name = state.user.name;
+  if (state.user && state.user.email) state.profile.email = state.user.email;
   saveState();
   if (typeof updateIdentity === 'function') updateIdentity();
   showToast(`Welcome${state.user && state.user.name ? ', ' + state.user.name : ''} 👋`, 'green');
+  cloudPull().then(cloudFlushDirty);
   if ((state.habits || []).length) showTab('home');
   else goTo('screen-welcome');
 }
@@ -2608,10 +2731,12 @@ async function checkAuthOnLoad(){
     } catch (e) {}
   }
   if (currentUser()) {
+    cloudPull().then(cloudFlushDirty);
     if ((state.habits || []).length) showTab('home'); else goTo('screen-welcome');
   } else {
     goTo('screen-login');
   }
+  window.addEventListener('online', () => cloudFlushDirty());
 }
 
 // ─────────────────────────────────────────────
@@ -3685,6 +3810,7 @@ function commitHabit() {
   state.habits.push(h);
   saveState();
   registerStake(h);   // record the canonical stake server-side for charge-on-miss
+  stamp(h); cloudPushHabit(h);
   playAnteAnimation(state.onboardData.stake);
   showTab('home');
   setTimeout(() => showToast('🔒 Bet locked in — misses go to your Savings Vault.','green'), 300);
@@ -3748,6 +3874,7 @@ function completeHabit(id) {
   });
   saveState();
   if (h.escalate) registerStake(h);   // escalation may have raised the effective stake
+  stamp(h); cloudPushHabit(h); cloudPushTx(state.txHistory[0]);
   renderHabits();
   spawnConfetti();
   showToast(`🔥 ${h.currentStreak} day streak! Keep it up.`, 'green');
@@ -3781,6 +3908,7 @@ function missHabit(id) {
   });
   saveState();
   if (h.escalate) registerStake(h);   // streak reset → effective stake back to base
+  stamp(h); cloudPushHabit(h); cloudPushTx(state.txHistory[0]);
   renderHabits();
   closeModal('habit-detail-modal');
   showToast(toast, 'gold');
@@ -3789,6 +3917,7 @@ function missHabit(id) {
 function deleteHabit(id) {
   state.habits = state.habits.filter(h => h.id !== id);
   saveState();
+  cloudDeleteHabit(id);
   renderHabits();
   closeModal('habit-detail-modal');
   showToast('Habit removed', null);
@@ -3812,6 +3941,7 @@ const PAYMENTS = {
 };
 function anteUserId() {
   if (!state.profile) state.profile = {};
+  if (state.user && state.user.id) return state.user.id;   // real identity when signed in
   if (!state.profile.anteUserId) {
     state.profile.anteUserId = 'u_' + Math.random().toString(36).slice(2) + Date.now().toString(36);
     saveState();
@@ -3823,13 +3953,16 @@ function anteUserId() {
 // from this and never trusts a client-supplied amount. Sends the current effective
 // stake (after escalation) in cents. Best-effort + fire-and-forget; dormant until
 // PAYMENTS.BACKEND_URL is set, so this is a no-op today.
-function registerStake(habit) {
+async function registerStake(habit) {
   if (!PAYMENTS.BACKEND_URL || !habit || !habit.id) return;
   const cents = Math.round((escalatedStake(habit) || habit.stake || 0) * 100);
   if (!cents) return;
+  const token = await sbAccessToken();
+  if (!token) return;   // not signed in → no server-side stake yet
   fetch(PAYMENTS.BACKEND_URL.replace(/\/$/, '') + '/register-stake', {
-    method: 'POST', headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify({ anteUserId: anteUserId(), habitId: habit.id, amountCents: cents }),
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${token}` },
+    body: JSON.stringify({ habitId: habit.id, amountCents: cents }),
   }).catch(() => {});   // not user-facing; the next sync will retry
 }
 async function savePaymentMethod() {
@@ -3841,9 +3974,12 @@ async function savePaymentMethod() {
     const native = isNativeApp() && capPlugin('Stripe');
     showToast('💳 Setting up secure payment…', null);
     const apiVersion = native ? PAYMENTS.IOS_STRIPE_API_VERSION : undefined;
+    const token = await sbAccessToken();
+    if (!token) { showToast('Sign in to enable payments.', 'gold'); return; }
     const r = await fetch(PAYMENTS.BACKEND_URL.replace(/\/$/, '') + '/create-setup-intent', {
-      method: 'POST', headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ anteUserId: anteUserId(), email: (state.profile || {}).email, apiVersion }),
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${token}` },
+      body: JSON.stringify({ apiVersion }),
     }).then(x => x.json());
     if (r.error) throw new Error(r.error);
     const pk = PAYMENTS.STRIPE_PK || r.publishableKey;
@@ -4498,6 +4634,7 @@ function addHabitFromModal() {
   document.getElementById('modal-habit-name').value = '';
   saveState();
   registerStake(h);   // record the canonical stake server-side for charge-on-miss
+  stamp(h); cloudPushHabit(h);
   closeModal('add-habit-modal');
   renderHabits();
   playAnteAnimation(stake);
@@ -5134,18 +5271,20 @@ function seedChallenges(){
     grad:grads[i%grads.length], status: i%11===0 ? 'out' : 'in', streak: 1+(i%14)
   }));
   state.challenges = [
-    { id:'ch_steps', title:'10k steps a day', surface:'public', capability:'health.steps',
-      metric:'Steps', target:10000, freq:'Every Day', endType:'elim', durationDays:30, stake:10,
-      charity:'American Red Cross', participants: ppl(87), createdBy:'Ante' },
-    { id:'ch_run', title:'Run 2 miles daily', surface:'public', capability:'health.run',
-      metric:'Run distance', target:2, freq:'Every Day', endType:'elim', durationDays:21, stake:25,
-      charity:'World Wildlife Fund', participants: ppl(42), createdBy:'Ante' },
-    { id:'ch_gym', title:'Hit the gym 5×/week', surface:'public', capability:'gps.checkin',
-      metric:'Check-ins', target:5, freq:'3x week', endType:'time', durationDays:28, stake:15,
-      charity:'Feeding America', participants: ppl(31), createdBy:'Ante' },
-    { id:'ch_canvas', title:'No missing assignments', surface:'public', capability:'canvas.nomiss',
-      metric:'Assignments', target:0, freq:'Every Day', endType:'time', durationDays:30, stake:10,
-      charity:'Khan Academy', participants: ppl(19), createdBy:'Ante' },
+    // FLAGSHIP — summer challenge (it's summer; lead with this). Steps = most inclusive
+    // verifiable metric; last-one-standing shows off the growing prize.
+    { id:'ch_summer', title:'Summer Streak: 8k steps a day', surface:'public', capability:'health.steps',
+      metric:'Steps', target:8000, freq:'Every Day', endType:'elim', durationDays:60, stake:15,
+      charity:'American Red Cross', participants: ppl(146), createdBy:'Ante' },
+    { id:'ch_shred', title:'Summer Shred: run 60km by Labor Day', surface:'public', capability:'health.run',
+      metric:'Run distance', target:60, freq:'Every Day', endType:'time', durationDays:70, stake:25,
+      charity:'World Wildlife Fund', participants: ppl(73), createdBy:'Ante' },
+    { id:'ch_gym', title:'Summer gym streak: 4×/week', surface:'public', capability:'gps.checkin',
+      metric:'Check-ins', target:4, freq:'3x week', endType:'time', durationDays:56, stake:20,
+      charity:'Feeding America', participants: ppl(38), createdBy:'Ante' },
+    { id:'ch_run', title:'Run a mile a day', surface:'public', capability:'health.run',
+      metric:'Run distance', target:1, freq:'Every Day', endType:'elim', durationDays:30, stake:10,
+      charity:'American Heart Association', participants: ppl(54), createdBy:'Ante' },
   ];
   state.myChallengeIds = state.myChallengeIds || [];
 }
@@ -5857,6 +5996,7 @@ function saveHabitEdit() {
   if (freqEl) h.freq = freqEl.textContent;
   saveState();
   registerStake(h);   // stake may have changed — update the server's canonical amount
+  stamp(h); cloudPushHabit(h);
   closeModal('edit-habit-modal');
   renderHabits();
   showToast('✅ Bet updated', 'green');
@@ -5905,6 +6045,7 @@ function saveSettings() {
   state.profile.handle = handle;
   state.profile.reminderTime = document.getElementById('settings-reminder-time').value || '20:00';
   saveState();
+  cloudPushProfile();
   updateIdentity();
   scheduleReminder();
   closeModal('settings-modal');
