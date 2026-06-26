@@ -21,67 +21,37 @@
 //       guards /charge-on-miss. Generate with e.g. `openssl rand -hex 32`. The
 //       trusted miss-detection job sends it as `Authorization: Bearer
 //       <CHARGE_SECRET>`. NEVER ship this to the browser.
+//   SUPABASE_URL=https://xxx.supabase.co            <- from Supabase project settings
+//   SUPABASE_SERVICE_ROLE_KEY=eyJ...                <- secret; backend only
 //   ALLOWED_ORIGIN=https://4hhmt57fpf-blip.github.io
 //   APPLE_MERCHANT_ID=merchant.com.ante.app         <- for native Apple Pay (optional here)
 //
 // TRUST BOUNDARIES (read before adding endpoints):
 //   - /charge-on-miss MOVES money. It is server-to-server only and requires
-//     CHARGE_SECRET (see requireChargeSecret). It takes NO amount from the
-//     request — the charge is derived from the stored stake and clamped to
-//     [MIN_STAKE_CENTS, MAX_STAKE_CENTS].
-//   - /register-stake records the canonical stake for a (user, habit) when a bet
-//     is locked in. It is called FROM THE BROWSER, so it cannot hold the server
-//     secret; instead it only ever stores a validated, clamped amount, and it can
-//     never trigger a charge. (Same client trust tier as the card endpoints
-//     below — see the IDOR note.)
+//     CHARGE_SECRET. Amount is derived from the stored stake (never the body).
+//   - Client-facing endpoints (/create-customer, /create-setup-intent,
+//     /save-payment-method, /register-stake) require a Supabase access token.
+//     Identity is derived from the verified token (req.userId), NOT the body.
+//     This closes the IDOR that previously let any caller act under any user id.
 //   - /webhook is authenticated by the Stripe signature (constructEvent).
-//   - /create-customer, /create-setup-intent, /save-payment-method, /register-stake
-//     are called from the browser/app, so they CANNOT hold the server secret. None
-//     of them move money, but they currently trust the client-supplied anteUserId —
-//     i.e. a caller can act under any user id (an IDOR), e.g. set another user's
-//     stake. The blast radius is bounded (a charge still needs CHARGE_SECRET and is
-//     capped at MAX_STAKE_CENTS), but closing it properly needs a real per-user
-//     auth/session token (e.g. a Supabase Auth JWT verified here). That is OUT OF
-//     SCOPE for the charge-hardening fix and tracked as a follow-up.
-//
-// NOTE: the in-memory maps below (anteUserId -> {customerId, defaultPM} and the
-// stake ledger) are for clarity and are wiped on every serverless cold start.
-// REPLACE `db` with a real database (Supabase / Postgres / Firestore) before
-// production — including the stakes table that /charge-on-miss reads from.
 
 import express from 'express';
-import crypto from 'crypto';
 import Stripe from 'stripe';
 import Anthropic from '@anthropic-ai/sdk';
+import { supabaseAdmin } from './supabaseClient.js';
+import { makeDb } from './db.js';
+import { makeRequireUser, makeRequireChargeSecret } from './auth.js';
 
 const stripe = new Stripe(process.env.STRIPE_SECRET_KEY);
 const anthropic = new Anthropic(); // reads ANTHROPIC_API_KEY from env
 const ALLOWED_ORIGIN = process.env.ALLOWED_ORIGIN || 'https://4hhmt57fpf-blip.github.io';
-const CHARGE_SECRET = process.env.CHARGE_SECRET; // server-to-server secret for money endpoints
 const MIN_STAKE_CENTS = 50;     // Stripe's minimum USD charge ($0.50)
 const MAX_STAKE_CENTS = 40000;  // hard ceiling: $100 max stake × 4× escalation cap = $400
 const app = express();
 
-// Server-to-server auth for endpoints that move or determine money. The trusted
-// caller (miss-detection job) sends `Authorization: Bearer <CHARGE_SECRET>`.
-// Fail CLOSED: if CHARGE_SECRET isn't configured, no charge can ever fire.
-function requireChargeSecret(req, res, next) {
-  if (!CHARGE_SECRET) {
-    return res.status(503).json({ error: 'Charging is not configured (CHARGE_SECRET unset).' });
-  }
-  const m = /^Bearer\s+(.+)$/i.exec(req.headers.authorization || '');
-  if (!m || !timingSafeEqualStr(m[1], CHARGE_SECRET)) {
-    return res.status(401).json({ error: 'Unauthorized' });
-  }
-  next();
-}
-
-// Constant-time string compare (hash first so unequal lengths don't throw/leak).
-function timingSafeEqualStr(a, b) {
-  const ah = crypto.createHash('sha256').update(String(a)).digest();
-  const bh = crypto.createHash('sha256').update(String(b)).digest();
-  return crypto.timingSafeEqual(ah, bh);
-}
+const db = makeDb(supabaseAdmin);
+const requireUser = makeRequireUser(supabaseAdmin);
+const requireChargeSecret = makeRequireChargeSecret(process.env.CHARGE_SECRET);
 
 // Validate a stake amount (in cents) from a client. Returns the integer or null.
 function normalizeStakeCents(raw) {
@@ -103,7 +73,7 @@ app.use((req, res, next) => {
 });
 
 // Webhook MUST see the raw body, so register it BEFORE express.json().
-app.post('/webhook', express.raw({ type: 'application/json' }), (req, res) => {
+app.post('/webhook', express.raw({ type: 'application/json' }), async (req, res) => {
   let event;
   try {
     event = stripe.webhooks.constructEvent(
@@ -117,7 +87,7 @@ app.post('/webhook', express.raw({ type: 'application/json' }), (req, res) => {
   switch (event.type) {
     case 'setup_intent.succeeded': {
       const si = event.data.object;
-      if (si.customer && si.payment_method) db.setDefaultPM(si.customer, si.payment_method);
+      if (si.customer && si.payment_method) await db.setDefaultPMByCustomer(si.customer, si.payment_method);
       break;
     }
     case 'payment_intent.succeeded':
@@ -132,49 +102,30 @@ app.post('/webhook', express.raw({ type: 'application/json' }), (req, res) => {
 
 app.use(express.json({ limit: '12mb' }));   // photos (base64) for /verify-photo can be large
 
-// --- tiny stand-in store; REPLACE with a real DB ---
-const _users = {};      // anteUserId -> { customerId, defaultPM }
-const _byCustomer = {}; // customerId -> anteUserId
-const _stakes = {};     // `${anteUserId}::${habitId}` -> { amountCents, updatedAt }
-const stakeKey = (uid, habitId) => `${uid}::${habitId}`;
-const db = {
-  getCustomer: (uid) => _users[uid]?.customerId,
-  setCustomer: (uid, cid) => { _users[uid] = { ..._users[uid], customerId: cid }; _byCustomer[cid] = uid; },
-  setDefaultPM: (cid, pm) => { const uid = _byCustomer[cid]; if (uid) _users[uid].defaultPM = pm; },
-  getDefaultPM: (uid) => _users[uid]?.defaultPM,
-  // Canonical stake per (user, habit) — the ONLY source of truth for charge amounts.
-  setStake: (uid, habitId, amountCents) => { _stakes[stakeKey(uid, habitId)] = { amountCents, updatedAt: Date.now() }; },
-  getStake: (uid, habitId) => _stakes[stakeKey(uid, habitId)]?.amountCents,
-};
-
-async function ensureCustomer(anteUserId, email) {
-  let customerId = db.getCustomer(anteUserId);
+async function ensureCustomer(userId, email) {
+  let customerId = await db.getCustomer(userId);
   if (!customerId) {
-    const c = await stripe.customers.create({ email, metadata: { anteUserId } });
+    const c = await stripe.customers.create({ email, metadata: { anteUserId: userId } });
     customerId = c.id;
-    db.setCustomer(anteUserId, customerId);
+    await db.setCustomer(userId, customerId);
   }
   return customerId;
 }
 
-// 1) Create or fetch a Customer for an Ante user.
-app.post('/create-customer', async (req, res) => {
+// 1) Create or fetch a Customer for an Ante user. Identity from verified token.
+app.post('/create-customer', requireUser, async (req, res) => {
   try {
-    const { anteUserId, email } = req.body;
-    const customerId = await ensureCustomer(anteUserId, email);
+    const customerId = await ensureCustomer(req.userId, req.userEmail);
     res.json({ customerId });
   } catch (e) { res.status(400).json({ error: e.message }); }
 });
 
 // 2) SetupIntent to save a card with NO charge. Used by the native PaymentSheet
 //    (Apple Pay + card) AND the web Stripe.js Express Checkout / Payment Element.
-//    FIX (from adversarial review): allow_redirects:'never' so an off-session,
-//    card-only save never demands a return_url; apiVersion comes from the mobile
-//    SDK (sent by the client) so the ephemeral key matches it.
-app.post('/create-setup-intent', async (req, res) => {
+app.post('/create-setup-intent', requireUser, async (req, res) => {
   try {
-    const { anteUserId, email, apiVersion } = req.body;
-    const customerId = await ensureCustomer(anteUserId, email);
+    const { apiVersion } = req.body || {};
+    const customerId = await ensureCustomer(req.userId, req.userEmail);
 
     let ephemeralKeySecret;
     if (apiVersion) {
@@ -190,7 +141,7 @@ app.post('/create-setup-intent', async (req, res) => {
 
     res.json({
       setupIntentClientSecret: setupIntent.client_secret,
-      ephemeralKey: ephemeralKeySecret,  // present only when the client sent apiVersion (native sheet)
+      ephemeralKey: ephemeralKeySecret,
       customerId,
       publishableKey: process.env.STRIPE_PUBLISHABLE_KEY,
     });
@@ -198,55 +149,50 @@ app.post('/create-setup-intent', async (req, res) => {
 });
 
 // 3) Persist the saved payment method as default (webhook also covers this).
-app.post('/save-payment-method', async (req, res) => {
+app.post('/save-payment-method', requireUser, async (req, res) => {
   try {
-    const { anteUserId, paymentMethodId } = req.body;
-    const customerId = db.getCustomer(anteUserId);
+    const { paymentMethodId } = req.body || {};
+    const customerId = await db.getCustomer(req.userId);
+    if (!customerId) return res.status(400).json({ error: 'No customer' });
     await stripe.customers.update(customerId, { invoice_settings: { default_payment_method: paymentMethodId } });
-    db.setDefaultPM(customerId, paymentMethodId);
+    await db.setDefaultPMByUser(req.userId, paymentMethodId);
     res.json({ ok: true });
   } catch (e) { res.status(400).json({ error: e.message }); }
 });
 
-// 3b) Record the canonical stake for a (user, habit) when a bet is locked in or
-//     its stake changes (edit, escalation). The amount is set HERE — a user's own
-//     bet choice — and becomes the server-side source of truth. /charge-on-miss
-//     reads it and never accepts an amount at charge time, so a caller cannot
-//     dictate what gets charged. Client-facing (no secret) but only ever stores a
-//     validated, clamped amount; see the TRUST BOUNDARIES note at the top.
-app.post('/register-stake', async (req, res) => {
+// 3b) Record the canonical stake for a (user, habit). Amount is clamped server-side.
+//     /charge-on-miss reads this and never accepts an amount at charge time.
+app.post('/register-stake', requireUser, async (req, res) => {
   try {
-    const { anteUserId, habitId, amountCents } = req.body || {};
-    if (!anteUserId || !habitId) return res.status(400).json({ error: 'anteUserId and habitId required' });
+    const { habitId, amountCents } = req.body || {};
+    if (!habitId) return res.status(400).json({ error: 'habitId required' });
     const amount = normalizeStakeCents(amountCents);
     if (amount === null) {
       return res.status(400).json({ error: `amountCents must be an integer in [${MIN_STAKE_CENTS}, ${MAX_STAKE_CENTS}]` });
     }
-    db.setStake(anteUserId, habitId, amount);
+    await db.setStake(req.userId, habitId, amount);
     res.json({ ok: true });
   } catch (e) { res.status(400).json({ error: e.message }); }
 });
 
 // 4) Charge on a verified MISS — off-session, merchant-initiated. SERVER-ONLY:
 //    requires CHARGE_SECRET; call this only from your trusted miss-detection job.
-//    The amount is DERIVED from the stored stake (never the request body), so the
-//    caller cannot choose what to charge. Idempotent per (habitId, date) so a day
-//    can't be double-charged.
+//    Amount is derived from the stored stake (never the request body).
+//    Idempotent per (habitId, date) so a day can't be double-charged.
 app.post('/charge-on-miss', requireChargeSecret, async (req, res) => {
   try {
-    const { anteUserId, habitId, date } = req.body || {};
-    if (!anteUserId || !habitId) return res.status(400).json({ error: 'anteUserId and habitId required' });
-    const customerId = db.getCustomer(anteUserId);
-    const pm = db.getDefaultPM(anteUserId);
+    const { userId, habitId, date } = req.body || {};
+    if (!userId || !habitId) return res.status(400).json({ error: 'userId and habitId required' });
+    const customerId = await db.getCustomer(userId);
+    const pm = await db.getDefaultPM(userId);
     if (!customerId || !pm) return res.status(400).json({ error: 'No saved card' });
 
     // Amount comes ONLY from the stored stake — any amountCents in the body is ignored.
-    const amountCents = db.getStake(anteUserId, habitId);
+    const amountCents = await db.getStake(userId, habitId);
     if (amountCents == null) {
       return res.status(409).json({ error: 'No registered stake for this habit' });
     }
     if (amountCents < MIN_STAKE_CENTS || amountCents > MAX_STAKE_CENTS) {
-      // Defense in depth: refuse a stored value outside the allowed range.
       return res.status(409).json({ error: 'Stored stake out of allowed range' });
     }
 
@@ -257,8 +203,8 @@ app.post('/charge-on-miss', requireChargeSecret, async (req, res) => {
       payment_method: pm,
       off_session: true,
       confirm: true,
-      metadata: { anteUserId, habitId, date },
-    }, { idempotencyKey: `miss_${anteUserId}_${habitId}_${date}` });
+      metadata: { userId, habitId, date },
+    }, { idempotencyKey: `miss_${userId}_${habitId}_${date}` });
     res.json({ status: intent.status, amountCents });
   } catch (e) {
     if (e.code === 'authentication_required') {
