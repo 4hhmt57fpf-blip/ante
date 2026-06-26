@@ -2524,18 +2524,22 @@ function habitToRow(h) {
     completed_days: h.completedDays || [], missed_days: h.missedDays || [],
     current_streak: h.currentStreak || 0, best_streak: h.bestStreak || 0,
     created_at: h.createdAt, updated_at: h.updatedAt || nowIso(), deleted_at: h.deletedAt || null,
+    raw: h,   // full app object → preserves app-only fields (goalId, charity, gpsLat/lng/radius)
   };
 }
 function rowToHabit(r) {
-  return {
+  // If `raw` (the full app object) is present, use it as the base so app-only fields survive
+  // the round-trip; otherwise fall back to the structured columns (legacy rows). Server
+  // timestamps stay authoritative.
+  const base = (r.raw && typeof r.raw === 'object') ? r.raw : {
     id: r.id, name: r.name, emoji: r.emoji, icon: r.icon, color: r.color, category: r.category,
     source: r.source, metric: r.metric, dir: r.dir, target: r.target, unit: r.unit, verify: r.verify,
     apps: r.apps || [], capMinutes: r.cap_minutes,
     freq: r.freq, stake: r.stake, destination: r.destination, escalate: !!r.escalate,
     completedDays: r.completed_days || [], missedDays: r.missed_days || [],
     currentStreak: r.current_streak || 0, bestStreak: r.best_streak || 0,
-    createdAt: r.created_at, updatedAt: r.updated_at, deletedAt: r.deleted_at,
   };
+  return { ...base, id: r.id, createdAt: r.created_at, updatedAt: r.updated_at, deletedAt: r.deleted_at };
 }
 
 async function cloudPull() {

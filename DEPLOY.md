@@ -68,7 +68,7 @@ Or use:
 4. **Streak Length**: How long until people fail?
 5. **Retention**: % of users active after 7 days
 
-**Goal**: 50 users with 70%+ 7-day retention = YC-ready traction
+**Goal**: 50 users with 70%+ 7-day retention
 
 ---
 
