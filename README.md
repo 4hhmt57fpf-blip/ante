@@ -6,7 +6,6 @@ A habit tracker where you stake money on your commitments. Fail a habit = donati
 
 - **index.html** – Main app (habit tracking, check-ins, streaks)
 - **landing.html** – Marketing landing page
-- **pitch.html** – YC application one-pager
 
 ## Deploy in 30 Seconds
 
@@ -34,7 +33,7 @@ python3 -m http.server 8000
 2. **Share with 10 UMich friends** – test for 1 week
 3. **Measure retention** – who comes back daily?
 4. **Iterate** based on feedback
-5. **Scale to 50 users** – then pitch to YC
+5. **Scale to 50 users** – iterate and grow
 
 ## Monetization
 
@@ -47,4 +46,4 @@ python3 -m http.server 8000
 
 **Current User Count**: 0
 
-**Target**: 50 real users with 7+ day retention 
+**Target**: 50 real users with 7+ day retention
