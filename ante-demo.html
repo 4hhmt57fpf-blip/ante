@@ -427,16 +427,6 @@
   .chal-p-av { width: 30px; height: 30px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 11px; font-weight: 800; color: #fff; flex-shrink: 0; }
   .chal-p-name { font-size: 13.5px; font-weight: 600; color: var(--text); flex: 1; }
   .chal-p-status { font-size: 12px; font-weight: 700; }
-  .chal-tpl-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-bottom: 16px; }
-  .chal-tpl { background: var(--surface2); border: 1px solid var(--border); border-radius: 14px; padding: 14px 12px; display: flex; flex-direction: column; align-items: flex-start; gap: 4px; cursor: pointer; text-align: left; }
-  .chal-tpl:active { transform: scale(.98); }
-  .chal-tpl-ico { font-size: 22px; }
-  .chal-tpl-t { font-size: 14px; font-weight: 700; color: var(--text); }
-  .chal-tpl-cap { font-size: 11px; font-weight: 700; color: var(--green); }
-  .chal-or { text-align: center; font-size: 12px; color: var(--text-muted); margin: 6px 0 10px; }
-  .chal-verdict { font-size: 13px; line-height: 1.5; padding: 11px 13px; border-radius: 12px; }
-  .chal-verdict.ok { background: rgba(52,163,107,.12); border: 1px solid var(--green); color: var(--text); }
-  .chal-verdict.no { background: var(--surface2); border: 1px dashed var(--border); color: var(--text-dim); }
   .fr-f-av { width: 42px; height: 42px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-weight: 700; font-size: 15px; flex-shrink: 0; color: #fff; }
   /* Social: streak badges, leaderboard, group pot (#6) */
   .streak-badge { display: inline-flex; align-items: center; gap: 4px; font-size: 12px; font-weight: 800; padding: 4px 9px; border-radius: 100px; white-space: nowrap; flex-shrink: 0; }
@@ -1892,19 +1882,6 @@
     </div>
   </div>
 
-  <!-- HOME · entry into Group Challenges -->
-  <div class="j-mini" onclick="goTo('screen-challenges'); renderChallengeCatalog();" role="button" tabindex="0" aria-label="Open Challenges" style="cursor:pointer">
-    <div class="j-mini-canvaswrap" style="display:flex;align-items:center;justify-content:center;font-size:34px">🏆</div>
-    <div class="j-mini-text">
-      <div class="j-mini-eyebrow">Challenges</div>
-      <div class="j-mini-title">Stake with a crowd</div>
-      <div class="j-mini-stat">Join a pot · last one standing wins →</div>
-    </div>
-    <div class="j-mini-chev" aria-hidden="true">
-      <svg viewBox="0 0 24 24"><path d="m9 6 6 6-6 6"/></svg>
-    </div>
-  </div>
-
   <div id="canvas-due"></div>
 
   <div class="section-header" id="today-section">
@@ -2003,9 +1980,9 @@
     <div class="fr-section">
       <div class="grp-hero">
         <div class="grp-hero-ico"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M22 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg></div>
-        <div class="grp-hero-title">Group Challenges</div>
-        <div class="grp-hero-sub">Stake on the same goal as a crowd. Survivors keep their stake; misses go to charity; the last one standing wins an Ante-funded prize.</div>
-        <button type="button" class="grp-create" onclick="createGroupPot()">Browse challenges</button>
+        <div class="grp-hero-title">Group Pots</div>
+        <div class="grp-hero-sub">Pool stakes with friends. Everyone bets on the same habit — winners split the pot.</div>
+        <button type="button" class="grp-create" onclick="createGroupPot()">Create a Group Pot</button>
       </div>
     </div>
 
@@ -2260,14 +2237,6 @@
   <div class="modal" id="habit-detail-content"></div>
 </div>
 
-<div class="modal-overlay" id="challenge-detail-modal" onclick="closeModalIfBg(event,'challenge-detail-modal')">
-  <div class="modal" id="challenge-detail-content"></div>
-</div>
-
-<div class="modal-overlay" id="challenge-create-modal" onclick="closeModalIfBg(event,'challenge-create-modal')">
-  <div class="modal" id="challenge-create-content"></div>
-</div>
-
 <!-- Help + AI chatbot -->
 <!-- Sponsor someone (sponsored stakes) -->
 <div class="modal-overlay" id="sponsor-modal" onclick="closeModalIfBg(event,'sponsor-modal')">
@@ -2311,7 +2280,7 @@
       <button class="btn btn-secondary" style="width:100%;padding:14px;font-size:14px" onclick="shareNative()">📲 Share via Messages / AirDrop…</button>
     </div>
     <div style="background:var(--gold-dim);border:1px solid var(--gold);border-radius:12px;padding:14px 16px;font-size:13px;color:var(--text-dim);line-height:1.5">
-      🏆 <strong style="color:var(--gold)">Group challenge:</strong> Everyone stakes on the same goal. Keep it up and you keep your stake; miss a day and it goes to charity. The last one standing wins an Ante-funded prize that grows as more people join.
+      🏆 <strong style="color:var(--gold)">Group pot mode:</strong> When 2+ friends join the same habit, the person with the highest streak at month end splits the forfeited pot.
     </div>
   </div>
 </div>
@@ -5164,130 +5133,6 @@ function renderChallengeCatalog(){
     </div>`;
   }).join('') + `<div class="chal-preview-note">Preview — challenges run for real once accounts &amp; payments are live.</div>`;
 }
-function openChallenge(id){
-  const c = (state.challenges||[]).find(x=>x.id===id); if(!c) return;
-  const n = verifiedCount(c), prize = challengePrize(c);
-  const mine = (state.myChallengeIds||[]).includes(id);
-  const end = c.endType === 'elim' ? 'Last one standing wins' : c.durationDays + '-day challenge';
-  const players = (c.participants||[]).slice(0, 12).map(p => `
-    <div class="chal-player ${p.status==='out'?'out':''}">
-      <div class="chal-p-av" style="background:linear-gradient(135deg,${p.grad})">${esc(p.initials)}</div>
-      <div class="chal-p-name">${esc(p.name)}${p.me?' (you)':''}</div>
-      <span class="chal-p-status" style="color:${p.status==='out'?'var(--red)':'var(--green)'}">${p.status==='out'?'out':'🔥 '+p.streak}</span>
-    </div>`).join('');
-  const more = (c.participants||[]).length > 12 ? `<div class="chal-sub" style="text-align:center">+${c.participants.length-12} more</div>` : '';
-  document.getElementById('challenge-detail-content').innerHTML = `
-    <div class="modal-handle"></div>
-    <div class="modal-title" style="text-align:center">${esc(c.title)}</div>
-    <div style="text-align:center;margin:6px 0 14px">
-      <div class="chal-prize" style="font-size:30px">🏆 $${prize}</div>
-      <div class="chal-sub">prize grows as people join · Ante-funded</div>
-    </div>
-    <div class="info-row"><span class="info-label">Format</span><span class="info-val">${esc(end)}</span></div>
-    <div class="info-row"><span class="info-label">Stake</span><span class="info-val" style="color:var(--gold)">$${c.stake}</span></div>
-    <div class="info-row"><span class="info-label">Miss a day</span><span class="info-val">→ ${esc(c.charity)}</span></div>
-    <div class="info-row" style="border:none"><span class="info-label">Players in</span><span class="info-val">${n}</span></div>
-    <div class="chal-sub" style="margin:6px 0 12px">Winner keeps their stake + the prize. The prize can never exceed the total stakes collected.</div>
-    <div style="max-height:240px;overflow:auto;margin-bottom:14px">${players}${more}</div>
-    ${mine
-      ? `<button class="btn btn-secondary" disabled>You're in ✓ — good luck</button>`
-      : `<button class="btn btn-primary" onclick="joinChallenge('${c.id}')">Join for $${c.stake}</button>`}
-  `;
-  showModal('challenge-detail-modal');
-}
-function joinChallenge(id){
-  // Phase 0 demo: no card charge. Real join stakes via Stripe + a server membership record.
-  const c = (state.challenges||[]).find(x=>x.id===id); if(!c) return;
-  if((state.myChallengeIds||[]).includes(id)){ showToast("You're already in this one", ''); return; }
-  const nm = (state.profile && state.profile.name) || 'You';
-  c.participants.push({ id:'me', name:nm, initials:initialsFor(nm), grad:'#7fdca4,#34a36b', status:'in', streak:0, me:true });
-  state.myChallengeIds = [...(state.myChallengeIds||[]), id];
-  saveState();
-  renderChallengeCatalog();
-  openChallenge(id);
-  showToast(`You're in — good luck. $${c.stake} on the line.`, 'green');
-}
-
-// ── Create flow + verification gate (Phase 0: client-side classifier stub) ──
-// Real classification is the server /classify-challenge (Claude). Here a keyword
-// map → capability, and a hard allowlist decides money-eligibility (default deny).
-const CAPABILITY_ALLOW = { 'gps.checkin':true, 'health.run':true, 'health.steps':true, 'canvas.nomiss':true,
-                           'photo.ai':false, 'sleep':false, 'screen.time':false };
-function classifyChallengeLocal(text){
-  const t = (text||'').toLowerCase();
-  let capability = 'photo.ai';                 // default: unmapped → not money-eligible
-  if (/\b(run|jog|ran|miles|5k|marathon)\b/.test(t)) capability='health.run';
-  else if (/\b(steps?|walk)\b/.test(t)) capability='health.steps';
-  else if (/\b(gym|pool|library|check ?in|show up|go to)\b/.test(t)) capability='gps.checkin';
-  else if (/\b(assignment|canvas|homework|submit)\b/.test(t)) capability='canvas.nomiss';
-  else if (/\b(sleep|bed)\b/.test(t)) capability='sleep';
-  else if (/\b(screen|social|tiktok|instagram|phone)\b/.test(t)) capability='screen.time';
-  const eligible = CAPABILITY_ALLOW[capability] === true;
-  const redirect = eligible ? null
-    : "We can't verify that without a sensor, so it can't hold money. Run it as a free streak, or pick a verifiable goal like a daily run or 10k steps.";
-  return { capability, eligible, redirect };
-}
-const CHALLENGE_TEMPLATES = [
-  { capability:'health.steps',  title:'10k steps a day', metric:'Steps',        target:10000, icon:'👟' },
-  { capability:'health.run',    title:'Run daily',       metric:'Run distance', target:2,     icon:'🏃' },
-  { capability:'gps.checkin',   title:'Gym check-ins',   metric:'Check-ins',    target:5,     icon:'📍' },
-  { capability:'canvas.nomiss', title:'No missing work', metric:'Assignments',  target:0,     icon:'🎓' },
-];
-function capLabel(cap){ return ({ 'health.steps':'Apple Health','health.run':'Apple Health','gps.checkin':'GPS','canvas.nomiss':'Canvas','photo.ai':'Photo','sleep':'Sleep','screen.time':'Screen Time' })[cap] || cap; }
-function openCreateChallenge(){
-  document.getElementById('challenge-create-content').innerHTML = `
-    <div class="modal-handle"></div>
-    <div class="modal-title">Start a challenge</div>
-    <div class="chal-sub" style="margin-bottom:12px">Pick a verified goal, or describe your own — only goals we can auto-verify can hold money.</div>
-    <div class="chal-tpl-grid">
-      ${CHALLENGE_TEMPLATES.map(t=>`<button class="chal-tpl" onclick="createChallengeFromTemplate('${t.capability}')">
-        <span class="chal-tpl-ico">${t.icon}</span><span class="chal-tpl-t">${esc(t.title)}</span>
-        <span class="chal-tpl-cap">✓ ${capLabel(t.capability)}</span></button>`).join('')}
-    </div>
-    <div class="chal-or">or describe your own</div>
-    <input class="input-field" id="chal-custom" placeholder="e.g. run 2 miles every morning" autocomplete="off"
-      oninput="var v=document.getElementById('chal-verdict'); if(v) v.innerHTML='';">
-    <button class="btn btn-secondary" style="margin-top:10px" onclick="checkCustomChallenge()">Check it</button>
-    <div id="chal-verdict" style="margin-top:12px"></div>
-  `;
-  showModal('challenge-create-modal');
-}
-function checkCustomChallenge(){
-  const text = ((document.getElementById('chal-custom')||{}).value || '').trim();
-  if(!text){ showToast('Describe your challenge first', ''); return; }
-  const v = classifyChallengeLocal(text);
-  const el = document.getElementById('chal-verdict');
-  if(v.eligible){
-    el.innerHTML = `<div class="chal-verdict ok">✓ We can verify this with <b>${capLabel(v.capability)}</b> — it can hold money.</div>
-      <button class="btn btn-primary" style="margin-top:10px" onclick="createChallengeFromText(false)">Create challenge</button>`;
-  } else {
-    el.innerHTML = `<div class="chal-verdict no">🚫 ${esc(v.redirect)}</div>
-      <div style="display:flex;gap:8px;margin-top:10px">
-        <button class="btn btn-secondary" style="flex:1" onclick="createChallengeFromText(true)">Run it free</button>
-        <button class="btn btn-ghost" style="flex:1" onclick="var i=document.getElementById('chal-custom');i.value='';i.focus();document.getElementById('chal-verdict').innerHTML='';">Pick verifiable</button>
-      </div>`;
-  }
-}
-function createChallengeFromTemplate(capability){
-  const t = CHALLENGE_TEMPLATES.find(x=>x.capability===capability) || {};
-  _addPrivateChallenge({ title:t.title, capability, free:false });
-}
-function createChallengeFromText(free){
-  const text = ((document.getElementById('chal-custom')||{}).value || 'My challenge').trim();
-  const v = classifyChallengeLocal(text);
-  _addPrivateChallenge({ title:text.slice(0,48), capability:(free || !v.eligible) ? 'honor' : v.capability, free: !!free || !v.eligible });
-}
-function _addPrivateChallenge(o){
-  const id = 'ch_u' + Date.now();
-  const c = { id, title:o.title||'My challenge', surface:'private', capability:o.capability,
-    metric:'', target:0, freq:'Every Day', endType:'elim', durationDays:30,
-    stake: o.free ? 0 : 10, charity:'American Red Cross', participants:[], createdBy:'You', free:!!o.free };
-  state.challenges = [c, ...(state.challenges||[])];
-  saveState();
-  closeModal('challenge-create-modal');
-  if(o.free) showToast('Free streak created — no money on this one.', 'gold');
-  joinChallenge(id);
-}
 
 const FRIEND_ROSTER = [
   { id:'mk', name:'Marcus K.', handle:'@marcus_k', initials:'MK', grad:'#5b5bf6,#3b3b8c',
@@ -5382,9 +5227,10 @@ function frSegKey(e) {
 }
 // Create a group pot (multi-user pooling + settlement runs through the backend — see INTEGRATIONS.md).
 function createGroupPot() {
-  // Repointed to the Group Challenges feature (self-staking + Ante-funded prize).
-  goTo('screen-challenges');
-  renderChallengeCatalog();
+  state._groupPotJoined = true;
+  if (!state._preview) saveState();
+  renderGroupPot();
+  showToast('Group pot created — invite friends to pool in 💰', 'green');
 }
 
 // Team / head-to-head challenges (Bundle D).
@@ -6426,6 +6272,67 @@ if ('serviceWorker' in navigator) {
     <button class="btn btn-primary" id="tour-next" onclick="nextTourStep()">Next</button>
   </div>
 </div>
+
+
+<!-- ============================================================
+     DEMO MODE  (auto-generated from index.html — do not hand-edit)
+     A stripped, pitch-ready build: one seeded habit + the core
+     steps -> verify -> vault loop. Non-core features hidden.
+     ============================================================ -->
+<style id="demo-mode-css">
+  /* Hide the AI chatbot, the Journey home card, and the Friends + Stats tabs */
+  .ai-btn { display: none !important; }
+  .j-mini { display: none !important; }
+  .bottom-nav .nav-item[aria-label="Friends"],
+  .bottom-nav .nav-item[aria-label="Stats"] { display: none !important; }
+  /* Onboarding: hide stake destinations + escalating stakes (Savings Vault only) */
+  #dest-q, #dest-grid, #dest-blurb, .escalate-row { display: none !important; }
+</style>
+<script id="demo-mode-js">
+(function () {
+  function seedAndStrip() {
+    try {
+      if (typeof state === 'undefined' || !state) return;
+      // --- Seed one clean habit; no localStorage dependency so it works from file:// ---
+      state.user = { id: 'demo', provider: 'demo', name: 'Beckett', email: 'demo@ante.app' };
+      state.profile = Object.assign({}, state.profile, { name: 'Beckett', handle: 'beckett' });
+      state.walletBalance = 50; state.savingsVault = 0; state.totalForfeit = 0;
+      state.connections = Object.assign({}, state.connections, { health: true });
+      state._preview = false;
+      if (typeof createHabit === 'function') {
+        var h = createHabit({ goalId: 'steps', categoryId: 'fitness', name: 'Walk 10,000 steps',
+          target: 10000, freq: 'Every Day', stake: 5, destination: 'vault', escalate: false });
+        var t = new Date();
+        var ds = function (off) { var x = new Date(t); x.setDate(x.getDate() - off); return x.toISOString().slice(0, 10); };
+        h.currentStreak = 4; h.bestStreak = 6; h.completedDays = [ds(1), ds(2), ds(3), ds(4)]; h.missedDays = [];
+        state.habits = [h];
+      }
+      try { if (typeof saveState === 'function') saveState(); } catch (e) {}
+      var pb = document.getElementById('preview-bar'); if (pb) pb.style.display = 'none';
+      document.body.classList.remove('previewing');
+      if (typeof showTab === 'function') showTab('home');
+      // Replace the hidden destination picker with one plain line.
+      var grid = document.getElementById('dest-grid');
+      if (grid && grid.parentNode && !document.getElementById('demo-miss-note')) {
+        var note = document.createElement('div');
+        note.id = 'demo-miss-note'; note.className = 'onboard-hint'; note.style.marginTop = '0';
+        note.textContent = '🔒 If you miss a day, your stake locks into your Savings Vault — still yours, just inaccessible until you rebuild the habit.';
+        grid.parentNode.insertBefore(note, grid);
+      }
+      // In case of sign-out: hide the login "preview" + "tour" entry points.
+      document.querySelectorAll('button').forEach(function (b) {
+        var oc = b.getAttribute('onclick') || '';
+        if (/openTour\(|previewDemo\(/.test(oc)) b.style.display = 'none';
+      });
+      document.querySelectorAll('.auth-divider').forEach(function (dv) {
+        if (/just looking/i.test(dv.textContent || '')) dv.style.display = 'none';
+      });
+    } catch (e) {}
+  }
+  if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', function () { setTimeout(seedAndStrip, 80); });
+  else setTimeout(seedAndStrip, 80);
+})();
+</script>
 
 </body>
 </html>
